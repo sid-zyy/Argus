@@ -33,7 +33,7 @@ SEVERITIES = ("sev1", "sev2", "sev3", "sev4")
 
 store = Store(os.getenv("INCIDENT_DB", ROOT / "incidents.db"))
 store.mark_interrupted()
-runner = IncidentRunner(store, replay_speed=float(os.getenv("REPLAY_SPEED", "4")))
+runner = IncidentRunner(store, replay_speed=float(os.getenv("REPLAY_SPEED", "2")))
 
 app = FastAPI(title="Argus incident tracker")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")

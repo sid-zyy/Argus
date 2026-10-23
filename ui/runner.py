@@ -23,7 +23,11 @@ from tools.workspace import Workspace
 
 ROOT = Path(__file__).resolve().parent.parent
 incKey = lambda iid: f"INC-{iid}"  # noqa: E731
-REPLAY_DELAY_CAP = 2.5  # seconds between replayed events, at most
+REPLAY_DELAY_CAP = 3.5  # seconds between replayed events, at most
+REPLAY_MIN_GAP = 0.5    # seconds, so bursts of steps stay readable
+# handoffs between agents get time for their animation to finish
+REPLAY_HANDOFF_GAP = 2.2
+HANDOFFS = {"plan", "claim", "verdict", "suspects", "patch", "sandbox", "awaiting_approval", "rejected"}
 
 
 class Denied(Exception):
@@ -41,7 +45,7 @@ class _Gate:
 
 
 class IncidentRunner:
-    def __init__(self, store: Store, replay_speed: float = 4.0, llm_factory=LLM):
+    def __init__(self, store: Store, replay_speed: float = 2.0, llm_factory=LLM):
         self.store = store
         self.replay_speed = replay_speed
         self.llm_factory = llm_factory
@@ -260,7 +264,8 @@ class IncidentRunner:
         for e in events:
             t = datetime.fromisoformat(e["ts"])
             if prev is not None and self.replay_speed > 0:
-                time.sleep(min(REPLAY_DELAY_CAP, max(0.0, (t - prev).total_seconds()) / self.replay_speed))
+                gap = REPLAY_HANDOFF_GAP if e["type"] in HANDOFFS else REPLAY_MIN_GAP
+                time.sleep(min(REPLAY_DELAY_CAP, max(gap, (t - prev).total_seconds() / self.replay_speed)))
             prev = t
             payload = dict(e["payload"])
             if e["type"] == "approval":

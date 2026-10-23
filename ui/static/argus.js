@@ -229,13 +229,13 @@ const Argus = (() => {
     function ignite(key, n) {
       if (reduced || !AGENTS[key]) return;
       const start = anchorNode[key];
-      for (let i = 0; i < n; i++) S.sparks.push({ key, from: start, to: M.nbrs[start][i % M.nbrs[start].length], t0: performance.now() + i * 90, hops: 5 + (i % 3) });
+      for (let i = 0; i < n; i++) S.sparks.push({ key, from: start, to: M.nbrs[start][i % M.nbrs[start].length], t0: performance.now() + i * 140, hops: 5 + (i % 3) });
     }
-    function ripple(key, rgb) { S.ripples.push({ o: anchors[key] || [0, -1, 0], rgb, t0: performance.now(), dur: 1400 }); }
+    function ripple(key, rgb) { S.ripples.push({ o: anchors[key] || [0, -1, 0], rgb, t0: performance.now(), dur: 2200 }); }
     function send(key, n, inbound = true) {
       if (!S.cards[key] || reduced) return;
       const now = performance.now();
-      for (let i = 0; i < n; i++) S.packets.push({ key, inbound, t0: now + i * 140, dur: 900 + Math.random() * 300 });
+      for (let i = 0; i < n; i++) S.packets.push({ key, inbound, t0: now + i * 220, dur: 1500 + Math.random() * 400 });
     }
 
     // A handoff between agents: a labelled packet leaves the sender's card, crosses the sphere and lands on the
@@ -243,9 +243,11 @@ const Argus = (() => {
     let relayAt = 0;
     function relay(from, to, label) {
       if (reduced || !AGENTS[to]) return;
-      const t0 = Math.max(performance.now(), relayAt + 420);
+      // one handoff at a time; close up the queue if it falls far behind
+      const backlog = relayAt - performance.now();
+      const t0 = Math.max(performance.now(), relayAt + (backlog > 6000 ? 900 : 1700));
       relayAt = t0;
-      S.relays.push({ from, to, label, t0, dur: 2100, landed: false });
+      S.relays.push({ from, to, label, t0, dur: 3600, landed: false });
     }
     function edgePoint(key) {
       const lp = key && linkPath(key);
@@ -256,7 +258,7 @@ const Argus = (() => {
     function land(r) {
       r.landed = true;
       const el = nodes[r.to]?.el;
-      if (el) { el.classList.remove("receiving"); void el.offsetWidth; el.classList.add("receiving"); setTimeout(() => el.classList.remove("receiving"), 1200); }
+      if (el) { el.classList.remove("receiving"); void el.offsetWidth; el.classList.add("receiving"); setTimeout(() => el.classList.remove("receiving"), 2000); }
       ripple(r.to, col(r.to));
     }
 
@@ -482,7 +484,7 @@ const Argus = (() => {
       if (!fresh || reduced) { line.textContent = text; return; }
       let i = 0;
       line.textContent = "";
-      typer = setInterval(() => { line.textContent = text.slice(0, (i += 2)); if (i >= text.length) clearInterval(typer); }, 12);
+      typer = setInterval(() => { line.textContent = text.slice(0, (i += 2)); if (i >= text.length) clearInterval(typer); }, 24);
     }
     let toastTimer = null;
     function showToast(text, kind, fresh) {
@@ -490,7 +492,7 @@ const Argus = (() => {
       toast.textContent = text;
       toast.className = `argus-toast show ${kind}`;
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => { toast.className = "argus-toast"; }, 2600);
+      toastTimer = setTimeout(() => { toast.className = "argus-toast"; }, 4500);
     }
     const shortArgs = (args) => Object.values(args || {}).map((v) => typeof v === "string" ? v : JSON.stringify(v)).join(", ").slice(0, 48);
 
@@ -625,7 +627,7 @@ const Argus = (() => {
           status("reporter", "Summary is ready to read");
           remember("reporter", "Wrote the incident summary.");
           say("reporter", "All done. The summary is ready in the Report tab.", fresh);
-          setTimeout(() => { if (S.mood !== "awaiting") { S.mood = "serene"; S.ringTarget = 0; setActive(null); } }, fresh ? 2200 : 0);
+          setTimeout(() => { if (S.mood !== "awaiting") { S.mood = "serene"; S.ringTarget = 0; setActive(null); } }, fresh ? 3500 : 0);
           break;
         case "escalated":
           container.classList.remove("awaiting");
