@@ -168,6 +168,24 @@ def index():
     return _page("index.html")
 
 
+@app.get("/results", include_in_schema=False)
+def results_page():
+    return _page("results.html")
+
+
+@app.get("/results/data")
+def results_data():
+    """Argus (scored from the recorded runs) next to a single chatbot prompt (eval/baseline.json)."""
+    from eval.compare import BASELINE, argus_from_replay
+    baseline = json.loads(BASELINE.read_text(encoding="utf-8")) if BASELINE.is_file() else {"rows": []}
+    by_name = {r["scenario"]: r for r in baseline["rows"]}
+    rows = []
+    for s in runner.scenarios():
+        rows.append({"scenario": s["name"], "service": s["service"], "title": s["title"],
+                     "argus": argus_from_replay(s["name"]), "chatbot": by_name.get(s["name"])})
+    return {"rows": rows, "baseline_recorded_at": baseline.get("recorded_at")}
+
+
 @app.get("/incidents/{iid}/view", include_in_schema=False)
 def ticket_page(iid: int):
     _incident_or_404(iid)
@@ -175,10 +193,34 @@ def ticket_page(iid: int):
 
 
 # ---- intake --------------------------------------------------------------------
+AM_SEVERITY = {"critical": "sev1", "page": "sev1", "high": "sev2", "error": "sev2", "warning": "sev3", "info": "sev4"}
+
+
 @app.post("/alerts", status_code=201)
-def post_alert(body: AlertIn):
-    """Webhook-style intake from monitoring. Unauthenticated, like a real alert webhook on an internal network."""
-    return _start(body.scenario, body.mode, body.alert)
+def post_alert(body: dict):
+    """Webhook intake from monitoring. Accepts Prometheus Alertmanager's webhook format, or {"scenario": ..., "alert": {...}}.
+    Unauthenticated, like a real alert webhook on an internal network."""
+    if "alerts" in body:  # Alertmanager
+        firing = [a for a in body.get("alerts", []) if a.get("status", "firing") == "firing"]
+        if not firing:
+            raise HTTPException(422, "no firing alerts in the payload")
+        a = firing[0]
+        labels, notes = a.get("labels", {}), a.get("annotations", {})
+        names = {s["name"]: s for s in runner.scenarios()}
+        scenario = labels.get("scenario") if labels.get("scenario") in names else next(
+            (n for n, s in names.items() if s["service"] == labels.get("service")), None)
+        if not scenario:
+            raise HTTPException(404, f"no environment for service {labels.get('service')!r}")
+        override = {"id": f"AM-{labels.get('alertname', 'alert')}-{a.get('fingerprint', '')[:6]}".rstrip("-"),
+                    "title": notes.get("summary") or labels.get("alertname") or "Alert",
+                    "severity": AM_SEVERITY.get(str(labels.get("severity", "")).lower(), "sev2"),
+                    "source": "Prometheus Alertmanager"}
+        return {**_start(scenario, "live", override), "received_from": "alertmanager"}
+    try:
+        parsed = AlertIn.model_validate(body)
+    except ValueError as e:
+        raise HTTPException(422, f"not an Alertmanager payload or {{scenario, alert}}: {e}")
+    return _start(parsed.scenario, parsed.mode, parsed.alert)
 
 
 @app.post("/demo/trigger/{scenario}", status_code=201)
@@ -229,7 +271,7 @@ def list_incidents():
 
 @app.get("/incidents/{iid}")
 def get_incident(iid: int):
-    return _incident_or_404(iid)
+    return {**_incident_or_404(iid), "approval_sla_minutes": runner.sla_minutes}
 
 
 @app.patch("/incidents/{iid}")

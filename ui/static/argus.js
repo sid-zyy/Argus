@@ -100,7 +100,7 @@ const Argus = (() => {
       w: 0, h: 0, dpr: 1, t: 0, yaw: .4, pitch: -.25, vyaw: 0, vpitch: 0, lastTouch: -1e9,
       tint: P('BASE').slice(), tintTarget: P('BASE'), energy: .3, energyTarget: .3, beat: 0,
       active: null, done: new Set(), mood: "idle", ring: 0, ringTarget: 0, ringColor: P('GOLD'),
-      sparks: [], packets: [], ripples: [], proj: [], hoverNode: -1, hoverAgent: null, selected: null, dragging: false, cards: {},
+      sparks: [], packets: [], relays: [], ripples: [], proj: [], hoverNode: -1, hoverAgent: null, selected: null, dragging: false, cards: {},
     };
 
     const nodes = {};
@@ -236,6 +236,28 @@ const Argus = (() => {
       if (!S.cards[key] || reduced) return;
       const now = performance.now();
       for (let i = 0; i < n; i++) S.packets.push({ key, inbound, t0: now + i * 140, dur: 900 + Math.random() * 300 });
+    }
+
+    // A handoff between agents: a labelled packet leaves the sender's card, crosses the sphere and lands on the
+    // receiver's card. from = null means the Commander (the sphere itself).
+    let relayAt = 0;
+    function relay(from, to, label) {
+      if (reduced || !AGENTS[to]) return;
+      const t0 = Math.max(performance.now(), relayAt + 420);
+      relayAt = t0;
+      S.relays.push({ from, to, label, t0, dur: 2100, landed: false });
+    }
+    function edgePoint(key) {
+      const lp = key && linkPath(key);
+      if (lp) return { at: lp.p0, link: lp };
+      const p = key && S.proj[anchorNode[key]];
+      return { at: p && p[2] > -.2 ? [p[0], p[1]] : [S.cx, S.cy], link: null };
+    }
+    function land(r) {
+      r.landed = true;
+      const el = nodes[r.to]?.el;
+      if (el) { el.classList.remove("receiving"); void el.offsetWidth; el.classList.add("receiving"); setTimeout(() => el.classList.remove("receiving"), 1200); }
+      ripple(r.to, col(r.to));
     }
 
     // ---- render ----
@@ -374,6 +396,54 @@ const Argus = (() => {
         });
       }
 
+      // handoffs between agents
+      S.relays = S.relays.filter((r) => {
+        const u = (now - r.t0) / r.dur;
+        if (u < 0) return true;
+        if (u > 1) { if (!r.landed) land(r); return false; }
+        const a = r.from ? edgePoint(r.from) : { at: [S.cx, S.cy], link: null }, b = edgePoint(r.to);
+        const ca = r.from ? col(r.from) : P("WHITE"), cb = col(r.to);
+        const ctrl = [S.cx + (a.at[0] + b.at[0] - 2 * S.cx) * .15, S.cy + (a.at[1] + b.at[1] - 2 * S.cy) * .15];
+        const quad = (t) => [0, 1].map((i) => (1 - t) * (1 - t) * a.at[i] + 2 * (1 - t) * t * ctrl[i] + t * t * b.at[i]);
+        // the route stays lit while the message travels
+        const fade = Math.min(1, 4 * (1 - u));
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 5]); ctx.lineDashOffset = -now / 30;
+        ctx.strokeStyle = rgba(mix(ca, cb, .5), .5 * fade);
+        ctx.beginPath(); ctx.moveTo(...a.at); ctx.quadraticCurveTo(...ctrl, ...b.at); ctx.stroke();
+        for (const [lk, key] of [[a.link, r.from], [b.link, r.to]]) {
+          if (!lk) continue;
+          ctx.strokeStyle = rgba(col(key), .55 * fade);
+          ctx.beginPath(); ctx.moveTo(...lk.p0); ctx.bezierCurveTo(...lk.p1, ...lk.p2, ...lk.p3); ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        // where the packet is: along the sender's link, across the sphere, then along the receiver's link
+        const s1 = a.link ? .3 : 0, s2 = b.link ? .7 : 1;
+        const ease = (t) => t * t * (3 - 2 * t);
+        let pos, c;
+        if (u < s1) { pos = bez(a.link, 1 - ease(u / s1)); c = ca; }
+        else if (u < s2) { const t = ease((u - s1) / (s2 - s1)); pos = quad(t); c = mix(ca, cb, t); }
+        else { pos = bez(b.link, ease((u - s2) / (1 - s2))); c = cb; }
+        if (u > .985 && !r.landed) land(r);
+        const g = ctx.createRadialGradient(pos[0], pos[1], 0, pos[0], pos[1], 10);
+        g.addColorStop(0, rgba(c, .95)); g.addColorStop(.4, rgba(c, .45)); g.addColorStop(1, rgba(c, 0));
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(pos[0], pos[1], 10, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = light ? "#fff" : "rgb(20,22,34)"; ctx.beginPath(); ctx.arc(pos[0], pos[1], 2.4, 0, Math.PI * 2); ctx.fill();
+        if (r.label) {
+          ctx.font = "600 11px Inter, system-ui, sans-serif";
+          const w = ctx.measureText(r.label).width + 16, h = 20, x = pos[0] - w / 2, y = pos[1] - 30;
+          ctx.globalAlpha = Math.min(1, u * 8, fade);
+          ctx.fillStyle = light ? "rgba(255,255,255,.96)" : "rgba(24,26,40,.94)";
+          ctx.strokeStyle = rgba(c, .8); ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.roundRect(x, y, w, h, 10); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = light ? "rgb(30,32,48)" : "rgb(236,238,248)";
+          ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText(r.label, pos[0], y + h / 2 + .5);
+          ctx.textAlign = "start"; ctx.textBaseline = "alphabetic"; ctx.globalAlpha = 1;
+        }
+        return true;
+      });
+
       // decision ring (human gate)
       if (S.ring > .01) {
         const rr = S.R * 1.28;
@@ -458,7 +528,7 @@ const Argus = (() => {
           const text = `${doing}. ${first.length > 90 ? first.slice(0, 90) + "…" : first}`;
           status(key, doing);
           remember(key, text);
-          say(key, text, fresh);
+          say(key, `${doing}…`, fresh);
           if (fresh) { send(key, 3); ignite(key, 4); }
           break;
         }
@@ -466,6 +536,7 @@ const Argus = (() => {
           const fabricated = (p.errors || []).some((x) => /not found|out of range|unknown source/.test(x));
           status(key, fabricated ? "Quoted something that isn't in the logs" : "Answer sent back to fix");
           remember(key, `Checker rejected: ${(p.errors || [])[0] || ""}`);
+          if (fresh && key) relay(null, key, "Sent back");
           say(key, fabricated ? "Caught it quoting evidence that doesn't exist. Sent it back to try again." : "Its answer didn't pass the checks. Sent back to fix.", fresh);
           showToast(fabricated ? "Made-up evidence caught" : "Answer sent back", "bad", fresh);
           if (fresh && key) ripple(key, P('BAD'));
@@ -476,17 +547,20 @@ const Argus = (() => {
           status("triage", `Possible cause ${p.id}`);
           remember("triage", `Possible cause ${p.id}: ${p.statement}`);
           say("triage", `Possible cause: ${p.statement}`, fresh);
-          if (fresh) send("triage", 2);
+          if (fresh) relay("triage", "verifier", `Check ${p.id}`);
           break;
         case "verdict": {
           setActive("verifier"); markDone("verifier");
           const kind = p.verdict === "supported" ? "good" : p.verdict === "refuted" ? "bad" : "warn";
-          result("verifier", `${p.claim_id} ${VERDICT_TEXT[p.verdict].toLowerCase()}`, kind);
+          result("verifier", VERDICT_TEXT[p.verdict], kind);
           status("verifier", p.reasoning.slice(0, 80));
-          remember("verifier", `${p.claim_id} ${VERDICT_TEXT[p.verdict].toLowerCase()}: ${p.reasoning}`);
+          remember("verifier", `${p.claim_id} ${VERDICT_TEXT[p.verdict]}: ${p.reasoning}`);
           say("verifier", `${VERDICT_TEXT[p.verdict]}: ${p.reasoning}`, fresh);
           showToast(`${p.claim_id} · ${VERDICT_TEXT[p.verdict]}`, kind, fresh);
-          if (fresh) ripple("verifier", kind === "good" ? P('GOOD') : kind === "bad" ? P('BAD') : P('GOLD'));
+          if (fresh) {
+            ripple("verifier", kind === "good" ? P('GOOD') : kind === "bad" ? P('BAD') : P('GOLD'));
+            relay("verifier", p.verdict === "supported" ? "fix" : "triage", `${p.claim_id} ${VERDICT_TEXT[p.verdict].toLowerCase()}`);
+          }
           break;
         }
         case "suspects":
@@ -494,26 +568,27 @@ const Argus = (() => {
           result("code_history", p.suspects[0]?.sha || "", "");
           status("code_history", p.suspects[0] ? `Suspect: ${p.suspects[0].summary}` : "No suspicious changes");
           p.suspects.forEach((s) => remember("code_history", `Suspect ${s.sha}: ${s.summary}`));
+          if (fresh && p.suspects[0]) relay("code_history", "verifier", `Commit ${p.suspects[0].sha.slice(0, 7)}`);
           say("code_history", p.suspects[0] ? `Found a suspicious change: "${p.suspects[0].summary}" (${p.suspects[0].sha})` : "No suspicious changes found.", fresh);
           break;
         case "patch":
           markDone("fix"); setActive("sandbox");
-          result("fix", p.fix_type, ""); result("sandbox", "", "");
+          result("fix", { patch: "Code fix", config_change: "Settings", rollback: "Rollback" }[p.fix_type] || "Fix", ""); result("sandbox", "", "");
           status("fix", p.rationale.slice(0, 80)); status("sandbox", "Testing the fix…");
           remember("fix", `Proposed ${p.fix_type}: ${p.rationale}`);
           say("fix", `Suggested a ${p.fix_type === "rollback" ? "rollback" : p.fix_type === "config_change" ? "settings change" : "code fix"}: ${p.rationale}`, fresh);
-          if (fresh) { send("sandbox", 3, false); ignite("sandbox", 6); }
+          if (fresh) { relay("fix", "sandbox", { patch: "Code fix", config_change: "Settings change", rollback: "Rollback" }[p.fix_type] || "Fix"); ignite("sandbox", 6); }
           break;
         case "sandbox": {
           markDone("sandbox");
-          result("sandbox", p.passed ? "pass" : "fail", p.passed ? "good" : "bad");
+          result("sandbox", p.passed ? "Pass" : "Fail", p.passed ? "good" : "bad");
           const b = p.before?.exit_code, a = p.after?.exit_code;
           status("sandbox", `Before: ${b === 0 ? "working" : "broken"} · After: ${a === undefined ? "not run" : a === 0 ? "working" : "broken"}`);
           const text = p.passed ? "The problem happens without the fix and goes away with it. All tests pass." : `The fix didn't work: ${p.error || "the problem still happens"}`;
           remember("sandbox", text);
           say("sandbox", text, fresh);
           showToast(p.passed ? "Fix works in testing" : "Fix didn't work", p.passed ? "good" : "bad", fresh);
-          if (fresh) ripple("sandbox", p.passed ? P('GOOD') : P('BAD'));
+          if (fresh) relay("sandbox", p.passed ? "human" : "fix", p.passed ? "Tested fix" : "Still broken");
           break;
         }
         case "awaiting_approval":
@@ -534,11 +609,11 @@ const Argus = (() => {
           S.mood = p.approved ? "approved" : "rejected";
           S.ringColor = p.approved ? P('GOOD') : P('BAD'); S.ring = 0; S.ringTarget = 1;
           markDone("human");
-          result("human", p.approved ? "approved" : "rejected", p.approved ? "good" : "bad");
+          result("human", p.approved ? "Approved" : "Declined", p.approved ? "good" : "bad");
           status("human", p.approver);
           say("human", `${p.approved ? "Approved" : "Rejected"} by ${p.approver}.`, fresh);
           showToast(p.approved ? "Approved" : "Rejected", p.approved ? "good" : "bad", fresh);
-          if (fresh) ripple("human", p.approved ? P('GOOD') : P('BAD'));
+          if (fresh) { ripple("human", p.approved ? P('GOOD') : P('BAD')); if (p.approved) relay("human", "reporter", "Approved"); }
           break;
         case "qa":
           say(null, `QA by ${p.tester}: ${p.result === "verified" ? "verified fixed" : "still failing"}`, fresh);
@@ -546,7 +621,7 @@ const Argus = (() => {
           break;
         case "report":
           markDone("reporter"); setActive("reporter");
-          result("reporter", "ready", "good");
+          result("reporter", "Ready", "good");
           status("reporter", "Summary is ready to read");
           remember("reporter", "Wrote the incident summary.");
           say("reporter", "All done. The summary is ready in the Report tab.", fresh);
@@ -566,15 +641,23 @@ const Argus = (() => {
           say(null, `${p.label}. ${p.detail}`, fresh);
           break;
         case "thinking":
-          if (key) { setActive(key); status(key, `Thinking… step ${p.step} of ${p.max_steps}`); }
+          if (key) { setActive(key); status(key, `Thinking · Step ${p.step} of ${p.max_steps}`); }
           break;
         case "waiting":
           say(key, p.reason === "busy" ? "The AI service is busy. Trying again in a moment." :
             `Pausing ${Math.round(p.seconds)}s. The free AI service only allows so much per minute.`, fresh);
-          if (key) status(key, `Paused ${Math.round(p.seconds)}s (free-tier limit)`);
+          if (key) status(key, `Paused ${Math.round(p.seconds)}s · Free-tier limit`);
           break;
         case "failover":
           say(key, "Switched to another AI service to keep going.", fresh);
+          break;
+        case "plan":
+          if (fresh) relay(null, "triage", p.version > 1 ? `New plan v${p.version}` : "Plan");
+          say(null, p.version > 1 ? `New plan: ${p.rationale}` : `Plan: ${p.rationale}`, fresh);
+          break;
+        case "sla_breach":
+          showToast("Approval overdue", "warn", fresh);
+          say("human", `Waited over ${p.minutes} min for approval. ${p.escalated_to} has been alerted.`, fresh);
           break;
         case "comment":
           say(null, `${p.author}: ${p.text}`, fresh);

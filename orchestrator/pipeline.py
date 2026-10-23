@@ -18,6 +18,7 @@ from tools.workspace import Workspace
 MAX_ATTEMPTS = 3
 # Shown live in the UI so people always know what is happening and why.
 PHASES = {
+    "plan": ("Making a plan", "The commander decides which checks to run, in what order, and why."),
     "investigate": ("Looking into it", "The investigator reads the logs and metrics and writes down possible causes."),
     "verify": ("Double-checking", "The fact checker tries to prove each possible cause wrong, using only real evidence."),
     "history": ("Checking recent changes", "The change finder looks for a recent code or settings change that lines up with the problem."),
@@ -73,8 +74,11 @@ def run_incident(ws: Workspace, llm, trace: Trace, approve: Approver, claim_offs
     feedback, suspects, counter = "", None, claim_offset
 
     try:
+        _plan(ws, llm, emit, trace, 1)
         for attempt in range(1, MAX_ATTEMPTS + 1):
             state["attempts"] = attempt
+            if attempt > 1:
+                _plan(ws, llm, emit, trace, attempt, feedback, suspects)
             trace.emit("orchestrator", "attempt", {"n": attempt, "max": MAX_ATTEMPTS, "stage": "investigate"})
             _phase(trace, "investigate", attempt=attempt)
             t = ag.triage(ws, llm, emit, feedback, suspects)
@@ -134,6 +138,12 @@ def run_incident(ws: Workspace, llm, trace: Trace, approve: Approver, claim_offs
     except (AgentError, LLMError) as e:
         trace.emit("orchestrator", "error", {"message": str(e)})
         return _escalate(trace, state, f"Pipeline error: {e}")
+
+
+def _plan(ws, llm, emit, trace, version: int, feedback: str = "", suspects=None) -> None:
+    _phase(trace, "plan", attempt=version)
+    plan = ag.planner(ws, llm, emit, feedback, suspects)
+    trace.emit("planner", "plan", {"version": version, "steps": [s.model_dump() for s in plan.steps], "rationale": plan.rationale})
 
 
 def _code_history(ws, llm, emit, trace) -> list[SuspectChange]:

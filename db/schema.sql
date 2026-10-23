@@ -101,4 +101,10 @@ CREATE TABLE IF NOT EXISTS comments (
     author_id INTEGER REFERENCES users(id)
 );
 
+-- Who is paged first for each service; the lead is the escalation contact.
+CREATE TABLE IF NOT EXISTS on_call (
+    service TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id)
+);
+
 CREATE INDEX IF NOT EXISTS events_by_incident ON events (incident_id, id);

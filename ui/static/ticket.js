@@ -23,22 +23,23 @@ function scheduleRefresh() {
 
 async function refresh() {
   inc = await api(`/incidents/${iid}`);
+  impactLoaded = Date.now();
   render();
 }
 
 function render() {
-  document.title = `${incKey(inc.id)} · ${inc.title}`;
+  document.title = `${incKey(inc.id)} · ${inc.title} · Argus`;
   $("crumb").textContent = `${incKey(inc.id)} · ${SOURCE_LABEL[inc.source] || "Alert"}`;
   $("summary-line").textContent = summaryLine();
   renderStepper();
   $("title").textContent = inc.title;
   $("status").innerHTML = statusBadge(inc.status);
   $("chips").innerHTML = [
-    ["Service", inc.service], ["Seriousness", SEV_LABEL[inc.severity] || inc.severity], ["Assigned to", inc.assignee || "nobody yet"],
-    ["Try", `${inc.attempts || 1} of 3`], ["Started", ago(inc.created_at)], ["AI model", inc.model || "–"],
-    ...(inc.mode === "replay" ? [["Mode", "replay of a recorded run"]] : []),
+    ["Service", inc.service], ["Severity", SEV_LABEL[inc.severity] || inc.severity], ["Assigned to", inc.assignee || "Nobody yet"],
+    ["Opened", ago(inc.created_at)], ...(inc.mode === "replay" ? [["Mode", "Replay of a recorded run"]] : []),
   ].map(([k, v]) => `<span class="chip"><span class="faint">${esc(k)}</span> ${esc(v)}</span>`).join("");
   renderAlert();
+  renderImpact();
   renderReportBox();
   renderDetails();
   renderRerun();
@@ -84,6 +85,33 @@ function summaryLine() {
     default: return "";
   }
 }
+
+function money(v) {
+  if (v >= 1e7) return `₹${(v / 1e7).toFixed(2)} Cr`;
+  if (v >= 1e5) return `₹${(v / 1e5).toFixed(1)} L`;
+  return `₹${Math.round(v).toLocaleString("en-IN")}`;
+}
+
+function renderImpact() {
+  const m = inc.impact;
+  $("impact-wrap").hidden = !m || inc.source === "tester_report";
+  if (!m) return;
+  const minutes = m.fixed ? m.minutes_so_far : m.minutes_so_far + (Date.now() - impactLoaded) / 60000;
+  const tiles = m.fixed ? [
+    ["Revenue protected", money(m.saved_value), `Fixed ${Math.max(0, m.manual_minutes - m.minutes_so_far).toFixed(0)} min faster than a typical manual fix`, "good"],
+    ["Fixed in", `${m.minutes_so_far.toFixed(0)} min`, `Typical manual fix: ${m.manual_minutes.toFixed(0)} min`],
+    ["Engineer time saved", `${m.engineer_hours_saved} h`, "People who didn't need to be paged"],
+    [`${m.unit[0].toUpperCase()}${m.unit.slice(1)} affected`, `${Math.round(m.affected_per_minute).toLocaleString("en-IN")}/min`, "While the problem lasted"],
+  ] : [
+    ["Revenue at risk", `${money(m.at_risk_per_minute)}/min`, `${Math.round(m.failure_share * 100)}% of ${m.unit} failing`, "bad"],
+    ["Cost so far", money(m.at_risk_per_minute * minutes), `${minutes.toFixed(0)} min since the problem started`, "bad"],
+    [`${m.unit[0].toUpperCase()}${m.unit.slice(1)} affected`, `${Math.round(m.affected_per_minute).toLocaleString("en-IN")}/min`, m.service_label],
+    ["Typical manual fix", `${m.manual_minutes.toFixed(0)} min`, "Argus aims to beat this"],
+  ];
+  $("impact").innerHTML = tiles.map(([k, v, sub, kind]) => `<div class="tile ${kind || ""}"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div><div class="s">${esc(sub)}</div></div>`).join("");
+  $("impact-assumptions").innerHTML = m.assumptions.map((a) => `<li>${esc(a)}</li>`).join("");
+}
+let impactLoaded = Date.now();
 
 function renderAlert() {
   const a = inc.alert;
@@ -210,13 +238,15 @@ function renderApproval() {
     else if (inc.votes.some((v) => v.user_id === u.id)) blocker = "Thanks, your approval is in. Waiting for the second person.";
     else if (need.count === 2 && u.role === "developer" && yes.length === 1 && yes[0].role !== "lead") blocker = "A developer has already approved. The second approval needs to come from a team lead.";
     box.innerHTML = `
-      <p class="small" style="margin-top:0">Argus found the cause and tested a fix. Nothing changes until it's approved.</p>
+      <div id="sla" class="note" style="margin-top:0"></div>
+      <p class="small">Argus found the cause and tested a fix. Nothing changes until it's approved.</p>
       <div class="small muted">${need.count === 2 ? "This is a serious issue, so two people must approve, and one must be a team lead." : "One developer or team lead needs to approve."}</div>
       ${voteList()}
       ${blocker ? `<div class="note">${esc(blocker)}</div>` : `
         <label for="ap-reason">Comment <span class="field-hint">needed if you decline</span></label><textarea id="ap-reason" placeholder="e.g. Checked the change, looks safe"></textarea>
         <div class="row" style="margin-top: 10px"><button class="btn primary" id="ap-yes">Approve fix</button><button class="btn danger" id="ap-no">Decline</button></div>`}
       <div id="ap-err" class="error-text"></div>`;
+    renderSla();
     if (!blocker) {
       const send = async (approve) => {
         try {
@@ -262,6 +292,16 @@ function renderApproval() {
   }
 }
 
+function renderSla() {
+  const el = $("sla");
+  if (!el || !inc.approval_waiting_since || !inc.approval_sla_minutes) { if (el) el.hidden = true; return; }
+  const left = Date.parse(inc.approval_waiting_since) + inc.approval_sla_minutes * 60000 - Date.now();
+  el.className = `note ${left <= 0 || inc.sla_breached ? "warn" : ""}`;
+  el.textContent = left > 0 ? `Please decide within ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, "0")}. After that the team lead is alerted.`
+    : "Overdue. The team lead has been alerted.";
+}
+setInterval(() => { if (inc && inc.status === "awaiting_approval") renderSla(); if (inc && inc.impact && !inc.impact.fixed) renderImpact(); }, 1000);
+
 function renderRerun() {
   const box = $("rerun-box");
   const can = ["escalated", "rejected"].includes(inc.status) && inc.mode === "live";
@@ -297,7 +337,6 @@ function renderDetails() {
 function renderReportBox() {
   const isBug = inc.source === "tester_report";
   $("alert-title").textContent = isBug ? `Reported by ${inc.reported_by_name || "a tester"}` : "What happened";
-  $("alert-help").textContent = isBug ? "What the tester saw, in their own words." : "The alert that started this, from the monitoring system.";
   $("alert").hidden = isBug;
   const box = $("bug-report");
   box.hidden = !isBug;
@@ -329,8 +368,8 @@ function addActivity(e) {
 
 function connect() {
   const es = new EventSource(`/incidents/${iid}/events`);
-  es.onopen = () => { $("live").textContent = "● live"; };
-  es.onerror = () => { $("live").textContent = "reconnecting…"; };
+  es.onopen = () => { $("live").textContent = "● Live"; };
+  es.onerror = () => { $("live").textContent = "Reconnecting…"; };
   es.onmessage = (m) => {
     const e = JSON.parse(m.data);
     addActivity(e);

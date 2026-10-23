@@ -1,0 +1,44 @@
+{
+  "rows": [
+    {
+      "scenario": "incident1_conn_leak",
+      "root_cause": "The newly added order history endpoint (commit 6c95fcb) acquires a connection from the pool but fails to release it back when an exception or normal execution happens outside of standard connection management, or more specifically, the `order_history` function in `app/history.py` relies on `finally: pool.release(conn)`, but the connection is leaked because the underlying database call or connection handling leaves references hanging, or in `app/history.py` the `conn.order_history(customer_id)` call doesn't release the connection properly under certain conditions or connection acquisition/release is unbalanced causing pool exhaustion.",
+      "right_category": true,
+      "named_culprit": false,
+      "evidence_total": 3,
+      "evidence_verified": 0,
+      "fix_passes": true,
+      "fix_note": "passed",
+      "wrong_guess_caught": false,
+      "seconds": 8.2,
+      "model": "gemini/gemini-3.5-flash-lite"
+    },
+    {
+      "scenario": "incident2_timeout",
+      "root_cause": "The request timeout for upstream payments was lowered too aggressively in commit 1ff1467, setting it to 3.0 seconds. Since the upstream payment provider's p95 latency frequently exceeds 3.0 seconds (reaching up to 4.8 seconds), legitimate payment requests are timing out and throwing 504 errors.",
+      "right_category": true,
+      "named_culprit": true,
+      "evidence_total": 3,
+      "evidence_verified": 1,
+      "fix_passes": true,
+      "fix_note": "passed",
+      "wrong_guess_caught": false,
+      "seconds": 3.4,
+      "model": "gemini/gemini-3.5-flash-lite"
+    },
+    {
+      "scenario": "incident3_cache_oom",
+      "root_cause": "An unbounded product page cache implementation in commit 24e0838 accumulates page_cache_entries indefinitely without eviction, leading to excessive memory usage and ultimately OOMKilled container restarts when combined with increased traffic from the October email campaign.",
+      "right_category": false,
+      "named_culprit": true,
+      "evidence_total": 2,
+      "evidence_verified": 1,
+      "fix_passes": true,
+      "fix_note": "passed",
+      "wrong_guess_caught": false,
+      "seconds": 5.2,
+      "model": "gemini/gemini-3.5-flash-lite"
+    }
+  ],
+  "recorded_at": "2026-10-24 00:18"
+}

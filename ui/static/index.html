@@ -3,17 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Argus Dashboard</title>
+<title>Argus · Incident Commander</title>
 <script>try { document.documentElement.dataset.theme = localStorage.getItem("argus.theme") || "light"; } catch (e) { document.documentElement.dataset.theme = "light"; }</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="icon" type="image/svg+xml" href="/static/logo.svg">
 <link rel="stylesheet" href="/static/style.css">
 <link rel="stylesheet" href="/static/argus.css">
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="/"><span class="brand-orb"></span>Argus</a>
-  <span class="sub">Your AI helper for when things break</span>
+  <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
+  <nav class="nav"><a href="/" class="on">Dashboard</a><a href="/results">Results</a></nav>
   <span class="spacer"></span>
   <button class="icon-btn" id="theme-btn" type="button"></button>
   <div class="user-menu" id="user-menu"></div>
@@ -23,7 +24,7 @@
   <div class="dash-head">
     <div>
       <h1 id="greeting">Welcome to Argus</h1>
-      <p id="subgreeting">When something breaks, Argus investigates, double-checks itself, tests a fix, and asks a person before changing anything.</p>
+      <p id="subgreeting">Finds the cause, tests a fix, and asks a person before changing anything.</p>
     </div>
     <div class="dash-actions">
       <button class="btn" id="bug-btn" hidden>Report a problem</button>
@@ -35,12 +36,11 @@
   <section class="panel welcome" id="welcome" hidden>
     <div>
       <h2>How Argus works</h2>
-      <p class="help" style="margin:0">Four steps, and a person always has the final say.</p>
       <div class="how">
-        <div class="how-step"><div class="num">1</div><b>Looks into it</b><span>Reads the logs and recent changes to find likely causes.</span></div>
-        <div class="how-step"><div class="num">2</div><b>Double-checks</b><span>A second agent tries to prove each guess wrong. Only real evidence counts.</span></div>
-        <div class="how-step"><div class="num">3</div><b>Tests a fix</b><span>Tries the fix in a safe copy and checks the problem goes away.</span></div>
-        <div class="how-step"><div class="num">4</div><b>Asks you</b><span>Nothing changes until a person approves the fix.</span></div>
+        <div class="how-step"><div class="num">1</div><b>Plans and investigates</b><span>Reads logs, metrics and recent changes.</span></div>
+        <div class="how-step"><div class="num">2</div><b>Double-checks</b><span>A second agent tries to prove each guess wrong.</span></div>
+        <div class="how-step"><div class="num">3</div><b>Tests a fix</b><span>On a safe copy, before anything changes.</span></div>
+        <div class="how-step"><div class="num">4</div><b>Asks a person</b><span>Nothing is applied without approval.</span></div>
       </div>
     </div>
     <div id="welcome-right"></div>
@@ -51,24 +51,21 @@
       <h2>Argus right now</h2>
       <div id="mind"></div>
       <div class="mind-status" id="mind-status">All quiet.</div>
-      <div class="mind-hint">Each colour is a different helper. Drag to spin it, hover to see who is who.</div>
     </div>
     <div class="tiles" id="tiles"></div>
   </section>
 
-  <div class="section-head"><h2>Incidents</h2><p>Every problem Argus is handling, by stage.</p></div>
+  <div class="section-head"><h2>Incidents</h2></div>
   <div class="board" id="board"></div>
 
   <section class="dash-bottom">
     <div class="panel">
       <h2>Recent activity</h2>
-      <p class="help">What Argus and the team did most recently.</p>
-      <div class="activity feed" id="feed"></div>
+      <div class="activity feed" id="feed" style="margin-top: 8px"></div>
     </div>
     <div class="panel">
       <h2 id="queue-title">Waiting on you</h2>
-      <p class="help" id="queue-help"></p>
-      <div id="queue"></div>
+      <div id="queue" style="margin-top: 8px"></div>
     </div>
   </section>
 </main>
@@ -134,11 +131,11 @@ function renderMindStatus() {
   watch(busy || waiting[0] || null);
   if (busy) {
     const who = busy.last_event && AGENT_NAME[busy.last_event.actor];
-    $("mind-status").innerHTML = `Working on <a href="/incidents/${busy.id}/view"><b>${esc(busy.title)}</b></a>${who && who !== "Argus" ? `<br>The ${esc(who.toLowerCase())} is on it right now.` : ""}`;
+    $("mind-status").innerHTML = `Working on <a href="/incidents/${busy.id}/view"><b>${esc(busy.title)}</b></a>${who && who !== "Argus" ? `<br>${esc(who)} is on it.` : ""}`;
   } else if (waiting.length) {
-    $("mind-status").innerHTML = `<b>${waiting.length} fix${waiting.length > 1 ? "es are" : " is"} ready</b> and waiting for someone to approve.`;
+    $("mind-status").innerHTML = `<b>${waiting.length} fix${waiting.length > 1 ? "es" : ""} waiting</b> for approval.`;
   } else {
-    $("mind-status").innerHTML = "All quiet. Nothing needs attention right now.";
+    $("mind-status").innerHTML = "All quiet.";
   }
 }
 
@@ -149,14 +146,20 @@ function fmtDuration(s) {
   if (s < 3600) return `${Math.round(s / 60)} min`;
   return `${(s / 3600).toFixed(1)} h`;
 }
+function money(v) {
+  if (!v) return "₹0";
+  if (v >= 1e7) return `₹${(v / 1e7).toFixed(2)} Cr`;
+  if (v >= 1e5) return `₹${(v / 1e5).toFixed(1)} L`;
+  return `₹${Math.round(v).toLocaleString("en-IN")}`;
+}
 function renderTiles(m) {
   const tiles = [
-    ["Open right now", m.open, m.total ? `${m.total} handled so far` : "Nothing yet"],
-    ["Waiting for a person", m.awaiting_approval + m.awaiting_qa, `${m.awaiting_approval} to approve, ${m.awaiting_qa} to test`],
-    ["Fixed", m.resolved, m.escalated ? `${m.escalated} handed to a person` : "None handed off"],
-    ["Average time to fix", fmtDuration(m.mttr_seconds), "From the first alert to an approved fix"],
-    ["Wrong guesses caught", m.claims_refuted, "Ruled out by the fact checker before anyone acted on them"],
-    ["Made-up evidence blocked", m.fabrications_blocked, `Fixes that worked in testing: ${m.sandbox_passed} of ${m.sandbox_runs}`],
+    ["Revenue protected", money(m.saved_value), "Estimated, compared with a manual fix"],
+    ["Engineer time saved", `${m.engineer_hours_saved} h`, `${m.resolved} incident${m.resolved === 1 ? "" : "s"} fixed`],
+    ["Open right now", m.open, m.at_risk_per_minute_now ? `${money(m.at_risk_per_minute_now)}/min at risk` : "Nothing at risk"],
+    ["Average time to fix", fmtDuration(m.mttr_seconds), "Including human approval"],
+    ["Wrong guesses caught", m.claims_refuted, "Before anyone acted on them"],
+    ["Made-up evidence blocked", m.fabrications_blocked, `AI used: ≈${m.wh_estimate} Wh`],
   ];
   $("tiles").innerHTML = tiles.map(([k, v, s]) => `<div class="tile"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`).join("");
 }
@@ -167,20 +170,20 @@ function friendlyLine(i) {
   const ev = i.last_event;
   switch (i.status) {
     case "open": case "investigating":
-      return `<span class="live"></span>${esc(ev ? (ev.type === "phase" ? `${ev.payload.label}…` : `${AGENT_NAME[ev.actor] || "Argus"} ${describeEvent(ev)}`) : "Getting started")}`;
-    case "awaiting_approval": return `Fix ready. ${i.votes} of ${need} approval${need > 1 ? "s" : ""} so far.`;
-    case "awaiting_qa": return "Waiting for a tester to confirm it works.";
+      return `<span class="live"></span>${esc(ev ? (ev.type === "phase" ? `${ev.payload.label}…` : `${AGENT_NAME[ev.actor] || "Argus"}: ${describeEvent(ev)}`) : "Getting started")}`;
+    case "awaiting_approval": return `Fix ready. ${i.votes} of ${need} approval${need > 1 ? "s" : ""}.`;
+    case "awaiting_qa": return "Waiting for a tester.";
     case "resolved": return "Fixed and approved.";
-    case "closed": return "Fixed, and a tester confirmed it.";
-    case "rejected": return "The suggested fix was declined.";
-    case "escalated": return "Argus couldn't solve this one. Someone should take a look.";
+    case "closed": return "Fixed and confirmed.";
+    case "rejected": return "Fix declined.";
+    case "escalated": return "Needs a person.";
     default: return esc(STATUS_LABEL[i.status] || i.status);
   }
 }
 function card(i) {
-  const person = i.assignee ? `${avatar(i.assignee, "developer")}${esc(i.assignee)}` : i.reported_by_name ? `${avatar(i.reported_by_name, "tester")}Reported by ${esc(i.reported_by_name)}` : `<span>From monitoring</span>`;
+  const person = i.assignee ? `${avatar(i.assignee, "developer")}${esc(i.assignee)}` : i.reported_by_name ? `${avatar(i.reported_by_name, "tester")}${esc(i.reported_by_name)}` : "";
   return `<a class="card" href="/incidents/${i.id}/view">
-    <div class="card-top"><span class="key">${incKey(i.id)}</span><span>· ${esc(i.service)}</span><span class="sev-pill ${esc(i.severity)}">${esc(SEV_LABEL[i.severity] || i.severity)}</span></div>
+    <div class="card-top"><span class="key">${incKey(i.id)}</span><span class="sev-pill ${esc(i.severity)}">${esc(SEV_LABEL[i.severity] || i.severity)}</span></div>
     <div class="card-title">${esc(i.title)}</div>
     <div class="card-ai">${friendlyLine(i)}</div>
     <div class="card-foot">${person}<span class="spacer"></span><span>${esc(ago(i.created_at))}</span></div>
@@ -191,7 +194,6 @@ function renderBoard() {
   $("board").innerHTML = COLUMNS.map((c) => {
     const items = incidents.filter((i) => c.statuses.includes(i.status));
     return `<div class="col"><div class="col-head"><span class="col-dot" style="background:${c.color}"></span>${esc(c.label)}<span class="n">${items.length}</span></div>
-      <div class="col-help">${esc(c.help)}</div>
       ${items.length ? items.map(card).join("") : `<div class="col-empty">Nothing here</div>`}</div>`;
   }).join("");
 }
@@ -200,24 +202,21 @@ function renderBoard() {
 function renderFeed(events) {
   $("feed").innerHTML = events.length ? events.map((e) => `<div class="act"><span class="t">${esc(clock(e.ts))}</span>
     <div><a href="/incidents/${e.incident_id}/view">${incKey(e.incident_id)}</a> <span class="actor">${esc(actorName(e))}</span> <span class="detail">${esc(describeEvent(e))}</span></div></div>`).join("")
-    : `<p class="empty">No activity yet. Try a demo incident to see Argus at work.</p>`;
+    : `<p class="empty">No activity yet.</p>`;
 }
 function renderQueue() {
   const u = Session.user;
   let items = [];
   if (!u) {
     $("queue-title").textContent = "Waiting on you";
-    $("queue-help").textContent = "Choose who you are (top right) to see what needs your attention.";
-    $("queue").innerHTML = "";
+    $("queue").innerHTML = `<p class="small faint">Choose who you are (top right).</p>`;
     return;
   }
   if (u.role === "tester") {
     $("queue-title").textContent = "Ready for you to test";
-    $("queue-help").textContent = "Fixes that need someone to confirm they work.";
     items = incidents.filter((i) => i.status === "awaiting_qa").map((i) => [i, "Check that it's really fixed"]);
   } else {
     $("queue-title").textContent = "Ready for your review";
-    $("queue-help").textContent = "Tested fixes waiting for approval.";
     items = incidents.filter((i) => i.status === "awaiting_approval").map((i) => {
       const need = ["sev1", "sev2"].includes(i.severity) ? 2 : 1;
       return [i, need > 1 ? `${i.votes} of 2 approvals · a team lead must be one of them` : "Needs one approval"];
@@ -232,28 +231,19 @@ function renderQueue() {
 function hour() { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"; }
 function renderWelcome() {
   const u = Session.user;
-  const dismissed = store.get("argus.welcome", "") === "hidden";
-  $("welcome").hidden = !!u && dismissed;
+  $("welcome").hidden = !!u;
   $("bug-btn").hidden = !Session.is("tester");
   $("trigger-btn").hidden = !u;
   if (!u) {
     $("greeting").textContent = "Welcome to Argus";
-    $("subgreeting").textContent = "When something breaks, Argus investigates, double-checks itself, tests a fix, and asks a person before changing anything.";
-    $("welcome-right").innerHTML = `<h2>Who are you?</h2><p class="help" style="margin:0">Pick a demo person to get started. No password needed.</p>
+    $("subgreeting").textContent = "Finds the cause, tests a fix, and asks a person before changing anything.";
+    $("welcome-right").innerHTML = `<h2>Who are you?</h2><p class="help" style="margin:0">Pick a demo person. No password needed.</p>
       <div class="people">${Session.users.map((x) => `<button class="person" type="button" data-id="${x.id}">${avatar(x.name, x.role)}
         <span><b>${esc(x.name)}</b><small>${esc(ROLE_LABEL[x.role])}. ${esc(ROLE_HELP[x.role])}.</small></span></button>`).join("")}</div>`;
     $("welcome-right").querySelectorAll(".person").forEach((b) => b.onclick = () => Session.signIn(Number(b.dataset.id)));
   } else {
     $("greeting").textContent = `${hour()}, ${u.name}`;
-    $("subgreeting").textContent = u.role === "tester"
-      ? "Spotted something broken? Report it and Argus will start investigating."
-      : "Here's what Argus is working on. Fixes only go ahead once someone approves them.";
-    $("welcome-right").innerHTML = `<h2>You're signed in as a ${esc(ROLE_LABEL[u.role].toLowerCase())}</h2>
-      <p class="help">${esc(ROLE_HELP[u.role])}.${u.role === "developer" ? " Serious fixes also need a team lead's OK." : ""}</p>
-      <div class="row"><button class="btn primary" id="w-try">${u.role === "tester" ? "Report a problem" : "Try a demo incident"}</button>
-        <button class="btn ghost" id="w-hide">Hide this guide</button></div>`;
-    $("w-try").onclick = (e) => { e.stopPropagation(); (u.role === "tester" ? $("bug-btn") : $("trigger-btn")).click(); };
-    $("w-hide").onclick = () => { store.set("argus.welcome", "hidden"); renderWelcome(); };
+    $("subgreeting").textContent = `${ROLE_LABEL[u.role]}: ${ROLE_HELP[u.role]}.`;
   }
 }
 
@@ -261,7 +251,7 @@ function renderWelcome() {
 $("trigger-btn").onclick = (e) => {
   e.stopPropagation();
   const menu = $("trigger-menu");
-  menu.innerHTML = `<div class="menu-head">Start a pretend problem and watch Argus handle it. Uses made-up data.</div>` +
+  menu.innerHTML = `<div class="menu-head">Demo incidents (made-up data)</div>` +
     scenarios.map((s) => { const [t, d] = DEMO_LABEL[s.name] || [s.title, s.service];
       return `<div class="sc"><div class="t"><div>${esc(t)}</div><div>${esc(d)} · ${esc(s.service)}</div></div>
       <button class="btn small primary" data-s="${esc(s.name)}" data-m="live">Start</button>

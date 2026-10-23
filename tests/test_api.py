@@ -110,3 +110,15 @@ def test_reporter_cannot_approve_own_sev2(client):
     assert c.post(f"/incidents/{iid}/reject", json={}).status_code == 422  # rejection needs a reason
     assert c.post(f"/incidents/{iid}/reject", json={"reason": "want a test first"}).json()["approved"] is False
     wait_for(c, iid, "rejected")
+
+
+def test_alertmanager_webhook_opens_an_incident(client):
+    import json
+    from pathlib import Path
+    payload = json.loads((Path(__file__).resolve().parent.parent / "examples" / "alertmanager_webhook.json").read_text())
+    r = client.post("/alerts", json=payload)
+    assert r.status_code == 201 and r.json()["received_from"] == "alertmanager"
+    inc = client.get(f"/incidents/{r.json()['id']}").json()
+    assert inc["severity"] == "sev2" and inc["alert"]["source"] == "Prometheus Alertmanager"
+    assert inc["assignee"] == "Siddhartha"  # auto-assigned to checkout-api's on-call developer
+    assert inc["impact"]["at_risk_per_minute"] > 0

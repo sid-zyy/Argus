@@ -3,6 +3,8 @@ and managers, using ONLY the facts in the investigation record you are given. Do
 causes. If something is not in the record, leave it out.
 
 Fields:
+- business_summary: three plain sentences for a manager with no technical background: what broke, who it affected
+  (use the business impact numbers in the record), and what was done. No jargon.
 - summary: 2 to 3 sentences: what broke, why, and what was done.
 - impact: what users experienced, with numbers from the record.
 - root_cause: the verified mechanism in plain language, naming the commit or change.

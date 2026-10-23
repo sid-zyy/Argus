@@ -38,6 +38,14 @@ def call(name, args, i=[0]):
     return {"id": f"call_{i[0]}", "name": name, "arguments": args}
 
 
+PLAN = {"steps": [{"agent": "investigator", "goal": "Find when the 5xx errors started"},
+                  {"agent": "fact_checker", "goal": "Test each cause against DB health and deploy timing"},
+                  {"agent": "change_finder", "goal": "Check the 14:05 deploy for risky changes"},
+                  {"agent": "fixer", "goal": "Write the smallest fix for the confirmed cause"},
+                  {"agent": "test_lab", "goal": "Replay checkout traffic without and with the fix"}],
+        "rationale": "Separate the database theory from the deploy timing first."}
+
+
 class ScriptedLLM:
     def __init__(self, replies):
         self.replies = list(replies)
@@ -45,6 +53,8 @@ class ScriptedLLM:
 
     def chat(self, messages, tools=None, provider=None):
         self.seen.append(messages[-1])
+        if messages[0]["content"].startswith("You are the Commander"):  # planner: canned plan, outside the script
+            return {"content": "", "tool_calls": [call("submit_result", PLAN)], "provider": "scripted", "model": "test"}
         r = self.replies.pop(0)
         return {"content": "", "tool_calls": r, "provider": "scripted", "model": "test"}
 
@@ -100,7 +110,7 @@ def trap_script(ws):
         [call("read_file", {"path": "app/checkout.py"})],
         [call("submit_result", {"fix_type": "patch", "rationale": "release in finally", "edits": [{"file": "app/checkout.py", "old": OLD, "new": NEW}]})],
         # reporter
-        [call("submit_result", {"summary": "s", "impact": "i", "root_cause": "r", "follow_ups": ["add a decline-path test"]})],
+        [call("submit_result", {"business_summary": "b", "summary": "s", "impact": "i", "root_cause": "r", "follow_ups": ["add a decline-path test"]})],
     ]
 
 
@@ -117,7 +127,7 @@ def test_trap_is_refuted_then_leak_fixed(ws):
     assert state["sandbox"].reproduced and state["sandbox"].passed
     assert state["status"] == "applied" and decisions
     report = build_report(ws.alert, state, trace, llm)
-    assert "REFUTED" in report and "SUPPORTED" in report and "PASS" in report
+    assert "Ruled out" in report and "Confirmed" in report and "**Pass**" in report and "Decisions made by people" in report
 
 
 def test_no_supported_claim_escalates(ws):

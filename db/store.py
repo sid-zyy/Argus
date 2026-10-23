@@ -7,12 +7,16 @@ import threading
 from datetime import datetime, timezone
 from pathlib import Path
 
+from db.business import impact
+
 SCHEMA = Path(__file__).with_name("schema.sql")
 FIRST_ID = 101
 RUNNING_STATUSES = ("open", "investigating", "awaiting_approval")
 OPEN_STATUSES = RUNNING_STATUSES + ("awaiting_qa",)
 ROLES = ("tester", "developer", "lead")
 DEMO_USERS = [("Tara", "tester"), ("Siddhartha", "developer"), ("Meera", "developer"), ("Yuvika", "lead")]
+DEMO_ON_CALL = [("checkout-api", "Siddhartha"), ("catalog-api", "Meera")]
+WH_PER_1K_TOKENS = 0.3  # rough public estimate for a large hosted model; shown as an estimate everywhere
 # columns added after the first schema version: (table, column, type)
 MIGRATIONS = [
     ("incidents", "source", "TEXT NOT NULL DEFAULT 'alert'"), ("incidents", "reported_by", "INTEGER"),
@@ -39,6 +43,8 @@ class Store:
                 c.execute("INSERT INTO sqlite_sequence (name, seq) VALUES ('incidents', ?)", (FIRST_ID - 1,))
             if not c.execute("SELECT 1 FROM users LIMIT 1").fetchone():
                 c.executemany("INSERT INTO users (name, role) VALUES (?, ?)", DEMO_USERS)
+            if not c.execute("SELECT 1 FROM on_call LIMIT 1").fetchone():
+                c.executemany("INSERT INTO on_call (service, user_id) SELECT ?, id FROM users WHERE name=?", DEMO_ON_CALL)
 
     @staticmethod
     def _migrate(c: sqlite3.Connection) -> None:
@@ -136,7 +142,40 @@ class Store:
                 "SELECT q.result, q.note, q.ts, u.name FROM qa_checks q JOIN users u ON u.id = q.tester_id WHERE q.incident_id=? ORDER BY q.id",
                 (incident_id,))]
             inc["required_approvals"] = required_approvals(inc["severity"])
+            tokens = sum(json.loads(r[0]).get("tokens", 0) or 0 for r in
+                         c.execute("SELECT payload FROM events WHERE incident_id=? AND type='llm_step'", (incident_id,)))
+            inc["ai_usage"] = {"tokens": tokens, "wh_estimate": round(tokens / 1000 * WH_PER_1K_TOKENS, 1),
+                               "calls": c.execute("SELECT COUNT(*) FROM events WHERE incident_id=? AND type='llm_step'", (incident_id,)).fetchone()[0]}
+            waiting = c.execute("SELECT ts FROM events WHERE incident_id=? AND type='awaiting_approval' ORDER BY id DESC LIMIT 1", (incident_id,)).fetchone()
+            breach = c.execute("SELECT 1 FROM events WHERE incident_id=? AND type='sla_breach' AND ts >= ? LIMIT 1",
+                               (incident_id, waiting[0] if waiting else "")).fetchone()
+            inc["approval_waiting_since"] = waiting[0] if waiting else None
+            inc["sla_breached"] = bool(breach)
+        inc["impact"] = impact(inc)
         return inc
+
+    def on_call_for(self, service: str) -> dict | None:
+        with self._conn() as c:
+            r = c.execute("SELECT u.id, u.name, u.role FROM on_call o JOIN users u ON u.id = o.user_id WHERE o.service=?", (service,)).fetchone()
+        return dict(r) if r else None
+
+    def lead(self) -> dict | None:
+        with self._conn() as c:
+            r = c.execute("SELECT id, name, role FROM users WHERE role='lead' ORDER BY id LIMIT 1").fetchone()
+        return dict(r) if r else None
+
+    def awaiting_approval(self) -> list[dict]:
+        """Incidents waiting at the gate, with when they started waiting and whether the SLA was already breached."""
+        with self._conn() as c:
+            rows = c.execute("SELECT id, severity, assignee FROM incidents WHERE status='awaiting_approval'").fetchall()
+            out = []
+            for r in rows:
+                w = c.execute("SELECT ts FROM events WHERE incident_id=? AND type='awaiting_approval' ORDER BY id DESC LIMIT 1", (r["id"],)).fetchone()
+                if not w:
+                    continue
+                b = c.execute("SELECT 1 FROM events WHERE incident_id=? AND type='sla_breach' AND ts >= ?", (r["id"], w[0])).fetchone()
+                out.append({**dict(r), "since": w[0], "breached": bool(b)})
+        return out
 
     def add_comment(self, incident_id: int, user: dict, text: str) -> dict:
         ts = now()
@@ -180,6 +219,11 @@ class Store:
             durations = [(_ts(r[1]) - _ts(r[0])).total_seconds() for r in
                          c.execute("SELECT created_at, resolved_at FROM incidents WHERE resolved_at IS NOT NULL AND status IN ('resolved','closed','awaiting_qa')")]
             rejected = [json.loads(r[0]) for r in c.execute("SELECT payload FROM events WHERE type='rejected'")]
+            # a wrong guess is caught when it was not confirmed and a different cause in the same incident was
+            caught = q("SELECT COUNT(*) FROM claims c WHERE c.verdict IN ('refuted','insufficient') AND EXISTS "
+                       "(SELECT 1 FROM claims s WHERE s.incident_id=c.incident_id AND s.verdict='supported')")
+            tokens = sum(json.loads(r[0]).get("tokens", 0) or 0 for r in c.execute("SELECT payload FROM events WHERE type='llm_step'"))
+            ids = [r[0] for r in c.execute("SELECT id FROM incidents")]
             patches = c.execute("SELECT COUNT(*), COALESCE(SUM(passed),0) FROM patches WHERE passed IS NOT NULL").fetchone()
             return {
                 "total": sum(by_status.values()),
@@ -189,11 +233,27 @@ class Store:
                 "resolved": by_status.get("resolved", 0) + by_status.get("closed", 0),
                 "escalated": by_status.get("escalated", 0),
                 "mttr_seconds": sum(durations) / len(durations) if durations else None,
-                "claims_refuted": q("SELECT COUNT(*) FROM claims WHERE verdict='refuted'"),
+                "claims_refuted": caught,
                 "claims_total": q("SELECT COUNT(*) FROM claims"),
                 "fabrications_blocked": sum(1 for p in rejected if any(h in e for e in p.get("errors", []) for h in FABRICATION_HINTS)),
                 "sandbox_runs": patches[0], "sandbox_passed": patches[1],
+                "tokens": tokens, "wh_estimate": round(tokens / 1000 * WH_PER_1K_TOKENS, 1),
+                **self._money(ids),
             }
+
+    def _money(self, ids: list[int]) -> dict:
+        saved = hours = at_risk_now = 0
+        currency = "INR"
+        for i in ids:
+            imp = (self.get_incident(i) or {}).get("impact")
+            if not imp:
+                continue
+            currency = imp["currency"]
+            saved += imp["saved_value"]
+            hours += imp["engineer_hours_saved"]
+            if not imp["fixed"]:
+                at_risk_now += imp["at_risk_per_minute"]
+        return {"saved_value": saved, "engineer_hours_saved": round(hours, 1), "at_risk_per_minute_now": at_risk_now, "currency": currency}
 
     def recent_events(self, limit: int = 40) -> list[dict]:
         with self._conn() as c:

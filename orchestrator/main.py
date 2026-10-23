@@ -40,7 +40,7 @@ def main(argv=None) -> dict:
 
     out = ROOT / "runs" / f"{scenario.name}-{datetime.now():%Y%m%d-%H%M%S}"
     out.mkdir(parents=True, exist_ok=True)
-    report = build_report(ws.alert, state, trace, llm)
+    report = build_report(ws.alert, state, trace, llm, scenario.name)
     (out / "incident_report.md").write_text(report, encoding="utf-8")
     trace.emit("reporter", "report", {"path": str(out / "incident_report.md"), "markdown": report})
     trace.save(out / "trace.json")

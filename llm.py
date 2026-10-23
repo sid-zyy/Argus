@@ -152,7 +152,9 @@ class LLM:
             tool_calls.append(call)
         extra = msg.model_extra or {}
         reasoning = extra.get("reasoning") or extra.get("reasoning_content") or ""
-        return {"content": msg.content or "", "tool_calls": tool_calls, "provider": provider, "model": model, "reasoning": reasoning}
+        tokens = getattr(resp.usage, "total_tokens", 0) if getattr(resp, "usage", None) else 0
+        return {"content": msg.content or "", "tool_calls": tool_calls, "provider": provider, "model": model,
+                "reasoning": reasoning, "tokens": tokens or 0}
 
 
 def _plain_reason(err: str) -> str:

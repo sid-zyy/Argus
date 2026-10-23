@@ -3,19 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Argus Incident</title>
+<title>Incident · Argus</title>
 <script>try { document.documentElement.dataset.theme = localStorage.getItem("argus.theme") || "light"; } catch (e) { document.documentElement.dataset.theme = "light"; }</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="icon" type="image/svg+xml" href="/static/logo.svg">
 <link rel="stylesheet" href="/static/style.css">
 <link rel="stylesheet" href="/static/argus.css">
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="/"><span class="brand-orb"></span>Argus</a>
-  <span class="sub"><a href="/">← All incidents</a></span>
+  <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
+  <nav class="nav"><a href="/">Dashboard</a><a href="/results">Results</a></nav>
   <span class="spacer"></span>
-  <span id="live" class="small faint">connecting…</span>
+  <span id="live" class="small faint">Connecting…</span>
   <button class="icon-btn" id="theme-btn" type="button"></button>
   <div class="user-menu" id="user-menu"></div>
 </header>
@@ -31,38 +32,39 @@
     <div class="chips" id="chips"></div>
   </section>
 
+  <section id="impact-wrap" hidden>
+    <div class="impact" id="impact"></div>
+    <details class="impact-note"><summary>How these estimates are worked out</summary><ul id="impact-assumptions"></ul></details>
+  </section>
+
   <section id="argus" style="margin-top: 16px"></section>
   <section class="panel live" id="progress" aria-live="polite"></section>
 
   <div class="grid" style="margin-top: 16px">
     <div>
       <nav class="tabs">
-        <button class="tab active" data-tab="investigation">What Argus found</button>
-        <button class="tab" data-tab="report">Summary report</button>
+        <button class="tab active" data-tab="investigation">Findings</button>
+        <button class="tab" data-tab="report">Report</button>
       </nav>
 
       <div id="tab-investigation" class="stack">
         <section class="panel" id="alert-panel">
           <h2 id="alert-title">What happened</h2>
-          <p class="help" id="alert-help">The alert that started this, from the monitoring system.</p>
-          <dl class="kv" id="alert"></dl>
+          <dl class="kv" id="alert" style="margin-top: 10px"></dl>
           <dl class="report-box" id="bug-report" hidden></dl>
         </section>
         <section class="panel">
           <h2>Possible causes</h2>
-          <p class="help">Argus lists what might have caused this. Then a fact checker tries to prove each one wrong using the logs and the code.
-            Every quote below was checked against the real files, so nothing is made up.</p>
+          <p class="help">Every quote is checked against the real files.</p>
           <div id="claims"></div>
         </section>
         <section class="panel" id="suspects-panel" hidden>
-          <h2>The change that likely caused it</h2>
-          <p class="help">A recent code or settings change that lines up with when the problem started.</p>
-          <div id="suspects"></div>
+          <h2>Change that caused it</h2>
+          <div id="suspects" style="margin-top: 10px"></div>
         </section>
         <section class="panel" id="fix-panel" hidden>
           <h2>Suggested fix</h2>
-          <p class="help">Tested on a safe copy first: the problem should happen without the fix and go away with it.</p>
-          <div id="fix"></div>
+          <div id="fix" style="margin-top: 10px"></div>
         </section>
         <section class="panel" id="escalation-panel" hidden>
           <h2 id="escalation-title">Argus needs a person</h2>
@@ -74,8 +76,8 @@
       <div id="tab-report" hidden>
         <section class="panel">
           <div class="row" style="justify-content: space-between">
-            <h2 style="margin: 0">Summary report</h2>
-            <a id="download" class="btn small" hidden>Download .md</a>
+            <h2 style="margin: 0">Report</h2>
+            <a id="download" class="btn small" hidden>Download</a>
           </div>
           <div id="report" class="report" style="margin-top: 10px"></div>
         </section>
@@ -85,20 +87,20 @@
     <aside class="stack">
       <section class="panel" id="approval-panel">
         <h2>Your decision</h2>
-        <div id="approval"></div>
+        <div id="approval" style="margin-top: 8px"></div>
       </section>
       <section class="panel">
         <h2>Details</h2>
-        <label for="assignee">Assignee</label>
+        <label for="assignee">Assigned to</label>
         <select id="assignee"></select>
         <label for="severity">Severity</label>
-        <select id="severity"><option>sev1</option><option>sev2</option><option>sev3</option><option>sev4</option></select>
+        <select id="severity"><option value="sev1">Critical</option><option value="sev2">Major</option><option value="sev3">Minor</option><option value="sev4">Small</option></select>
         <p class="small faint" id="details-hint" style="margin: 8px 0 0"></p>
       </section>
       <section class="panel">
         <div class="row" style="justify-content: space-between">
           <h2 style="margin: 0">Timeline</h2>
-          <label class="small row" style="margin: 0; gap: 6px; width: auto; font-weight: 400; color: var(--muted)"><input type="checkbox" id="show-steps" style="width: auto"> Show every step</label>
+          <label class="small row" style="margin: 0; gap: 6px; width: auto; font-weight: 400; color: var(--muted)"><input type="checkbox" id="show-steps" style="width: auto"> All steps</label>
         </div>
         <div class="activity" id="activity" style="margin-top: 8px"></div>
       </section>

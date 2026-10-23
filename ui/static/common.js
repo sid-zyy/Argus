@@ -20,14 +20,14 @@ const STATUS_LABEL = {
 };
 const VERDICT_LABEL = { supported: "Confirmed", refuted: "Ruled out", insufficient: "Not enough proof" };
 const AGENT_NAME = { triage: "Investigator", code_history: "Change finder", verifier: "Fact checker", fix: "Fixer",
-  sandbox: "Test lab", reporter: "Writer", orchestrator: "Argus", human: "Person" };
+  sandbox: "Test lab", reporter: "Writer", planner: "Commander", orchestrator: "Argus", human: "Person" };
 const statusBadge = (s) => `<span class="badge s-${esc(s)}">${esc(STATUS_LABEL[s] || s)}</span>`;
 const incKey = (id) => `INC-${id}`;
 
 function ago(iso) {
   if (!iso) return "";
   const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
-  if (s < 60) return "just now";
+  if (s < 60) return "Just now";
   if (s < 3600) return `${Math.floor(s / 60)} min ago`;
   if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
   return `${Math.floor(s / 86400)} d ago`;
@@ -60,6 +60,14 @@ function renderMarkdown(md) {
       continue;
     }
     if (inCode) { code.push(line); continue; }
+    if (line.startsWith("|")) {  // simple tables: skip the |---| separator and an empty header row
+      closeList();
+      const cells = line.replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+      if (cells.every((c) => /^-*$/.test(c))) continue;
+      if (out[out.length - 1] !== "</table>") out.push("<table class=\"md\">"); else out.pop();
+      out.push(`<tr>${cells.map((c) => `<td>${inline(c)}</td>`).join("")}</tr>`, "</table>");
+      continue;
+    }
     const h = line.match(/^(#{1,3})\s+(.*)/);
     const li = line.match(/^(\s*)-\s+(.*)/);
     if (h) { closeList(); out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`); }
@@ -155,43 +163,49 @@ function toastMsg(text, kind = "") {
 
 // One-line, plain-language description of an audit-log event (activity feeds, board cards).
 const TOOL_TEXT = {
-  search_logs: (a) => `searched ${a.source || "the logs"} for "${a.pattern}"`,
-  read_lines: (a) => `read lines ${a.start_line}-${a.end_line} of ${a.source}`,
-  list_sources: () => "checked which logs are available",
-  get_metrics: () => "looked at the health metrics",
-  git_log: () => "looked at recent code changes",
-  git_show: (a) => `read change ${a.sha}`,
-  read_file: (a) => `read ${a.path}`,
-  list_files: () => "looked through the code",
+  search_logs: (a) => `Searched ${a.source || "the logs"} for "${a.pattern}"`,
+  read_lines: (a) => `Read lines ${a.start_line}-${a.end_line} of ${a.source}`,
+  list_sources: () => "Checked which logs are available",
+  get_metrics: () => "Looked at the health metrics",
+  git_log: () => "Looked at recent code changes",
+  git_show: (a) => `Read change ${a.sha}`,
+  read_file: (a) => `Read ${a.path}`,
+  list_files: () => "Looked through the code",
 };
+const FIX_WORD = { rollback: "rollback", config_change: "settings change", patch: "code fix" };
+// Every description is a sentence that starts with a capital letter; the actor is shown separately.
 function describeEvent(e) {
   const p = e.payload || {};
   switch (e.type) {
-    case "incident_opened": return `reported: ${p.alert.title}`;
-    case "attempt": return p.n > 1 ? `trying again (attempt ${p.n} of ${p.max})` : p.stage === "fix" ? "started on a fix" : "started investigating";
-    case "llm_step": return `thinking (step ${p.step})`;
-    case "tool_call": return (TOOL_TEXT[p.tool] || (() => `used ${p.tool}`))(p.args || {});
+    case "incident_opened": return `Reported: ${p.alert.title}`;
+    case "attempt": return p.n > 1 ? `Trying again (attempt ${p.n} of ${p.max})` : p.stage === "fix" ? "Started on a fix" : "Started investigating";
+    case "llm_step": return `Thinking (step ${p.step})`;
+    case "tool_call": return (TOOL_TEXT[p.tool] || (() => `Used ${p.tool}`))(p.args || {});
     case "rejected": return (p.errors || []).some((x) => /not found|out of range|unknown source/.test(x))
-      ? "quoted evidence that doesn't exist; sent back to try again" : "answer didn't pass the checks; sent back";
-    case "claim": return `suggested a possible cause: ${p.statement}`;
-    case "verdict": return `${VERDICT_LABEL[p.verdict].toLowerCase()}: ${p.claim_id}`;
-    case "suspects": return p.suspects[0] ? `found a suspicious change: ${p.suspects[0].summary}` : "found no suspicious changes";
-    case "patch": return `suggested a ${p.fix_type === "rollback" ? "rollback" : p.fix_type === "config_change" ? "settings change" : "code fix"}`;
-    case "sandbox": return p.passed ? "tested the fix: it works" : "tested the fix: it didn't work";
-    case "awaiting_approval": return "a tested fix is waiting for approval";
+      ? "Quoted evidence that doesn't exist. Sent back to try again" : "Answer didn't pass the checks. Sent back";
+    case "claim": return `Possible cause: ${p.statement}`;
+    case "verdict": return `${VERDICT_LABEL[p.verdict]}: ${p.claim_id}`;
+    case "suspects": return p.suspects[0] ? `Suspicious change: ${p.suspects[0].summary}` : "No suspicious changes found";
+    case "patch": return `Suggested a ${FIX_WORD[p.fix_type] || "fix"}`;
+    case "sandbox": return p.passed ? "Tested the fix: it works" : "Tested the fix: it didn't work";
+    case "awaiting_approval": return "Tested fix is waiting for approval";
     case "approval_vote": return `${p.approver} ${p.decision} the fix${p.reason ? `: ${p.reason}` : ""}`;
-    case "approval": return `fix ${p.approved ? "approved" : "declined"} by ${p.approver}`;
+    case "approval": return `Fix ${p.approved ? "approved" : "declined"} by ${p.approver}`;
     case "qa": return `${p.tester} ${p.result === "verified" ? "confirmed it's fixed" : "says it's still broken"}${p.note ? `: ${p.note}` : ""}`;
     case "rerun": return `${p.by} asked Argus to try again${p.note ? `: ${p.note}` : ""}`;
-    case "escalated": return `handed to a person: ${p.reason}`;
-    case "report": return "wrote the summary";
-    case "comment": return `${p.author}: ${p.text}`;
-    case "updated": return `${p.by} updated ${Object.entries(p).filter(([k]) => k !== "by").map(([k, v]) => `${k} to ${v ?? "none"}`).join(", ")}`;
-    case "error": return `something went wrong: ${p.message}`;
-    case "thinking": return `is thinking (step ${p.step} of ${p.max_steps})`;
-    case "waiting": return p.reason === "busy" ? `is waiting ${p.seconds}s for a busy AI service` : `is pausing ${Math.round(p.seconds)}s for the free AI service's limit`;
-    case "failover": return `switched AI service (${p.provider} ${p.reason})`;
-    case "phase": return `${p.label.toLowerCase()}: ${p.detail}`;
+    case "escalated": return `Handed to a person: ${p.reason}`;
+    case "report": return "Wrote the summary";
+    case "comment": return p.text;
+    case "updated": return `Updated ${Object.entries(p).filter(([k]) => k !== "by").map(([k, v]) => `${k} to ${v ?? "none"}`).join(", ")}`;
+    case "error": return `Something went wrong: ${p.message}`;
+    case "thinking": return `Thinking (step ${p.step} of ${p.max_steps})`;
+    case "waiting": return p.reason === "busy" ? `Waiting ${p.seconds}s for a busy AI service` : `Pausing ${Math.round(p.seconds)}s for the free AI service's limit`;
+    case "failover": return `Switched AI service (${p.provider} ${p.reason})`;
+    case "phase": return p.label;
+    case "plan": return p.version > 1 ? "Made a new plan" : "Made a plan";
+    case "assigned": return `Assigned to ${p.to} (${p.reason.charAt(0).toLowerCase() + p.reason.slice(1)})`;
+    case "notified": return `Messaged ${p.to} on ${p.channel}: ${p.message}`;
+    case "sla_breach": return `Approval waited over ${p.minutes} min. Escalated to ${p.escalated_to}`;
     default: return JSON.stringify(p).slice(0, 160);
   }
 }

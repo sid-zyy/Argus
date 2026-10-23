@@ -1,0 +1,15 @@
+{
+  "service_label": "Checkout",
+  "unit": "orders",
+  "units_per_minute": 320,
+  "value_per_unit": 1450,
+  "currency": "INR",
+  "failure_share": "alert",
+  "manual_mttr_minutes": 95,
+  "engineers_paged": 3,
+  "assumptions": [
+    "320 checkout orders per minute at peak, average order value ₹1,450",
+    "Failed share of orders equals the alert's 5xx rate (38%)",
+    "A typical manual fix for this kind of incident takes about 95 minutes with 3 engineers paged"
+  ]
+}

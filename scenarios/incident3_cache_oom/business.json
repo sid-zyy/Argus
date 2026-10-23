@@ -1,0 +1,15 @@
+{
+  "service_label": "Product pages",
+  "unit": "shopping sessions",
+  "units_per_minute": 2400,
+  "value_per_unit": 43.5,
+  "currency": "INR",
+  "failure_share": 0.05,
+  "manual_mttr_minutes": 120,
+  "engineers_paged": 2,
+  "assumptions": [
+    "2,400 shopping sessions per minute; each is worth ₹43.50 on average (3% buy, ₹1,450 per order)",
+    "About 5% of sessions are lost to crashes and slow pages during the restart loop",
+    "A typical manual fix for a memory leak takes about 120 minutes with 2 engineers paged"
+  ]
+}

@@ -99,7 +99,7 @@ def run_agent(
         thought = (reply.get("reasoning") or reply["content"] or "").strip()
         emit(name, "llm_step", {"step": step + 1, "provider": reply.get("provider"), "model": reply.get("model"),
                                 "tools": [c["name"] for c in reply["tool_calls"]], "text": (reply["content"] or "")[:300],
-                                "thought": thought[-400:], "failovers": reply.get("failovers") or []})
+                                "thought": thought[-400:], "failovers": reply.get("failovers") or [], "tokens": reply.get("tokens", 0)})
         step += 1
 
         calls = reply["tool_calls"]

@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import json
 
-from agents.base import prompt, run_agent
-from orchestrator.state import (Claim, CodeHistoryOutput, FixOutput, ReportOutput, SuspectChange, TriageOutput,
-                                VerifierOutput)
+from agents.base import AgentError, prompt, run_agent
+from orchestrator.state import (Claim, CodeHistoryOutput, FixOutput, Plan, PlanStep, ReportOutput, SuspectChange,
+                                TriageOutput, VerifierOutput)
 from tools.evidence_check import cause_evidence_missing, check_all
 from tools.git_tools import file_tools, git_tools
 from tools.logs import log_tools
@@ -111,3 +111,31 @@ def reporter(record: dict, llm, emit) -> ReportOutput:
     task = "INVESTIGATION RECORD:\n" + json.dumps(record, indent=2, default=str)[:12000]
     out, _ = run_agent("reporter", prompt("reporter"), task, ToolSet(), ReportOutput, llm, emit, max_steps=3)
     return out
+
+
+DEFAULT_PLAN = [
+    ("investigator", "Find when the errors started and which requests fail"),
+    ("fact_checker", "Try to disprove each possible cause with logs, metrics and code"),
+    ("change_finder", "Check deploys and commits made just before the errors began"),
+    ("fixer", "Write the smallest change that removes the confirmed cause"),
+    ("test_lab", "Replay the failure without and with the fix"),
+]
+
+
+def planner(ws: Workspace, llm, emit, feedback: str = "", suspects: list[SuspectChange] | None = None) -> Plan:
+    """The Commander writes the investigation plan up front, and a new one after guesses are ruled out."""
+    task = [_alert_text(ws)]
+    if suspects:
+        task.append("Recent changes found so far:\n" + "\n".join(f"- {s.sha}: {s.summary}" for s in suspects))
+    if feedback:
+        task.append("EARLIER GUESSES THAT WERE RULED OUT:\n" + feedback)
+
+    def check(out: Plan) -> list[str]:
+        return [] if 3 <= len(out.steps) <= 7 else ["write between 4 and 6 steps"]
+
+    try:
+        out, _ = run_agent("planner", prompt("planner"), "\n\n".join(task), ToolSet(), Plan, llm, emit, check, max_steps=2)
+        return out
+    except AgentError:
+        return Plan(steps=[PlanStep(agent=a, goal=g) for a, g in DEFAULT_PLAN],
+                    rationale="Standard plan: find the onset, test each cause against evidence, then fix and test.")

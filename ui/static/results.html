@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Results · Argus</title>
+<script>try { document.documentElement.dataset.theme = localStorage.getItem("argus.theme") || "light"; } catch (e) { document.documentElement.dataset.theme = "light"; }</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="icon" type="image/svg+xml" href="/static/logo.svg">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
+  <nav class="nav"><a href="/">Dashboard</a><a href="/results" class="on">Results</a></nav>
+  <span class="spacer"></span>
+  <button class="icon-btn" id="theme-btn" type="button"></button>
+  <div class="user-menu" id="user-menu"></div>
+</header>
+<main class="wrap">
+  <div class="dash-head">
+    <div>
+      <h1>Argus vs a chatbot</h1>
+      <p>Same incidents, same free AI models, scored the same way.</p>
+    </div>
+  </div>
+  <section class="tiles" id="totals"></section>
+  <div id="rows"></div>
+  <p class="small faint" id="note" style="margin-top: 18px"></p>
+</main>
+<script src="/static/common.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const CHECKS = [
+  ["right_category", "Found the right kind of cause"],
+  ["named_culprit", "Named the change that caused it"],
+  ["evidence", "Evidence matches the real files"],
+  ["fix_passes", "Fix works in testing"],
+  ["wrong_guess_caught", "Caught its own wrong guess"],
+];
+const DEMO = { incident1_conn_leak: "Checkout is failing", incident2_timeout: "Payments are timing out", incident3_cache_oom: "Product pages keep crashing" };
+const tick = (ok, label) => `<li class="${ok ? "yes" : "no"}"><span class="mark">${ok ? "✓" : "✗"}</span>${esc(label)}</li>`;
+
+function side(name, r) {
+  if (!r) return `<div class="cmp-side"><h3>${esc(name)}</h3><p class="faint small">Not run yet.</p></div>`;
+  const ev = r.evidence_total ? `${r.evidence_verified} of ${r.evidence_total}` : "None given";
+  const items = CHECKS.map(([k, label]) => k === "evidence"
+    ? tick(r.evidence_total > 0 && r.evidence_verified === r.evidence_total, `${label}: ${ev}`)
+    : tick(r[k], label)).join("");
+  return `<div class="cmp-side"><h3>${esc(name)}</h3><p class="cmp-cause">"${esc(r.root_cause)}"</p><ul class="cmp-checks">${items}</ul>
+    ${r.fix_note && !r.fix_passes ? `<p class="small faint">Fix: ${esc(r.fix_note)}</p>` : ""}
+    ${name === "Argus" && r.fabrications_blocked ? `<p class="small muted">Blocked ${r.fabrications_blocked} made-up quote${r.fabrications_blocked > 1 ? "s" : ""} before anyone saw ${r.fabrications_blocked > 1 ? "them" : "it"}.</p>` : ""}</div>`;
+}
+
+api("/results/data").then((d) => {
+  const sum = (who, k) => d.rows.filter((r) => r[who] && (k === "evidence" ? r[who].evidence_total && r[who].evidence_verified === r[who].evidence_total : r[who][k])).length;
+  const n = d.rows.length;
+  $("totals").innerHTML = [
+    ["Fix works in testing", sum("argus", "fix_passes"), sum("chatbot", "fix_passes")],
+    ["Named the culprit change", sum("argus", "named_culprit"), sum("chatbot", "named_culprit")],
+    ["All evidence checks out", sum("argus", "evidence"), sum("chatbot", "evidence")],
+  ].map(([k, a, c]) => `<div class="tile"><div class="k">${esc(k)}</div><div class="v">${a} <span class="vs">vs</span> ${c}</div><div class="s">Argus vs chatbot, out of ${n}</div></div>`).join("");
+  $("rows").innerHTML = d.rows.map((r) => `<section class="panel cmp">
+      <h2>${esc(DEMO[r.scenario] || r.title)}</h2><p class="help">${esc(r.title)} · ${esc(r.service)}</p>
+      <div class="cmp-grid">${side("Chatbot (one prompt)", r.chatbot)}${side("Argus", r.argus)}</div></section>`).join("");
+  const models = (who) => [...new Set(d.rows.map((r) => r[who] && r[who].model).filter(Boolean).join(", ").split(", "))].join(", ") || "–";
+  $("note").textContent = `Argus: one recorded run per incident (models: ${models("argus")}). Chatbot: one answer per incident (model: ${models("chatbot")}), given what an engineer would usually paste: the alert, the end of each log, the deploy log and the latest code change, with no tools.${d.baseline_recorded_at ? ` Chatbot run on ${d.baseline_recorded_at}.` : ""} Fixes from both are tested in the same sandbox.`;
+}).catch((e) => toastMsg(e.message, "bad"));
+
+mountThemeToggle($("theme-btn"));
+mountUserMenu($("user-menu"));
+Session.load();
+</script>
+</body>
+</html>

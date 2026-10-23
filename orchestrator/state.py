@@ -62,7 +62,21 @@ class FixOutput(BaseModel):
     rollback_to: Optional[str] = Field(default=None, description="Commit sha to roll back to (rollback only)")
 
 
+PlanAgent = Literal["investigator", "fact_checker", "change_finder", "fixer", "test_lab"]
+
+
+class PlanStep(BaseModel):
+    agent: PlanAgent
+    goal: str = Field(description="One plain sentence starting with a verb, at most 14 words")
+
+
+class Plan(BaseModel):
+    steps: list[PlanStep] = Field(description="4 to 6 steps in order")
+    rationale: str = Field(description="One sentence: what the plan focuses on, or what changed and why")
+
+
 class ReportOutput(BaseModel):
+    business_summary: str = Field(description="Three plain sentences for a manager: what broke, who it affected, what was done")
     summary: str
     impact: str
     root_cause: str

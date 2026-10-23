@@ -1,0 +1,15 @@
+{
+  "version": "4",
+  "status": "firing",
+  "receiver": "argus",
+  "groupLabels": {"alertname": "CheckoutHighErrorRate"},
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {"alertname": "CheckoutHighErrorRate", "service": "checkout-api", "severity": "high", "scenario": "incident1_conn_leak"},
+      "annotations": {"summary": "checkout-api 5xx rate 38%", "description": "5xx rate above 5% for 2 minutes"},
+      "startsAt": "2026-10-22T14:06:30Z",
+      "fingerprint": "a1b2c3d4e5f6"
+    }
+  ]
+}

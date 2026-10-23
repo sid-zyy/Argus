@@ -33,6 +33,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { -webkit-font-smoothing: antialiased; }
 body { margin: 0; color: var(--text); font: 15px/1.6 var(--sans); min-height: 100vh; background: var(--bg); }
 a { color: var(--accent); text-decoration: none; }
@@ -51,7 +52,9 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
 }
 .topbar .brand { display: inline-flex; align-items: center; gap: 9px; font-weight: 650; font-size: 16px; color: var(--text); }
 .topbar .brand:hover { text-decoration: none; }
-.brand-orb { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 38% 34%, #a5a0ff, #5048d8 62%, #2f2a8f); }
+.brand-logo { width: 26px; height: 26px; display: block; }
+.brand-tag { font-weight: 500; font-size: 13px; color: var(--muted); padding-left: 10px; margin-left: 1px; border-left: 1px solid var(--border-strong); }
+@media (max-width: 640px) { .brand-tag { display: none; } }
 .topbar .sub { color: var(--faint); font-size: 14px; }
 .topbar .sub a { color: var(--muted); }
 .topbar .spacer { flex: 1; }
@@ -230,7 +233,7 @@ label { display: block; font-size: 13.5px; font-weight: 550; color: var(--text);
 .welcome { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 28px; align-items: center; margin-bottom: 22px; }
 @media (max-width: 960px) { .welcome { grid-template-columns: 1fr; } }
 .welcome h2 { font-size: 20px; }
-.how { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.how { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
 @media (max-width: 720px) { .how { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .how-step { padding: 14px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
 .how-step .num { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; font-size: 13px; font-weight: 700;
@@ -327,8 +330,51 @@ dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top
 .report-box dt:first-child { margin-top: 0; }
 .report-box dd { margin: 2px 0 0; white-space: pre-wrap; }
 
+/* ---- nav, results ---- */
+.nav { display: flex; gap: 4px; margin-left: 8px; }
+.nav a { padding: 6px 12px; border-radius: 9px; color: var(--muted); font-size: 14px; font-weight: 550; }
+.nav a:hover { text-decoration: none; color: var(--text); background: var(--surface-2); }
+.nav a.on { color: var(--text); background: var(--surface-3); }
+.vs { font-size: 15px; color: var(--faint); font-weight: 500; }
+.cmp { margin-top: 16px; }
+.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 760px) { .cmp-grid { grid-template-columns: 1fr; } }
+.cmp-side { padding: 16px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
+.cmp-side h3 { font-size: 15px; margin-bottom: 6px; }
+.cmp-cause { font-size: 14px; color: var(--muted); font-style: italic; margin: 0 0 10px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cmp-checks { list-style: none; padding: 0; margin: 0; }
+.cmp-checks li { display: flex; gap: 10px; align-items: center; padding: 5px 0; font-size: 14px; }
+.cmp-checks .mark { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none; }
+.cmp-checks .yes .mark { background: var(--ok-bg); color: var(--ok); }
+.cmp-checks .no .mark { background: var(--bad-bg); color: var(--bad); }
+.cmp-checks .no { color: var(--muted); }
+
+/* ---- impact, plan, usage ---- */
+.impact { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+@media (max-width: 860px) { .impact { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.impact .tile .v { font-size: 26px; }
+.impact .tile.good .v { color: var(--ok); }
+.impact .tile.bad .v { color: var(--bad); }
+.impact-note { font-size: 12.5px; color: var(--faint); margin: 8px 2px 0; }
+.impact-note summary { cursor: pointer; }
+.impact-note ul { margin: 6px 0 0; padding-left: 18px; }
+.plan { list-style: none; padding: 0; margin: 0; counter-reset: plan; }
+.plan li { display: grid; grid-template-columns: 24px 1fr; gap: 10px; padding: 7px 0; font-size: 14px; color: var(--muted); counter-increment: plan; }
+.plan li::before { content: counter(plan); width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  background: var(--surface-3); color: var(--muted); }
+.plan li.done { color: var(--text); }
+.plan li.done::before { content: "✓"; background: var(--ok); color: #fff; }
+.plan li.now { color: var(--accent); font-weight: 600; }
+.plan li.now::before { background: var(--accent); color: #fff; }
+.plan .who { font-size: 12px; color: var(--faint); font-weight: 500; display: block; }
+.plan-why { font-size: 13px; color: var(--muted); margin: 0 0 8px; padding: 8px 10px; border-radius: 10px; background: var(--accent-soft); }
+.plan-why b { color: var(--accent); }
+.usage { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+.usage b { color: var(--text); font-weight: 600; }
+
 /* ---- live progress ---- */
-.live { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 22px; margin-top: 16px; }
+.live { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 4px 22px; margin-top: 16px; }
 @media (max-width: 860px) { .live { grid-template-columns: 1fr; } }
 .live-head { display: flex; align-items: center; gap: 10px; }
 .live-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--faint); flex: none; }
@@ -347,11 +393,12 @@ dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top
 .live-thought { margin-top: 10px; padding: 10px 14px; border-radius: 12px; background: var(--surface-2); border: 1px dashed var(--border-strong);
   font-size: 14px; color: var(--text); font-style: italic; line-height: 1.5; }
 .live-thought::before { content: "Thinking: "; font-style: normal; font-weight: 600; color: var(--muted); }
+.la-who { font-weight: 600; color: var(--text); margin-right: 2px; }
 .live-wait { margin-top: 10px; padding: 10px 14px; border-radius: 12px; background: var(--warn-bg); color: var(--warn); font-size: 14px; }
 .live-wait-bar { height: 5px; border-radius: 999px; background: color-mix(in srgb, var(--warn) 20%, transparent); margin-top: 8px; overflow: hidden; }
 .live-wait-bar span { display: block; height: 100%; background: var(--warn); border-radius: 999px; transition: width 1s linear; }
 .live-actions { list-style: none; padding: 0; margin: 14px 0 0; }
-.live-actions li { display: grid; grid-template-columns: 70px 1fr; gap: 8px; padding: 7px 0; border-top: 1px solid var(--border); font-size: 13.5px; color: var(--muted); }
+.live-actions li { display: grid; grid-template-columns: 48px 1fr; gap: 8px; padding: 7px 0; border-top: 1px solid var(--border); font-size: 13.5px; color: var(--muted); }
 .live-actions li:first-child { border-top: none; }
 .live-actions li.latest { color: var(--text); font-weight: 550; }
 .live-actions li.good span:last-child { color: var(--ok); }
@@ -359,7 +406,7 @@ dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top
 .live-actions li.warn span:last-child { color: var(--warn); }
 .live-actions li.key span:last-child { color: var(--text); }
 .la-when { font-family: var(--mono); font-size: 11.5px; color: var(--faint); padding-top: 2px; }
-.live-side { border-left: 1px solid var(--border); padding-left: 20px; }
+.live-side { border-left: 1px solid var(--border); padding-left: 20px; min-width: 0; }
 @media (max-width: 860px) { .live-side { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: 14px; } }
 .live-side-title { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
 .live-phases { list-style: none; padding: 0; margin: 0; }
@@ -383,3 +430,7 @@ dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top
   .user-btn .user-role, .user-btn .avatar + .user-name { display: none; }
   .dash-head h1 { font-size: 24px; }
 }
+.report table.md { border-collapse: collapse; margin: 6px 0 4px; font-size: 14px; }
+.report table.md td { padding: 6px 14px 6px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+.report table.md tr td:first-child { color: var(--muted); white-space: nowrap; }
+.report table.md tr:has(td:empty) { display: none; }

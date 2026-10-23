@@ -6,6 +6,7 @@ run blocks at the approval gate until the required humans approve (or one reject
 from __future__ import annotations
 
 import json
+import os
 import re
 import threading
 import time
@@ -21,6 +22,7 @@ from scenarios.build import build
 from tools.workspace import Workspace
 
 ROOT = Path(__file__).resolve().parent.parent
+incKey = lambda iid: f"INC-{iid}"  # noqa: E731
 REPLAY_DELAY_CAP = 2.5  # seconds between replayed events, at most
 
 
@@ -45,6 +47,10 @@ class IncidentRunner:
         self.llm_factory = llm_factory
         self._gates: dict[int, _Gate] = {}
         self._lock = threading.Lock()
+        # a fix waiting longer than this for approval is escalated to the lead (0 turns it off)
+        self.sla_minutes = float(os.getenv("APPROVAL_SLA_MINUTES", "10"))
+        if self.sla_minutes > 0:
+            threading.Thread(target=self._watch_sla, daemon=True, name="approval-sla").start()
 
     # ---- public ------------------------------------------------------------
     def scenarios(self) -> list[dict]:
@@ -78,8 +84,55 @@ class IncidentRunner:
         if report:
             alert["id"] = f"BUG-{iid}"
             self.store.update_incident(iid, alert=alert)
+        self._assign(iid, alert["service"])
         self._launch(iid, scenario_dir, mode)
         return iid
+
+    # ---- workflow automation: on-call assignment, notifications, approval SLA -------
+    def _assign(self, iid: int, service: str) -> None:
+        person = self.store.on_call_for(service)
+        if person:
+            self.store.update_incident(iid, assignee=person["name"], assignee_id=person["id"])
+            self.store.record_event(iid, {"actor": "orchestrator", "type": "assigned",
+                                          "payload": {"to": person["name"], "reason": f"On call for {service}"}})
+
+    def _send(self, iid: int, to: str, message: str) -> None:
+        """Simulated chat notification, recorded in the audit log like a real one would be."""
+        self.store.record_event(iid, {"actor": "orchestrator", "type": "notified",
+                                      "payload": {"channel": "Slack #incidents", "to": to, "message": message, "simulated": True}})
+
+    def _record(self, iid: int, event: dict) -> None:
+        self.store.record_event(iid, event)
+        t, p = event["type"], event["payload"]
+        if t not in ("incident_opened", "awaiting_approval", "approval", "escalated"):
+            return
+        inc = self.store.get_incident(iid)
+        owner = inc["assignee"] or "on-call"
+        lead = (self.store.lead() or {}).get("name", "the lead")
+        if t == "incident_opened":
+            self._send(iid, owner, f"New incident {incKey(iid)}: {inc['title']}. Argus is investigating.")
+        elif t == "awaiting_approval":
+            who = f"{owner} and {lead}" if inc["required_approvals"]["count"] > 1 else owner
+            self._send(iid, who, f"{incKey(iid)}: a tested fix is ready for approval"
+                                 + (f" within {self.sla_minutes:.0f} minutes." if self.sla_minutes else "."))
+        elif t == "approval":
+            self._send(iid, "#incidents", f"{incKey(iid)}: fix {'approved' if p.get('approved') else 'declined'} by {p.get('approver')}.")
+        elif t == "escalated":
+            self._send(iid, lead, f"{incKey(iid)} needs a person: {p.get('reason')}")
+
+    def _watch_sla(self) -> None:
+        while True:
+            time.sleep(10)
+            try:
+                for r in self.store.awaiting_approval():
+                    waited = (datetime.now(timezone.utc) - datetime.fromisoformat(r["since"])).total_seconds() / 60
+                    if not r["breached"] and waited >= self.sla_minutes:
+                        lead = (self.store.lead() or {}).get("name", "the lead")
+                        self.store.record_event(r["id"], {"actor": "orchestrator", "type": "sla_breach",
+                                                          "payload": {"minutes": self.sla_minutes, "escalated_to": lead}})
+                        self._send(r["id"], lead, f"{incKey(r['id'])}: fix has waited {self.sla_minutes:.0f} minutes for approval. Please review.")
+            except Exception:
+                pass
 
     def rerun(self, iid: int, user: dict, note: str = "") -> None:
         inc = self.store.get_incident(iid)
@@ -190,9 +243,9 @@ class IncidentRunner:
     def _live(self, iid: int, scenario_dir: Path, note: str) -> None:
         ws = self._workspace(iid, scenario_dir, note)
         llm = self.llm_factory()
-        trace = Trace([lambda e: self.store.record_event(iid, e)])
+        trace = Trace([lambda e: self._record(iid, e)])
         state = run_incident(ws, llm, trace, lambda ctx: self._wait_for_human(iid), claim_offset=self.store.claim_count(iid))
-        md = build_report(ws.alert, state, trace, llm)
+        md = build_report(ws.alert, state, trace, llm, scenario_dir.name)
         out = ROOT / "runs" / f"{scenario_dir.name}-INC-{iid}-{datetime.now():%Y%m%d-%H%M%S}"
         out.mkdir(parents=True, exist_ok=True)
         (out / "incident_report.md").write_text(md, encoding="utf-8")
@@ -219,7 +272,7 @@ class IncidentRunner:
                 if md and decision:
                     md = _replace_approval(md, decision)
                 payload = {"markdown": (f"> Replayed from a recorded run ({path.name}).\n\n" + md) if md else None}
-            self.store.record_event(iid, {"actor": e["actor"], "type": e["type"], "payload": payload})
+            self._record(iid, {"actor": e["actor"], "type": e["type"], "payload": payload})
 
 
 def _report_text(path: str | None) -> str | None:
@@ -230,8 +283,9 @@ def _report_text(path: str | None) -> str | None:
 
 
 def _replace_approval(md: str, d: dict) -> str:
-    section = (f"## Approval\n- {'Approved' if d['approved'] else 'Rejected'} by {d['approver']} ({d['role']}). {d.get('reason') or ''}\n"
-               "- Apply is simulated; no production system was changed.\n\n")
-    if "## Approval" in md:
-        return re.sub(r"## Approval\n.*?(?=\n## |\Z)", section.rstrip("\n") + "\n", md, flags=re.DOTALL)
+    section = (f"## Decisions made by people\n\n- Fix **{'approved' if d['approved'] else 'declined'}** by {d['approver']} ({d['role']}). "
+               f"{d.get('reason') or ''}\n- This is a demo: applying the fix is simulated, no real system was changed.\n")
+    for header in ("## Decisions made by people", "## Approval"):
+        if header in md:
+            return re.sub(re.escape(header) + r"\n.*?(?=\n## |\Z)", lambda _m: section, md, flags=re.DOTALL)
     return md
