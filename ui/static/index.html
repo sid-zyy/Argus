@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Argus Dashboard</title>
+<script>try { document.documentElement.dataset.theme = localStorage.getItem("argus.theme") || "light"; } catch (e) { document.documentElement.dataset.theme = "light"; }</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/argus.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-orb"></span>Argus</a>
+  <span class="sub">Your AI helper for when things break</span>
+  <span class="spacer"></span>
+  <button class="icon-btn" id="theme-btn" type="button"></button>
+  <div class="user-menu" id="user-menu"></div>
+</header>
+
+<main class="wrap">
+  <div class="dash-head">
+    <div>
+      <h1 id="greeting">Welcome to Argus</h1>
+      <p id="subgreeting">When something breaks, Argus investigates, double-checks itself, tests a fix, and asks a person before changing anything.</p>
+    </div>
+    <div class="dash-actions">
+      <button class="btn" id="bug-btn" hidden>Report a problem</button>
+      <button class="btn primary" id="trigger-btn" hidden>Try a demo incident</button>
+      <div class="menu-pop" id="trigger-menu" hidden></div>
+    </div>
+  </div>
+
+  <section class="panel welcome" id="welcome" hidden>
+    <div>
+      <h2>How Argus works</h2>
+      <p class="help" style="margin:0">Four steps, and a person always has the final say.</p>
+      <div class="how">
+        <div class="how-step"><div class="num">1</div><b>Looks into it</b><span>Reads the logs and recent changes to find likely causes.</span></div>
+        <div class="how-step"><div class="num">2</div><b>Double-checks</b><span>A second agent tries to prove each guess wrong. Only real evidence counts.</span></div>
+        <div class="how-step"><div class="num">3</div><b>Tests a fix</b><span>Tries the fix in a safe copy and checks the problem goes away.</span></div>
+        <div class="how-step"><div class="num">4</div><b>Asks you</b><span>Nothing changes until a person approves the fix.</span></div>
+      </div>
+    </div>
+    <div id="welcome-right"></div>
+  </section>
+
+  <section class="dash-top" id="overview">
+    <div class="panel mind">
+      <h2>Argus right now</h2>
+      <div id="mind"></div>
+      <div class="mind-status" id="mind-status">All quiet.</div>
+      <div class="mind-hint">Each colour is a different helper. Drag to spin it, hover to see who is who.</div>
+    </div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <div class="section-head"><h2>Incidents</h2><p>Every problem Argus is handling, by stage.</p></div>
+  <div class="board" id="board"></div>
+
+  <section class="dash-bottom">
+    <div class="panel">
+      <h2>Recent activity</h2>
+      <p class="help">What Argus and the team did most recently.</p>
+      <div class="activity feed" id="feed"></div>
+    </div>
+    <div class="panel">
+      <h2 id="queue-title">Waiting on you</h2>
+      <p class="help" id="queue-help"></p>
+      <div id="queue"></div>
+    </div>
+  </section>
+</main>
+
+<dialog id="bug-dialog">
+  <form method="dialog" id="bug-form">
+    <h2>Report a problem</h2>
+    <p class="help">Tell Argus what you saw. It will investigate, and any guess about the cause still has to be backed up by real evidence.</p>
+    <div class="grid2">
+      <div><label for="b-scenario">Where did it happen?</label><select id="b-scenario" required></select></div>
+      <div><label for="b-sev">How serious is it?</label>
+        <select id="b-sev"><option value="sev1">Critical: nobody can use it</option><option value="sev2">Major: many people affected</option>
+          <option value="sev3" selected>Minor: some people affected</option><option value="sev4">Small: cosmetic or rare</option></select></div>
+    </div>
+    <label for="b-title">Short summary</label><input id="b-title" required minlength="4" placeholder="e.g. Checkout fails after a declined card">
+    <label for="b-steps">What did you do?</label><textarea id="b-steps" required placeholder="1. Added an item to the cart&#10;2. Paid with a card that was declined&#10;3. Tried again with a good card"></textarea>
+    <div class="grid2">
+      <div><label for="b-expected">What did you expect?</label><textarea id="b-expected" required placeholder="The second payment goes through"></textarea></div>
+      <div><label for="b-actual">What happened instead?</label><textarea id="b-actual" required placeholder="An error page: 503 Service Unavailable"></textarea></div>
+    </div>
+    <label for="b-env">Where were you? <span class="field-hint">optional</span></label><input id="b-env" placeholder="e.g. staging site, Chrome on Windows">
+    <label for="b-log">Any error message? <span class="field-hint">optional</span></label><textarea id="b-log" class="mono" placeholder="Paste it here"></textarea>
+    <div id="b-err" class="error-text"></div>
+    <div class="actions"><button class="btn ghost" value="cancel" formnovalidate>Cancel</button><button class="btn primary" id="b-submit" value="submit">Send to Argus</button></div>
+  </form>
+</dialog>
+
+<script src="/static/common.js"></script>
+<script src="/static/argus.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const COLUMNS = [
+  { label: "Investigating", help: "Argus is looking into these", statuses: ["open", "investigating"], color: "var(--info)" },
+  { label: "Needs approval", help: "A tested fix is ready for review", statuses: ["awaiting_approval"], color: "var(--warn)" },
+  { label: "Needs testing", help: "Fixed; a tester confirms it works", statuses: ["awaiting_qa"], color: "var(--qa)" },
+  { label: "Fixed", help: "All done", statuses: ["resolved", "closed"], color: "var(--ok)" },
+  { label: "Needs a person", help: "Argus couldn't fix these, or a fix was declined", statuses: ["escalated", "rejected"], color: "var(--bad)" },
+];
+const DEMO_LABEL = {
+  incident1_conn_leak: ["Checkout is failing", "A code bug after a deploy"],
+  incident2_timeout: ["Payments are timing out", "A settings change after a deploy"],
+  incident3_cache_oom: ["Product pages keep crashing", "Running out of memory"],
+};
+let scenarios = [], incidents = [];
+
+// ---- Argus widget: mirrors whichever incident the agents are working on ----
+const mind = Argus.mount($("mind"), { compact: true });
+let watching = null, stream = null;
+mind.onSelect(() => { if (watching) location.href = `/incidents/${watching}/view`; });
+function watch(inc) {
+  const id = inc ? inc.id : null;
+  if (id === watching) return;
+  watching = id;
+  if (stream) stream.close();
+  stream = null;
+  if (!id) { mind.setActive(null); mind.setMood("idle"); return; }
+  stream = new EventSource(`/incidents/${id}/events`);
+  stream.onmessage = (m) => { const e = JSON.parse(m.data); mind.handle(e, Date.now() - Date.parse(e.ts) < 8000); };
+}
+function renderMindStatus() {
+  const busy = incidents.find((i) => i.status === "investigating" || i.status === "open");
+  const waiting = incidents.filter((i) => i.status === "awaiting_approval");
+  watch(busy || waiting[0] || null);
+  if (busy) {
+    const who = busy.last_event && AGENT_NAME[busy.last_event.actor];
+    $("mind-status").innerHTML = `Working on <a href="/incidents/${busy.id}/view"><b>${esc(busy.title)}</b></a>${who && who !== "Argus" ? `<br>The ${esc(who.toLowerCase())} is on it right now.` : ""}`;
+  } else if (waiting.length) {
+    $("mind-status").innerHTML = `<b>${waiting.length} fix${waiting.length > 1 ? "es are" : " is"} ready</b> and waiting for someone to approve.`;
+  } else {
+    $("mind-status").innerHTML = "All quiet. Nothing needs attention right now.";
+  }
+}
+
+// ---- tiles ----
+function fmtDuration(s) {
+  if (s == null) return "–";
+  if (s < 60) return `${Math.round(s)} sec`;
+  if (s < 3600) return `${Math.round(s / 60)} min`;
+  return `${(s / 3600).toFixed(1)} h`;
+}
+function renderTiles(m) {
+  const tiles = [
+    ["Open right now", m.open, m.total ? `${m.total} handled so far` : "Nothing yet"],
+    ["Waiting for a person", m.awaiting_approval + m.awaiting_qa, `${m.awaiting_approval} to approve, ${m.awaiting_qa} to test`],
+    ["Fixed", m.resolved, m.escalated ? `${m.escalated} handed to a person` : "None handed off"],
+    ["Average time to fix", fmtDuration(m.mttr_seconds), "From the first alert to an approved fix"],
+    ["Wrong guesses caught", m.claims_refuted, "Ruled out by the fact checker before anyone acted on them"],
+    ["Made-up evidence blocked", m.fabrications_blocked, `Fixes that worked in testing: ${m.sandbox_passed} of ${m.sandbox_runs}`],
+  ];
+  $("tiles").innerHTML = tiles.map(([k, v, s]) => `<div class="tile"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`).join("");
+}
+
+// ---- board ----
+function friendlyLine(i) {
+  const need = ["sev1", "sev2"].includes(i.severity) ? 2 : 1;
+  const ev = i.last_event;
+  switch (i.status) {
+    case "open": case "investigating":
+      return `<span class="live"></span>${esc(ev ? (ev.type === "phase" ? `${ev.payload.label}…` : `${AGENT_NAME[ev.actor] || "Argus"} ${describeEvent(ev)}`) : "Getting started")}`;
+    case "awaiting_approval": return `Fix ready. ${i.votes} of ${need} approval${need > 1 ? "s" : ""} so far.`;
+    case "awaiting_qa": return "Waiting for a tester to confirm it works.";
+    case "resolved": return "Fixed and approved.";
+    case "closed": return "Fixed, and a tester confirmed it.";
+    case "rejected": return "The suggested fix was declined.";
+    case "escalated": return "Argus couldn't solve this one. Someone should take a look.";
+    default: return esc(STATUS_LABEL[i.status] || i.status);
+  }
+}
+function card(i) {
+  const person = i.assignee ? `${avatar(i.assignee, "developer")}${esc(i.assignee)}` : i.reported_by_name ? `${avatar(i.reported_by_name, "tester")}Reported by ${esc(i.reported_by_name)}` : `<span>From monitoring</span>`;
+  return `<a class="card" href="/incidents/${i.id}/view">
+    <div class="card-top"><span class="key">${incKey(i.id)}</span><span>· ${esc(i.service)}</span><span class="sev-pill ${esc(i.severity)}">${esc(SEV_LABEL[i.severity] || i.severity)}</span></div>
+    <div class="card-title">${esc(i.title)}</div>
+    <div class="card-ai">${friendlyLine(i)}</div>
+    <div class="card-foot">${person}<span class="spacer"></span><span>${esc(ago(i.created_at))}</span></div>
+  </a>`;
+}
+const SEV_LABEL = { sev1: "Critical", sev2: "Major", sev3: "Minor", sev4: "Small" };
+function renderBoard() {
+  $("board").innerHTML = COLUMNS.map((c) => {
+    const items = incidents.filter((i) => c.statuses.includes(i.status));
+    return `<div class="col"><div class="col-head"><span class="col-dot" style="background:${c.color}"></span>${esc(c.label)}<span class="n">${items.length}</span></div>
+      <div class="col-help">${esc(c.help)}</div>
+      ${items.length ? items.map(card).join("") : `<div class="col-empty">Nothing here</div>`}</div>`;
+  }).join("");
+}
+
+// ---- feed and queue ----
+function renderFeed(events) {
+  $("feed").innerHTML = events.length ? events.map((e) => `<div class="act"><span class="t">${esc(clock(e.ts))}</span>
+    <div><a href="/incidents/${e.incident_id}/view">${incKey(e.incident_id)}</a> <span class="actor">${esc(actorName(e))}</span> <span class="detail">${esc(describeEvent(e))}</span></div></div>`).join("")
+    : `<p class="empty">No activity yet. Try a demo incident to see Argus at work.</p>`;
+}
+function renderQueue() {
+  const u = Session.user;
+  let items = [];
+  if (!u) {
+    $("queue-title").textContent = "Waiting on you";
+    $("queue-help").textContent = "Choose who you are (top right) to see what needs your attention.";
+    $("queue").innerHTML = "";
+    return;
+  }
+  if (u.role === "tester") {
+    $("queue-title").textContent = "Ready for you to test";
+    $("queue-help").textContent = "Fixes that need someone to confirm they work.";
+    items = incidents.filter((i) => i.status === "awaiting_qa").map((i) => [i, "Check that it's really fixed"]);
+  } else {
+    $("queue-title").textContent = "Ready for your review";
+    $("queue-help").textContent = "Tested fixes waiting for approval.";
+    items = incidents.filter((i) => i.status === "awaiting_approval").map((i) => {
+      const need = ["sev1", "sev2"].includes(i.severity) ? 2 : 1;
+      return [i, need > 1 ? `${i.votes} of 2 approvals · a team lead must be one of them` : "Needs one approval"];
+    });
+  }
+  $("queue").innerHTML = items.length ? items.map(([i, what]) => `<a class="queue-item" href="/incidents/${i.id}/view">
+      <span class="sev-pill ${esc(i.severity)}">${esc(SEV_LABEL[i.severity])}</span><div style="min-width:0"><div>${esc(i.title)}</div><div class="what">${esc(what)}</div></div></a>`).join("")
+    : `<p class="empty" style="padding:12px 0">You're all caught up.</p>`;
+}
+
+// ---- welcome / sign-in ----
+function hour() { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"; }
+function renderWelcome() {
+  const u = Session.user;
+  const dismissed = store.get("argus.welcome", "") === "hidden";
+  $("welcome").hidden = !!u && dismissed;
+  $("bug-btn").hidden = !Session.is("tester");
+  $("trigger-btn").hidden = !u;
+  if (!u) {
+    $("greeting").textContent = "Welcome to Argus";
+    $("subgreeting").textContent = "When something breaks, Argus investigates, double-checks itself, tests a fix, and asks a person before changing anything.";
+    $("welcome-right").innerHTML = `<h2>Who are you?</h2><p class="help" style="margin:0">Pick a demo person to get started. No password needed.</p>
+      <div class="people">${Session.users.map((x) => `<button class="person" type="button" data-id="${x.id}">${avatar(x.name, x.role)}
+        <span><b>${esc(x.name)}</b><small>${esc(ROLE_LABEL[x.role])}. ${esc(ROLE_HELP[x.role])}.</small></span></button>`).join("")}</div>`;
+    $("welcome-right").querySelectorAll(".person").forEach((b) => b.onclick = () => Session.signIn(Number(b.dataset.id)));
+  } else {
+    $("greeting").textContent = `${hour()}, ${u.name}`;
+    $("subgreeting").textContent = u.role === "tester"
+      ? "Spotted something broken? Report it and Argus will start investigating."
+      : "Here's what Argus is working on. Fixes only go ahead once someone approves them.";
+    $("welcome-right").innerHTML = `<h2>You're signed in as a ${esc(ROLE_LABEL[u.role].toLowerCase())}</h2>
+      <p class="help">${esc(ROLE_HELP[u.role])}.${u.role === "developer" ? " Serious fixes also need a team lead's OK." : ""}</p>
+      <div class="row"><button class="btn primary" id="w-try">${u.role === "tester" ? "Report a problem" : "Try a demo incident"}</button>
+        <button class="btn ghost" id="w-hide">Hide this guide</button></div>`;
+    $("w-try").onclick = (e) => { e.stopPropagation(); (u.role === "tester" ? $("bug-btn") : $("trigger-btn")).click(); };
+    $("w-hide").onclick = () => { store.set("argus.welcome", "hidden"); renderWelcome(); };
+  }
+}
+
+// ---- actions ----
+$("trigger-btn").onclick = (e) => {
+  e.stopPropagation();
+  const menu = $("trigger-menu");
+  menu.innerHTML = `<div class="menu-head">Start a pretend problem and watch Argus handle it. Uses made-up data.</div>` +
+    scenarios.map((s) => { const [t, d] = DEMO_LABEL[s.name] || [s.title, s.service];
+      return `<div class="sc"><div class="t"><div>${esc(t)}</div><div>${esc(d)} · ${esc(s.service)}</div></div>
+      <button class="btn small primary" data-s="${esc(s.name)}" data-m="live">Start</button>
+      ${s.replay_available ? `<button class="btn small" data-s="${esc(s.name)}" data-m="replay" title="Plays back a recorded run; works offline">Replay</button>` : ""}</div>`; }).join("");
+  menu.hidden = !menu.hidden;
+  menu.querySelectorAll("button").forEach((b) => b.onclick = async (ev) => {
+    ev.stopPropagation();
+    try { location.href = (await api(`/demo/trigger/${encodeURIComponent(b.dataset.s)}?mode=${b.dataset.m}`, { method: "POST" })).url; }
+    catch (err) { toastMsg(err.message, "bad"); }
+  });
+};
+$("trigger-menu").onclick = (e) => e.stopPropagation();
+document.addEventListener("click", () => { $("trigger-menu").hidden = true; });
+
+$("bug-btn").onclick = () => {
+  $("b-scenario").innerHTML = scenarios.map((s) => `<option value="${esc(s.name)}">${esc(s.service)}${DEMO_LABEL[s.name] ? ` (${esc(DEMO_LABEL[s.name][1].toLowerCase())} demo)` : ""}</option>`).join("");
+  $("b-err").textContent = "";
+  $("bug-dialog").showModal();
+};
+$("bug-form").addEventListener("submit", async (e) => {
+  if (e.submitter && e.submitter.value === "cancel") return;
+  e.preventDefault();
+  const body = { scenario: $("b-scenario").value, severity: $("b-sev").value, title: $("b-title").value.trim(),
+    repro_steps: $("b-steps").value.trim(), expected: $("b-expected").value.trim(), actual: $("b-actual").value.trim(),
+    environment: $("b-env").value.trim(), log_snippet: $("b-log").value };
+  $("b-submit").disabled = true;
+  try { location.href = (await api("/bugs", { method: "POST", body })).url; }
+  catch (err) { $("b-err").textContent = err.message; $("b-submit").disabled = false; }
+});
+
+async function refresh() {
+  const [inc, m, ev] = await Promise.all([api("/incidents"), api("/metrics"), api("/events/recent?limit=25")]);
+  incidents = inc;
+  renderTiles(m); renderBoard(); renderFeed(ev); renderQueue(); renderMindStatus();
+}
+
+mountThemeToggle($("theme-btn"));
+Session.onChange(() => { renderWelcome(); renderQueue(); });
+mountUserMenu($("user-menu"));
+Promise.all([Session.load(), api("/scenarios").then((s) => (scenarios = s))]).then(refresh).catch((e) => toastMsg(e.message, "bad"));
+setInterval(() => refresh().catch(() => {}), 3000);
+</script>
+</body>
+</html>

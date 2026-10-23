@@ -1,0 +1,13 @@
+{
+  "id": "ALERT-7802",
+  "service": "checkout-api",
+  "title": "checkout-api 5xx rate 9%",
+  "severity": "sev2",
+  "metric": "error_rate_5xx",
+  "value": 0.09,
+  "threshold": 0.05,
+  "window": "2m",
+  "started_at": "2026-10-22T13:52:30Z",
+  "fired_at": "2026-10-22T13:58:00Z",
+  "source": "synthetic-monitoring"
+}

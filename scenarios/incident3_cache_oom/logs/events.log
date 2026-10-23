@@ -1,0 +1,8 @@
+2026-10-21T18:30:00Z Normal TrafficPeak service=catalog-api peak_rps=63 max_rss_mb=228 restarts=0 (daily summary)
+2026-10-22T09:42:59Z Warning OOMKilled pod/catalog-api-7d9f container=catalog-api memory limit 512Mi exceeded (rss 512Mi); restarting restart_count=1
+2026-10-22T09:43:07Z Normal Started pod/catalog-api-7d9f container=catalog-api restart_count=1
+2026-10-22T09:45:00Z Normal CampaignSent campaign=october-picks recipients=120000 expected_traffic=+30% links=/products/*?utm_source=email
+2026-10-22T09:52:43Z Warning OOMKilled pod/catalog-api-7d9f container=catalog-api memory limit 512Mi exceeded (rss 514Mi); restarting restart_count=2
+2026-10-22T09:52:51Z Normal Started pod/catalog-api-7d9f container=catalog-api restart_count=2
+2026-10-22T10:02:32Z Warning OOMKilled pod/catalog-api-7d9f container=catalog-api memory limit 512Mi exceeded (rss 512Mi); restarting restart_count=3
+2026-10-22T10:02:40Z Normal Started pod/catalog-api-7d9f container=catalog-api restart_count=3

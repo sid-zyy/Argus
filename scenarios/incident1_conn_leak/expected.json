@@ -1,0 +1,7 @@
+{
+  "category": "code",
+  "culprit_sha": "cb77497",
+  "file": "app/checkout.py",
+  "trap": "database overloaded; scale up the database",
+  "fix_hint": "release the connection in a finally block (or roll back to eda931f)"
+}

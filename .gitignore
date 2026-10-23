@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.db
+.pytest_cache/
+runs/
+scenarios/*/repo/
+eval/results.json
+*.db-shm
+*.db-wal

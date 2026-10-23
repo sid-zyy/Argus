@@ -1,0 +1,13 @@
+{
+  "id": "ALERT-7815",
+  "service": "catalog-api",
+  "title": "catalog-api restarting: 3 OOMKilled restarts in 35m",
+  "severity": "sev2",
+  "metric": "container_restarts",
+  "value": 3,
+  "threshold": 1,
+  "window": "35m",
+  "started_at": "2026-10-22T09:42:59Z",
+  "fired_at": "2026-10-22T10:05:00Z",
+  "source": "synthetic-monitoring"
+}

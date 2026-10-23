@@ -1,0 +1,7 @@
+{
+  "category": "config",
+  "culprit_sha": "1ff1467",
+  "file": "app/config.py",
+  "trap": "the upstream payment provider is slow or degraded",
+  "fix_hint": "set REQUEST_TIMEOUT back above the provider's p99 (30s), or roll back to af76ffa"
+}

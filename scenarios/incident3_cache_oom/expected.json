@@ -1,0 +1,7 @@
+{
+  "category": "resource",
+  "culprit_sha": "24e0838",
+  "file": "app/catalog.py",
+  "trap": "the marketing traffic spike exhausted memory; add memory or replicas",
+  "fix_hint": "bound the page cache (LRU with a max size) or key it by product id, or roll back to 0182267"
+}

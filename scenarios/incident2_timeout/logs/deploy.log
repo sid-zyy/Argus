@@ -1,0 +1,4 @@
+2026-10-20T11:01:30Z DEPLOY checkout-api version=1.8.9 commit=af76ffa deployer=arjun status=started changes=af76ffa
+2026-10-20T11:02:41Z DEPLOY checkout-api version=1.8.9 commit=af76ffa deployer=arjun status=succeeded replicas=1/1
+2026-10-22T13:51:02Z DEPLOY checkout-api version=1.9.0 commit=567ec5a deployer=dev status=started changes=1ff1467,567ec5a
+2026-10-22T13:52:10Z DEPLOY checkout-api version=1.9.0 commit=567ec5a deployer=dev status=succeeded replicas=1/1
