@@ -149,4 +149,8 @@ def summary() -> dict:
         rules.append({"rule": "ai.budget_per_incident", "text": f"AI budget per run: {ai_budget():g} (at {cost_per_1k_tokens():g} per 1,000 tokens)"})
     if sla_minutes():
         rules.append({"rule": "approval_sla_minutes", "text": f"Lead is pinged after {sla_minutes():g} minutes waiting for approval"})
-    return {"sha": p["sha"], "file": p["path"], "version": p.get("version"), "two_person": _two_person_on(p), "rules": rules}
+    details = {"approvals": {s: approval_rule(s)["label"] for s in ("sev1", "sev2", "sev3", "sev4")},
+               "separation_of_duties": bool(p["separation_of_duties"]), "fixes": f,
+               "ai_budget": ai_budget(), "cost_per_1k_tokens": cost_per_1k_tokens(), "sla_minutes": sla_minutes()}
+    return {"sha": p["sha"], "file": p["path"], "version": p.get("version"), "two_person": _two_person_on(p), "rules": rules,
+            "details": details}

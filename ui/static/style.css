@@ -455,6 +455,10 @@ dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top
 .la-commit .mono { color: var(--text); }
 .la-chart { width: 100%; height: 64px; }
 .la-actions { display: flex; flex-direction: column; gap: 8px; }
+.la-agents { display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--surface-3); }
+.la-agents button { flex: 1; padding: 5px 10px; border: 0; border-radius: 8px; background: none; color: var(--muted); font: inherit; font-size: 12.5px; font-weight: 550; cursor: pointer; }
+.la-agents button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+.la-agents button:disabled:not(.on) { opacity: .5; cursor: not-allowed; }
 @media (max-width: 900px) { .live-app { grid-template-columns: 1fr; } .la-actions { flex-direction: row; flex-wrap: wrap; } }
 
 /* ticket header: incident key, prominent */
@@ -1148,6 +1152,16 @@ a.tile-link:hover { text-decoration: none; border-color: var(--border-strong); }
 .checks .fix { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .checks .fix code { font-size: 12px; }
 .rules { margin: 8px 0 0; padding-left: 18px; }
+.pol { margin: 12px 0 0; display: grid; gap: 0; }
+.pol-row { display: grid; grid-template-columns: 88px 1fr; gap: 12px; padding: 9px 0; border-top: 1px solid var(--border); font-size: 14px; }
+.pol-row:first-child { border-top: 0; padding-top: 2px; }
+.pol-row:has(dt:empty) { border-top: 0; padding-top: 0; }
+.pol-row dt { color: var(--muted); font-weight: 550; font-size: 13px; padding-top: 1px; }
+.pol-row dd { margin: 0; min-width: 0; }
+.pol-note { margin-top: 3px; color: var(--faint); font-size: 12.5px; line-height: 1.45; }
+.pol-note summary { cursor: pointer; color: var(--muted); }
+.pol-note details code { display: inline-block; margin: 4px 4px 0 0; font-size: 11.5px; }
+.pol-foot { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; color: var(--faint); }
 .rules li { margin: 4px 0; }
 .rules code, .val-table code { font-size: 12px; }
 .val-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; margin-top: 16px; }

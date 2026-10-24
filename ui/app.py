@@ -207,8 +207,18 @@ def health_check():
 
 @app.get("/policy")
 def get_policy():
+    """policy.yaml in plain words, plus the services whose argus.yaml sets its own approval rule."""
     from orchestrator import policy
-    return policy.summary()
+    overrides = []
+    for s in runner.scenarios():
+        try:
+            cfg = runner.config(s["name"])
+        except ConfigError:
+            continue
+        for sev, rule in cfg.severity.approvals.items():
+            who = f"{rule.count} people" + (", one a team lead" if rule.lead else "") if rule.count > 1 else ("a team lead" if rule.lead else "one developer or lead")
+            overrides.append({"service": cfg.service.label or cfg.service.name, "folder": cfg.key, "severity": sev, "who": who})
+    return {**policy.summary(), "overrides": overrides}
 
 
 @app.get("/audit/verify")
@@ -277,7 +287,11 @@ def _route(payload: dict) -> dict:
         cfg, inc, fmt = alert_adapters.route(payload, services)
     except alert_adapters.RouteError as e:
         raise HTTPException(e.status, str(e))
-    return {**_start(cfg.key, "live", inc.as_alert()), "received_from": fmt, "service_folder": cfg.key}
+    mode = "live"
+    # demo setting: a live app's alert can be answered by a recorded run of the same bug instead of live AI calls
+    if runner.live_app(cfg.key) and demo_agents()["mode"] == "replay" and runner.replay_file(cfg.key) and runner.replay_fits(cfg.key):
+        mode = "replay"
+    return {**_start(cfg.key, mode, inc.as_alert()), "received_from": fmt, "service_folder": cfg.key, "mode": mode}
 
 
 @app.post("/demo/trigger/{scenario}", status_code=201)
@@ -353,10 +367,29 @@ def _shop(path: str, method: str = "GET") -> dict:
 
 @app.get("/live/status")
 def live_status():
+    agents = {**demo_agents(), "replay_available": runner.replay_file("live_shop") is not None}
     try:
-        return {**_shop("/api/status"), "url": SHOP_URL}
+        return {**_shop("/api/status"), "url": SHOP_URL, "agents": agents}
     except HTTPException as e:
-        return {"online": False, "url": SHOP_URL, "error": e.detail if e.status_code != 503 else None}
+        return {"online": False, "url": SHOP_URL, "error": e.detail if e.status_code != 503 else None, "agents": agents}
+
+
+# For demos: who answers ShopFast's alerts. 'live' calls the AI models; 'replay' plays back a recorded real run of the same
+# bug (no AI calls), while the shop, its alert, the approval and the deploy stay real.
+def demo_agents() -> dict:
+    return {"mode": "live", "by": None, **(store.get_setting("demo_agents") or {})}
+
+
+class AgentsIn(BaseModel):
+    mode: str = Field(pattern="^(live|replay)$")
+
+
+@app.post("/demo/agents")
+def set_demo_agents(body: AgentsIn, user: dict = Depends(require("developer", "lead"))):
+    if body.mode == "replay" and not runner.replay_file("live_shop"):
+        raise HTTPException(409, "there is no recorded ShopFast run to replay")
+    store.set_setting("demo_agents", {"mode": body.mode, "by": user["name"]})
+    return demo_agents()
 
 
 @app.post("/live/break")

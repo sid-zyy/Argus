@@ -70,6 +70,10 @@
       <a class="btn" id="la-open" target="_blank" rel="noopener">Open the shop</a>
       <button class="btn danger" id="la-break">Push a bad change</button>
       <button class="btn ghost" id="la-reset">Reset</button>
+      <div class="la-agents" id="la-agents" role="group" aria-label="Who answers ShopFast's alerts">
+        <button type="button" data-mode="live" title="The agents call the AI models live">Live AI</button>
+        <button type="button" data-mode="replay" title="The agents' steps are played back from a recorded real run of this same bug: no AI calls. The shop, its alert, your approval and the deploy stay real.">Replay</button>
+      </div>
     </div>
   </section>
 
@@ -438,6 +442,7 @@ async function renderLiveApp() {
     + (s.alert.firing && inc ? ` · <a href="${esc(inc.url)}">${esc(inc.key)} open</a>` : "");
   $("la-break").disabled = !canAct || s.broken_change_live || pushing;
   $("la-reset").disabled = !canAct;
+  renderAgents(s.agents, canAct);
   drawLiveChart(s.series);
 }
 function drawLiveChart(series) {
@@ -454,6 +459,27 @@ function drawLiveChart(series) {
   ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, x(i), y(p.error_rate)));
   ctx.strokeStyle = css.getPropertyValue("--bad"); ctx.lineWidth = 2; ctx.stroke();
 }
+// who answers the shop's alerts: the live agents, or a recorded run of the same bug (no AI calls, for demos)
+function renderAgents(a, canAct) {
+  if (!a) return;
+  $("la-agents").querySelectorAll("button").forEach((b) => {
+    b.classList.toggle("on", b.dataset.mode === a.mode);
+    b.setAttribute("aria-pressed", b.dataset.mode === a.mode);
+    b.disabled = !canAct || (b.dataset.mode === "replay" && !a.replay_available);
+  });
+  $("la-sub").textContent = a.mode === "replay"
+    ? "Replay is on: push a bad change and the shop really breaks and alerts, but the agents' steps are a recorded run. Your approval deploys the fix for real."
+    : "The real app Argus watches. Its code is a git repo; every commit is deployed.";
+}
+$("la-agents").onclick = async (e) => {
+  const b = e.target.closest("button[data-mode]");
+  if (!b || b.classList.contains("on")) return;
+  try {
+    await api("/demo/agents", { method: "POST", body: { mode: b.dataset.mode } });
+    toastMsg(b.dataset.mode === "replay" ? "Replay on: ShopFast's next alert plays back a recorded run" : "Live AI on: the agents will call the AI models");
+  } catch (err) { toastMsg(err.message, "bad"); }
+  renderLiveApp();
+};
 let pushing = false;
 $("la-break").onclick = async () => {
   if (pushing) return;
