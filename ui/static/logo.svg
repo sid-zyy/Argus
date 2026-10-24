@@ -1,47 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Argus">
+  <!-- Argus's eye: a six-sided pupil for the six agents behind the Commander -->
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#2b2280"/>
-      <stop offset="1" stop-color="#0c0a24"/>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a2378"/>
+      <stop offset="1" stop-color="#110e33"/>
     </linearGradient>
-    <radialGradient id="sheen" cx=".25" cy=".1" r=".9">
-      <stop offset="0" stop-color="#fff" stop-opacity=".18"/>
-      <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6ee7ff"/>
-      <stop offset=".5" stop-color="#9d8cff"/>
-      <stop offset="1" stop-color="#ff7ad9"/>
+    <linearGradient id="iris" x1=".2" y1="0" x2=".8" y2="1">
+      <stop offset="0" stop-color="#67e8f9"/>
+      <stop offset="1" stop-color="#7c5cff"/>
     </linearGradient>
-    <radialGradient id="iris" cx=".5" cy=".5" r=".5">
-      <stop offset="0" stop-color="#e9e4ff"/>
-      <stop offset=".45" stop-color="#9d8cff"/>
-      <stop offset="1" stop-color="#3a2fa8"/>
-    </radialGradient>
-    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
-      <stop offset="0" stop-color="#9d8cff" stop-opacity=".55"/>
-      <stop offset="1" stop-color="#9d8cff" stop-opacity="0"/>
-    </radialGradient>
-    <clipPath id="lid"><path d="M7 32C15 18.5 23 14 32 14s17 4.5 25 18c-8 13.5-16 18-25 18S15 45.5 7 32Z"/></clipPath>
   </defs>
-  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
-  <rect width="64" height="64" rx="15" fill="url(#sheen)"/>
-  <circle cx="32" cy="32" r="22" fill="url(#glow)"/>
-  <!-- the eye: Argus, who never sleeps -->
-  <path d="M7 32C15 18.5 23 14 32 14s17 4.5 25 18c-8 13.5-16 18-25 18S15 45.5 7 32Z" fill="#0c0a24" fill-opacity=".55"
-        stroke="url(#neon)" stroke-width="3.2" stroke-linejoin="round"/>
-  <g clip-path="url(#lid)">
-    <circle cx="32" cy="32" r="12.5" fill="url(#iris)"/>
-    <!-- the agents, watching together -->
-    <g fill="#fff">
-      <circle cx="32" cy="21.5" r="1.7"/>
-      <circle cx="41.1" cy="26.75" r="1.7"/>
-      <circle cx="41.1" cy="37.25" r="1.7"/>
-      <circle cx="32" cy="42.5" r="1.7"/>
-      <circle cx="22.9" cy="37.25" r="1.7"/>
-      <circle cx="22.9" cy="26.75" r="1.7"/>
-    </g>
-    <circle cx="32" cy="32" r="5.6" fill="#0c0a24"/>
-    <circle cx="34.6" cy="29.4" r="1.9" fill="#fff"/>
-  </g>
+  <rect width="64" height="64" rx="15" fill="url(#tile)"/>
+  <path d="M8 32C16 20 23.5 15.5 32 15.5S48 20 56 32C48 44 40.5 48.5 32 48.5S16 44 8 32Z" fill="#f4f2ff"/>
+  <circle cx="32" cy="32" r="11" fill="url(#iris)"/>
+  <path d="M32 26.4 36.85 29.2V34.8L32 37.6 27.15 34.8V29.2Z" fill="#110e33" stroke="#110e33" stroke-width="1" stroke-linejoin="round"/>
+  <circle cx="35.6" cy="28.2" r="1.7" fill="#fff"/>
 </svg>
