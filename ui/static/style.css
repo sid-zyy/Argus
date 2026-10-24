@@ -524,3 +524,13 @@ dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top
   .tiles .tile:hover, .live-app:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -18px rgba(40, 30, 90, .35); }
 }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* board: columns hug their cards; long columns fold */
+.board { align-items: start; }
+.col { min-height: 0; }
+.col-more { display: block; width: 100%; margin-top: 8px; padding: 8px; border: 1px dashed var(--border-strong); border-radius: 10px;
+  background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.col-more:hover { color: var(--text); border-color: var(--muted); }
+.col-clear { margin-left: 6px; padding: 1px 8px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface);
+  color: var(--muted); font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+.col-clear:hover { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, var(--border)); }

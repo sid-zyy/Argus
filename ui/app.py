@@ -337,6 +337,20 @@ def patch_incident(iid: int, body: IncidentPatch, user: dict = Depends(require("
     return _incident_or_404(iid)
 
 
+class ArchiveIn(BaseModel):
+    statuses: list[str] = Field(default_factory=lambda: ["escalated", "rejected"])
+
+
+@app.post("/incidents/archive")
+def archive_incidents(body: ArchiveIn, user: dict = Depends(require("developer", "lead"))):
+    """Clear a board column (by default 'Needs a person'). Archived incidents keep their full history."""
+    allowed = {"escalated", "rejected", "resolved", "closed"}
+    if not body.statuses or not set(body.statuses) <= allowed:
+        raise HTTPException(422, f"can only clear finished incidents: {sorted(allowed)}")
+    ids = store.archive(tuple(body.statuses), user)
+    return {"archived": len(ids), "ids": ids}
+
+
 @app.post("/incidents/{iid}/approve")
 def approve(iid: int, body: Decision, user: dict = Depends(signed_in)):
     try:

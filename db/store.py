@@ -24,6 +24,7 @@ MIGRATIONS = [
     ("incidents", "assignee_id", "INTEGER"), ("incidents", "repro_steps", "TEXT"), ("incidents", "expected", "TEXT"),
     ("incidents", "actual", "TEXT"), ("incidents", "environment", "TEXT"), ("incidents", "log_snippet", "TEXT"),
     ("events", "actor_id", "INTEGER"), ("events", "actor_role", "TEXT"), ("comments", "author_id", "INTEGER"),
+    ("incidents", "archived_at", "TEXT"),
 ]
 FABRICATION_HINTS = ("quote not found", "out of range", "unknown source")
 
@@ -103,14 +104,26 @@ class Store:
             rows = [dict(r) for r in c.execute(
                 "SELECT i.id, i.title, i.service, i.severity, i.status, i.assignee, i.mode, i.attempts, i.model, i.created_at, "
                 "i.resolved_at, i.source, u.name AS reported_by_name FROM incidents i LEFT JOIN users u ON u.id = i.reported_by "
-                "ORDER BY i.id DESC")]
+                "WHERE i.archived_at IS NULL ORDER BY i.id DESC")]
             for r in rows:
+                r["required_approvals"] = required_approvals(r["severity"])
                 last = c.execute("SELECT actor, type, payload FROM events WHERE incident_id=? AND type NOT IN ('llm_step') "
                                  "ORDER BY id DESC LIMIT 1", (r["id"],)).fetchone()
                 r["last_event"] = {"actor": last["actor"], "type": last["type"], "payload": json.loads(last["payload"])} if last else None
                 r["votes"] = c.execute("SELECT COUNT(*) FROM approvals WHERE incident_id=? AND patch_id=(SELECT MAX(id) FROM patches "
                                        "WHERE incident_id=?) AND decision='approved'", (r["id"], r["id"])).fetchone()[0]
         return rows
+
+    def archive(self, statuses: tuple[str, ...], user: dict) -> list[int]:
+        """Hide finished-with incidents from the board. Nothing is deleted: the incident and its audit trail stay."""
+        marks = ",".join("?" * len(statuses))
+        with self._conn() as c:
+            ids = [r[0] for r in c.execute(f"SELECT id FROM incidents WHERE archived_at IS NULL AND status IN ({marks})", statuses)]
+        stamp = now()
+        for iid in ids:
+            self._write(lambda c, iid=iid: c.execute("UPDATE incidents SET archived_at=? WHERE id=?", (stamp, iid)))
+            self.record_event(iid, {"actor": "human", "type": "archived", "payload": {"by": user["name"]}}, user)
+        return ids
 
     def get_incident(self, incident_id: int) -> dict | None:
         with self._conn() as c:

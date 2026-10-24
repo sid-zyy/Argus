@@ -209,6 +209,7 @@ function describeEvent(e) {
     case "phase": return p.label;
     case "plan": return p.version > 1 ? "Made a new plan" : "Made a plan";
     case "assigned": return `Assigned to ${p.to} (${p.reason.charAt(0).toLowerCase() + p.reason.slice(1)})`;
+    case "archived": return `Cleared from the board by ${p.by}`;
     case "deployed": return `Deployed the approved fix to ${p.app} as commit ${p.commit}`;
     case "notified": return `Messaged ${p.to} on ${p.channel}: ${p.message}`;
     case "sla_breach": return `Approval waited over ${p.minutes} min. Escalated to ${p.escalated_to}`;

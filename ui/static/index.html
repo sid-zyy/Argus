@@ -119,8 +119,8 @@ const COLUMNS = [
   { label: "Investigating", help: "Argus is looking into these", statuses: ["open", "investigating"], color: "var(--info)" },
   { label: "Needs approval", help: "A tested fix is ready for review", statuses: ["awaiting_approval"], color: "var(--warn)" },
   { label: "Needs testing", help: "Fixed; a tester confirms it works", statuses: ["awaiting_qa"], color: "var(--qa)" },
-  { label: "Fixed", help: "All done", statuses: ["resolved", "closed"], color: "var(--ok)" },
-  { label: "Needs a person", help: "Argus couldn't fix these, or a fix was declined", statuses: ["escalated", "rejected"], color: "var(--bad)" },
+  { label: "Fixed", help: "All done", statuses: ["resolved", "closed"], color: "var(--ok)", clearable: true },
+  { label: "Needs a person", help: "Argus couldn't fix these, or a fix was declined", statuses: ["escalated", "rejected"], color: "var(--bad)", clearable: true },
 ];
 const DEMO_LABEL = {
   incident1_conn_leak: ["Checkout is failing", "A code bug after a deploy"],
@@ -209,7 +209,7 @@ function moneyCount(v) {
 
 // ---- board ----
 function friendlyLine(i) {
-  const need = ["sev1", "sev2"].includes(i.severity) ? 2 : 1;
+  const need = (i.required_approvals || {}).count || 1;
   const ev = i.last_event;
   switch (i.status) {
     case "open": case "investigating":
@@ -233,12 +233,33 @@ function card(i) {
   </a>`;
 }
 const SEV_LABEL = { sev1: "Critical", sev2: "Major", sev3: "Minor", sev4: "Small" };
+// each column shows its newest few cards; the rest open on request so the board stays short
+const COLUMN_LIMIT = 3;
+const expanded = new Set();
 function renderBoard() {
-  $("board").innerHTML = COLUMNS.map((c) => {
+  const u = Session.user, canClear = u && u.role !== "tester";
+  $("board").innerHTML = COLUMNS.map((c, ci) => {
     const items = incidents.filter((i) => c.statuses.includes(i.status));
-    return `<div class="col"><div class="col-head"><span class="col-dot" style="background:${c.color}"></span>${esc(c.label)}<span class="n">${items.length}</span></div>
-      ${items.length ? items.map(card).join("") : `<div class="col-empty">Nothing here</div>`}</div>`;
+    const open = expanded.has(ci), shown = open ? items : items.slice(0, COLUMN_LIMIT), more = items.length - shown.length;
+    const clear = c.clearable && canClear && items.length ? `<button class="col-clear" data-clear="${ci}" title="Hide these from the board. Nothing is deleted.">Clear</button>` : "";
+    return `<div class="col"><div class="col-head"><span class="col-dot" style="background:${c.color}"></span>${esc(c.label)}${clear}<span class="n">${items.length}</span></div>
+      ${items.length ? shown.map(card).join("") : `<div class="col-empty">Nothing here</div>`}
+      ${more > 0 ? `<button class="col-more" data-more="${ci}">Show ${more} more</button>` : open && items.length > COLUMN_LIMIT ? `<button class="col-more" data-more="${ci}">Show less</button>` : ""}</div>`;
   }).join("");
+  $("board").querySelectorAll("[data-more]").forEach((b) => b.onclick = () => {
+    const ci = +b.dataset.more;
+    expanded.has(ci) ? expanded.delete(ci) : expanded.add(ci);
+    renderBoard();
+  });
+  $("board").querySelectorAll("[data-clear]").forEach((b) => b.onclick = async () => {
+    const c = COLUMNS[+b.dataset.clear];
+    if (!confirm(`Clear ${incidents.filter((i) => c.statuses.includes(i.status)).length} incident(s) from "${c.label}"? They are archived, not deleted.`)) return;
+    try {
+      const r = await api("/incidents/archive", { method: "POST", body: { statuses: c.statuses } });
+      toastMsg(`Cleared ${r.archived} incident${r.archived === 1 ? "" : "s"}`);
+      refresh();
+    } catch (e) { toastMsg(e.message, "bad"); }
+  });
 }
 
 // ---- feed and queue ----
@@ -261,7 +282,7 @@ function renderQueue() {
   } else {
     $("queue-title").textContent = "Ready for your review";
     items = incidents.filter((i) => i.status === "awaiting_approval").map((i) => {
-      const need = ["sev1", "sev2"].includes(i.severity) ? 2 : 1;
+      const need = (i.required_approvals || {}).count || 1;
       return [i, need > 1 ? `${i.votes} of 2 approvals · a team lead must be one of them` : "Needs one approval"];
     });
   }
