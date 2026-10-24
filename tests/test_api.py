@@ -123,3 +123,23 @@ def test_alertmanager_webhook_opens_an_incident(client):
     assert inc["severity"] == "sev2" and inc["alert"]["source"] == "Prometheus Alertmanager"
     assert inc["assignee"] == "Siddhartha"  # auto-assigned to checkout-api's on-call developer
     assert inc["impact"]["at_risk_per_minute"] > 0
+
+
+def test_pause_ignores_alerts_and_notifications_are_sent(client):
+    c = client
+    alert = {"alerts": [{"status": "firing", "labels": {"alertname": "X", "service": "checkout-api", "severity": "high"},
+                         "annotations": {"summary": "Checkout errors"}}]}
+    sign_in(c, "Tara")
+    assert c.post("/argus/pause").status_code == 403  # only developers and leads
+    sign_in(c, "Siddhartha")
+    assert c.post("/argus/pause").json()["paused"] is True
+    r = c.post("/alerts", json=alert)
+    assert r.status_code == 202 and r.json()["paused"] is True
+    state = c.get("/argus/state").json()
+    assert state["held"] == 1 and state["last_held"]["title"] == "Checkout errors"
+    assert c.get("/incidents").json() == []
+    assert c.post("/argus/resume").json()["paused"] is False
+    iid = c.post("/alerts", json=alert).json()["id"]
+    wait_for(c, iid, "awaiting_approval")
+    kinds = [n["payload"]["kind"] for n in c.get("/notifications").json()]
+    assert "opened" in kinds and "cause" in kinds and "approval" in kinds

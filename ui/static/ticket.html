@@ -89,6 +89,16 @@
         <h2>Your decision</h2>
         <div id="approval" style="margin-top: 8px"></div>
       </section>
+      <section class="panel" id="ask-panel">
+        <h2>Ask Argus</h2>
+        <p class="help" style="margin-bottom: 0">Answers come only from this incident's record, with the source of each fact.</p>
+        <div class="ask-log" id="ask-log"></div>
+        <div class="ask-chips" id="ask-chips"></div>
+        <form class="ask-form" id="ask-form" autocomplete="off">
+          <input id="ask-input" maxlength="500" placeholder="Ask anything about this incident">
+          <button class="btn primary" id="ask-btn">Ask</button>
+        </form>
+      </section>
       <section class="panel">
         <h2>Details</h2>
         <label for="assignee">Assigned to</label>

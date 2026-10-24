@@ -49,8 +49,8 @@
   </section>
 
   <section class="dash-top" id="overview">
-    <div class="panel mind">
-      <h2>Argus right now</h2>
+    <div class="panel mind" id="mind-panel">
+      <div class="mind-head"><h2>Argus right now</h2><button class="pause-btn" id="pause-btn" type="button" hidden></button></div>
       <div id="mind"></div>
       <div class="mind-status" id="mind-status">All quiet.</div>
     </div>
@@ -113,6 +113,7 @@
 <script src="/static/common.js"></script>
 <script src="/static/vendor/reactbits.js"></script>
 <script src="/static/argus.js"></script>
+<script src="/static/push.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const COLUMNS = [
@@ -147,7 +148,11 @@ function renderMindStatus() {
   const busy = incidents.find((i) => i.status === "investigating" || i.status === "open");
   const waiting = incidents.filter((i) => i.status === "awaiting_approval");
   watch(busy || waiting[0] || null);
-  if (busy) {
+  const paused = ArgusState.state.paused;
+  $("mind-panel").classList.toggle("paused", paused && !busy);
+  if (paused && !busy && !waiting.length) {
+    $("mind-status").innerHTML = `<b>Paused.</b> Alerts from monitoring are ignored until you resume.`;
+  } else if (busy) {
     const who = busy.last_event && AGENT_NAME[busy.last_event.actor];
     $("mind-status").innerHTML = `Working on <a href="/incidents/${busy.id}/view"><b>${esc(busy.title)}</b></a>${who && who !== "Argus" ? `<br>${esc(who)} is on it.` : ""}`;
   } else if (waiting.length) {
@@ -391,9 +396,9 @@ async function renderLiveApp() {
   ].map(([k, v, bad]) => `<div><div class="k">${k}</div><div class="v ${bad ? "bad" : ""}">${esc(v)}</div></div>`).join("");
   const c = s.commits[0];
   const inc = s.alert.incident;
-  $("la-commit").innerHTML = `Live: <span class="mono">${esc(c.sha)}</span> ${esc(c.message)} <span class="faint">· ${esc(c.author)} · ${ago(c.date)}</span>`
+  $("la-commit").innerHTML = `Live: <button class="sha-link mono" data-sha="${esc(c.sha)}" title="See what changed">${esc(c.sha)}</button> ${esc(c.message)} <span class="faint">· ${esc(c.author)} · ${ago(c.date)}</span>`
     + (s.alert.firing && inc ? ` · <a href="${esc(inc.url)}">${esc(inc.key)} open</a>` : "");
-  $("la-break").disabled = !canAct || s.broken_change_live;
+  $("la-break").disabled = !canAct || s.broken_change_live || pushing;
   $("la-reset").disabled = !canAct;
   drawLiveChart(s.series);
 }
@@ -411,11 +416,36 @@ function drawLiveChart(series) {
   ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, x(i), y(p.error_rate)));
   ctx.strokeStyle = css.getPropertyValue("--bad"); ctx.lineWidth = 2; ctx.stroke();
 }
+let pushing = false;
 $("la-break").onclick = async () => {
-  try { const r = await api("/live/break", { method: "POST" }); toastMsg(`Pushed ${r.sha}: "${r.message}". Deploying…`); }
-  catch (e) { toastMsg(e.message, "bad"); }
-  renderLiveApp();
+  if (pushing) return;
+  pushing = true; $("la-break").disabled = true;
+  try {
+    const c = await api("/live/break", { method: "POST" });
+    await PushShow.play(c, async () => ((await api("/live/status")).commits || [])[0]?.sha === c.sha);
+  } catch (e) { toastMsg(e.message, "bad"); PushShow.close(); }
+  finally { pushing = false; renderLiveApp(); }
 };
+$("la-commit").onclick = async (e) => {
+  const b = e.target.closest("[data-sha]");
+  if (!b) return;
+  try { PushShow.show(await api(`/live/commits/${encodeURIComponent(b.dataset.sha)}`)); } catch (err) { toastMsg(err.message, "bad"); }
+};
+
+// ---- pause switch: for rehearsing, monitoring alerts are ignored while paused ----
+const PAUSE_ICON = '<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+const PLAY_ICON = '<svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>';
+function renderPause(s) {
+  const b = $("pause-btn");
+  b.hidden = !Session.is("developer", "lead");
+  b.classList.toggle("on", !!s.paused);
+  b.innerHTML = s.paused ? `${PLAY_ICON}Resume` : `${PAUSE_ICON}Pause`;
+  b.title = s.paused ? "Start investigating monitoring alerts again" : "Ignore monitoring alerts for now, e.g. while rehearsing the demo. Incidents already running carry on.";
+  if (incidents.length || !s.paused) renderMindStatus();
+}
+$("pause-btn").onclick = () => ArgusState.set(!ArgusState.state.paused).catch((e) => toastMsg(e.message, "bad"));
+ArgusState.onChange(renderPause);
+Session.onChange(() => renderPause(ArgusState.state));
 $("la-reset").onclick = async () => {
   if (!confirm("Reset ShopFast to its healthy code and clear its logs?")) return;
   try { await api("/live/reset", { method: "POST" }); toastMsg("ShopFast reset to the healthy version"); }

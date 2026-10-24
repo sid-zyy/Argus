@@ -107,29 +107,38 @@ class IncidentRunner:
             self.store.record_event(iid, {"actor": "orchestrator", "type": "assigned",
                                           "payload": {"to": person["name"], "reason": f"On call for {service}"}})
 
-    def _send(self, iid: int, to: str, message: str) -> None:
-        """Simulated chat notification, recorded in the audit log like a real one would be."""
+    def _send(self, iid: int, to: str, message: str, kind: str = "info") -> None:
+        """Simulated chat notification, recorded in the audit log like a real one would be. The app also shows it to
+        signed-in people as an in-app (and, if they allow it, desktop) notification."""
         self.store.record_event(iid, {"actor": "orchestrator", "type": "notified",
-                                      "payload": {"channel": "Slack #incidents", "to": to, "message": message, "simulated": True}})
+                                      "payload": {"channel": "Slack #incidents", "to": to, "message": message, "kind": kind, "simulated": True}})
 
     def _record(self, iid: int, event: dict) -> None:
         self.store.record_event(iid, event)
         t, p = event["type"], event["payload"]
-        if t not in ("incident_opened", "awaiting_approval", "approval", "escalated"):
+        if t not in ("incident_opened", "verdict", "awaiting_approval", "approval", "escalated", "deployed"):
+            return
+        if t == "verdict" and p.get("verdict") != "supported":
             return
         inc = self.store.get_incident(iid)
         owner = inc["assignee"] or "on-call"
         lead = (self.store.lead() or {}).get("name", "the lead")
         if t == "incident_opened":
-            self._send(iid, owner, f"New incident {incKey(iid)}: {inc['title']}. Argus is investigating.")
+            self._send(iid, owner, f"New incident {incKey(iid)}: {inc['title']}. Argus is investigating.", "opened")
+        elif t == "verdict":
+            claim = next((c for c in inc["claims"] if c["claim_key"] == p.get("claim_id")), None)
+            if claim and sum(c["verdict"] == "supported" for c in inc["claims"]) == 1:  # only the first confirmed cause
+                self._send(iid, owner, f"{incKey(iid)}: cause found. {claim['statement']}", "cause")
+        elif t == "deployed":
+            self._send(iid, "#incidents", f"{incKey(iid)}: approved fix deployed to {p.get('app')} as commit {p.get('commit')}.", "deployed")
         elif t == "awaiting_approval":
             who = f"{owner} and {lead}" if inc["required_approvals"]["count"] > 1 else owner
             self._send(iid, who, f"{incKey(iid)}: a tested fix is ready for approval"
-                                 + (f" within {self.sla_minutes:.0f} minutes." if self.sla_minutes else "."))
+                                 + (f" within {self.sla_minutes:.0f} minutes." if self.sla_minutes else "."), "approval")
         elif t == "approval":
-            self._send(iid, "#incidents", f"{incKey(iid)}: fix {'approved' if p.get('approved') else 'declined'} by {p.get('approver')}.")
+            self._send(iid, "#incidents", f"{incKey(iid)}: fix {'approved' if p.get('approved') else 'declined'} by {p.get('approver')}.", "decision")
         elif t == "escalated":
-            self._send(iid, lead, f"{incKey(iid)} needs a person: {p.get('reason')}")
+            self._send(iid, lead, f"{incKey(iid)} needs a person: {p.get('reason')}", "escalated")
 
     def _watch_sla(self) -> None:
         while True:
@@ -141,7 +150,7 @@ class IncidentRunner:
                         lead = (self.store.lead() or {}).get("name", "the lead")
                         self.store.record_event(r["id"], {"actor": "orchestrator", "type": "sla_breach",
                                                           "payload": {"minutes": self.sla_minutes, "escalated_to": lead}})
-                        self._send(r["id"], lead, f"{incKey(r['id'])}: fix has waited {self.sla_minutes:.0f} minutes for approval. Please review.")
+                        self._send(r["id"], lead, f"{incKey(r['id'])}: fix has waited {self.sla_minutes:.0f} minutes for approval. Please review.", "sla")
             except Exception:
                 pass
 

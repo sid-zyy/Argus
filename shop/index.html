@@ -326,7 +326,7 @@ async function refresh() {
   drawChart(s.series, s.deploys);
   const a = s.alert, inc = a.incident, link = inc ? `<a href="${esc(s.argus_url + inc.url)}" target="_blank">${esc(inc.key)}</a>` : "";
   $("alert").className = `alert ${a.firing ? "firing" : inc ? "ok" : ""}`;
-  $("alert").innerHTML = a.error ? `Alert firing, but ${esc(a.error)}`
+  $("alert").innerHTML = a.error ? `Alert firing, but ${esc(a.error)}.`
     : a.firing ? `Alert sent. Argus opened ${link || "an incident"} and is investigating.`
     : inc ? `Recovered. Argus handled ${link}.` : "Watching. Nothing wrong right now.";
   $("commits").innerHTML = s.commits.map((c, i) => `<button class="commit ${i === 0 ? "live" : ""} ${c.author === "Argus" ? "argus" : ""}" data-sha="${esc(c.sha)}">

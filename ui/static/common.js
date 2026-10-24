@@ -212,6 +212,7 @@ function describeEvent(e) {
     case "archived": return `Cleared from the board by ${p.by}`;
     case "deployed": return `Deployed the approved fix to ${p.app} as commit ${p.commit}`;
     case "notified": return `Messaged ${p.to} on ${p.channel}: ${p.message}`;
+    case "question": return `Asked Argus: “${p.question}”`;
     case "sla_breach": return `Approval waited over ${p.minutes} min. Escalated to ${p.escalated_to}`;
     default: return JSON.stringify(p).slice(0, 160);
   }
@@ -236,3 +237,153 @@ function mountThemeToggle(btn) {
   };
   render();
 }
+
+// ---- Argus paused: a banner on every page while monitoring alerts are being ignored ----
+const ArgusState = {
+  state: { paused: false },
+  listeners: [],
+  async load() {
+    try { this.state = await api("/argus/state"); } catch { return this.state; }
+    this.listeners.forEach((fn) => fn(this.state));
+    return this.state;
+  },
+  async set(paused) {
+    this.state = await api(paused ? "/argus/pause" : "/argus/resume", { method: "POST" });
+    this.listeners.forEach((fn) => fn(this.state));
+    toastMsg(paused ? "Argus is paused. Alerts from monitoring will be ignored." : "Argus is back on. New alerts will be investigated.");
+  },
+  onChange(fn) { this.listeners.push(fn); fn(this.state); },
+};
+function mountPauseBanner() {
+  const top = document.querySelector(".topbar");
+  if (!top) return;
+  const bar = document.createElement("div");
+  bar.className = "pause-banner";
+  bar.hidden = true;
+  top.after(bar);
+  const render = (s) => {
+    bar.hidden = !s.paused;
+    if (!s.paused) return;
+    const held = s.held ? ` ${s.held} alert${s.held === 1 ? "" : "s"} ignored so far${s.last_held ? `, latest: “${s.last_held.title}”` : ""}.` : "";
+    const canAct = Session.is("developer", "lead");
+    bar.innerHTML = `<span class="pb-icon"><svg viewBox="0 0 24 24" width="12" height="12"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></span>
+      <span><b>Argus is paused</b> by ${esc(s.by || "someone")}. Monitoring alerts are not investigated.${esc(held)}</span>
+      ${canAct ? `<button class="btn small" type="button">Resume Argus</button>` : ""}`;
+    const b = bar.querySelector("button");
+    if (b) b.onclick = () => ArgusState.set(false).catch((e) => toastMsg(e.message, "bad"));
+  };
+  ArgusState.onChange(render);
+  Session.onChange(() => render(ArgusState.state));
+  ArgusState.load();
+  setInterval(() => ArgusState.load(), 4000);
+}
+
+// ---- notifications: what Argus tells the team, as a bell in the top bar, a card, a chime and (if allowed) a desktop alert ----
+const NOTIF_KIND = {
+  opened: ["Argus found a problem", "bad"], cause: ["Cause found", "argus"], approval: ["Fix ready for approval", "warn"],
+  decision: ["Decision recorded", "info"], escalated: ["Needs a person", "bad"], deployed: ["Fix deployed", "ok"],
+  sla: ["Approval overdue", "warn"], info: ["Argus", "info"],
+};
+const Notifs = {
+  items: [], newest: 0, seen: 0, popAfter: null, el: null,
+  key() { return `argus.notif.seen.${Session.user ? Session.user.id : 0}`; },
+  kind(n) {  // older messages have no kind; tell from the wording
+    const m = String(n.payload.message || "");
+    return n.payload.kind || (/^New incident/.test(m) ? "opened" : /ready for approval/.test(m) ? "approval" : /has waited/.test(m) ? "sla"
+      : /needs a person/.test(m) ? "escalated" : /deployed/.test(m) ? "deployed" : /(approved|declined) by/.test(m) ? "decision" : "info");
+  },
+  title(n) { return (NOTIF_KIND[this.kind(n)] || NOTIF_KIND.info)[0]; },
+  tone(n) { return (NOTIF_KIND[this.kind(n)] || NOTIF_KIND.info)[1]; },
+  text(n) {
+    const t = String(n.payload.message || "").replace(/^New incident INC-\d+: /, "").replace(/^INC-\d+:?\s*/, "").replace(/^cause found\.\s*/, "");
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  },
+  async poll() {
+    if (!Session.user) return;
+    let fresh;
+    try { fresh = await api(`/notifications?after=${this.newest}&limit=20`); } catch { return; }
+    if (this.popAfter === null) {  // first load: what is already there is history, not news
+      this.popAfter = fresh.length ? fresh[0].id : 0;
+      this.seen = Number(store.get(this.key(), "0")) || 0;
+    }
+    if (!fresh.length) return this.render();
+    this.items = [...fresh, ...this.items].slice(0, 20);
+    this.newest = this.items[0].id;
+    fresh.filter((n) => n.id > this.popAfter).reverse().forEach((n) => this.pop(n));
+    this.render();
+  },
+  pop(n) {
+    let stack = document.querySelector(".notif-stack");
+    if (!stack) { stack = document.createElement("div"); stack.className = "notif-stack"; document.body.appendChild(stack); }
+    const card = document.createElement("a");
+    card.className = `notif-card t-${this.tone(n)}`;
+    card.href = `/incidents/${n.incident_id}/view`;
+    card.innerHTML = `<img src="/static/logo.svg" alt=""><div class="nc-body"><div class="nc-top"><b>${esc(this.title(n))}</b><span>${incKey(n.incident_id)} · now</span></div>
+      <div class="nc-msg">${esc(this.text(n))}</div></div><button class="nc-x" type="button" aria-label="Dismiss">×</button>`;
+    const close = () => { card.classList.remove("in"); setTimeout(() => card.remove(), 400); };
+    card.querySelector(".nc-x").onclick = (e) => { e.preventDefault(); close(); };
+    stack.prepend(card);
+    requestAnimationFrame(() => card.classList.add("in"));
+    setTimeout(close, 9000);
+    chime(this.tone(n));
+    if ("Notification" in window && Notification.permission === "granted") {
+      try {
+        const d = new Notification(`${this.title(n)} · ${incKey(n.incident_id)}`, { body: this.text(n), icon: "/static/logo.svg", tag: `argus-${n.id}` });
+        d.onclick = () => { window.focus(); location.href = `/incidents/${n.incident_id}/view`; };
+      } catch { /* some browsers only allow this from a service worker */ }
+    }
+  },
+  render() {
+    if (!this.el) return;
+    const unread = this.items.filter((n) => n.id > this.seen).length;
+    const badge = this.el.querySelector(".bell-n");
+    badge.textContent = unread > 9 ? "9+" : unread;
+    badge.hidden = !unread;
+    const pop = this.el.querySelector(".bell-pop");
+    const ask = "Notification" in window && Notification.permission === "default";
+    pop.innerHTML = `<div class="bell-head">Notifications${ask ? `<button type="button" class="bell-desk">Turn on desktop alerts</button>` : ""}</div>` +
+      (this.items.length ? this.items.map((n) => `<a class="bell-item ${n.id > this.seen ? "unread" : ""}" href="/incidents/${n.incident_id}/view">
+        <span class="bi-dot t-${this.tone(n)}"></span><span class="bi-body"><b>${esc(this.title(n))}</b> <span class="faint">${incKey(n.incident_id)} · ${esc(ago(n.ts))}</span>
+        <span class="bi-msg">${esc(this.text(n))}</span></span></a>`).join("") : `<p class="bell-empty">Nothing yet. Argus tells you here when it finds a problem.</p>`);
+    const desk = pop.querySelector(".bell-desk");
+    if (desk) desk.onclick = async (e) => { e.stopPropagation(); await Notification.requestPermission(); this.render(); };
+  },
+  markSeen() { this.seen = this.newest; store.set(this.key(), String(this.seen)); this.render(); },
+};
+function mountNotifications() {
+  const theme = document.getElementById("theme-btn");
+  if (!theme) return;
+  const el = document.createElement("div");
+  el.className = "bell";
+  el.hidden = true;
+  el.innerHTML = `<button class="icon-btn" type="button" aria-label="Notifications" title="Notifications">
+    <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="bell-n" hidden></span></button>
+    <div class="bell-pop" hidden></div>`;
+  theme.before(el);
+  Notifs.el = el;
+  const pop = el.querySelector(".bell-pop");
+  el.querySelector("button").onclick = (e) => { e.stopPropagation(); pop.hidden = !pop.hidden; if (!pop.hidden) Notifs.markSeen(); };
+  pop.onclick = (e) => e.stopPropagation();
+  document.addEventListener("click", () => { pop.hidden = true; });
+  Session.onChange((u) => {
+    el.hidden = !u;
+    Object.assign(Notifs, { items: [], newest: 0, popAfter: null });
+    Notifs.poll();
+  });
+  setInterval(() => Notifs.poll(), 3000);
+}
+// a soft two-note chime: falling for problems, rising for good news (browsers only play it once the page has been clicked)
+function chime(tone) {
+  try {
+    const ctx = chime.ctx || (chime.ctx = new (window.AudioContext || window.webkitAudioContext)());
+    const notes = tone === "bad" ? [659, 523] : tone === "ok" ? [523, 784] : [587, 698];
+    notes.forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime + i * .14;
+      o.type = "sine"; o.frequency.value = f;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.08, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .5);
+      o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + .55);
+    });
+  } catch { /* no audio */ }
+}
+mountPauseBanner();
+mountNotifications();

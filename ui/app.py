@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
@@ -202,7 +202,14 @@ AM_SEVERITY = {"critical": "sev1", "page": "sev1", "high": "sev2", "error": "sev
 @app.post("/alerts", status_code=201)
 def post_alert(body: dict):
     """Webhook intake from monitoring. Accepts Prometheus Alertmanager's webhook format, or {"scenario": ..., "alert": {...}}.
-    Unauthenticated, like a real alert webhook on an internal network."""
+    Unauthenticated, like a real alert webhook on an internal network. While Argus is paused, alerts are counted and ignored."""
+    state = pause_state()
+    if state["paused"]:
+        first = next(iter(body.get("alerts") or []), {})
+        title = (first.get("annotations") or {}).get("summary") or (body.get("alert") or {}).get("title") or body.get("scenario") or "Alert"
+        store.set_setting("pause", {**state, "held": state["held"] + 1,
+                                    "last_held": {"title": title, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")}})
+        return JSONResponse({"paused": True, "detail": "Argus is paused, so no incident was opened"}, status_code=202)
     if "alerts" in body:  # Alertmanager
         firing = [a for a in body.get("alerts", []) if a.get("status", "firing") == "firing"]
         if not firing:
@@ -256,6 +263,31 @@ def _start(scenario: str, mode: str, override: dict | None, reporter: dict | Non
     return {"id": iid, "key": f"INC-{iid}", "url": f"/incidents/{iid}/view"}
 
 
+# ---- pause switch ----------------------------------------------------------------
+# For rehearsing: while paused, monitoring alerts are ignored (counted, not investigated). Demo incidents started by
+# hand still run, and incidents already running carry on.
+def pause_state() -> dict:
+    return {"paused": False, "by": None, "at": None, "held": 0, "last_held": None, **(store.get_setting("pause") or {})}
+
+
+@app.get("/argus/state")
+def argus_state():
+    return pause_state()
+
+
+@app.post("/argus/pause")
+def pause(user: dict = Depends(require("developer", "lead"))):
+    state = {"paused": True, "by": user["name"], "at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "held": 0, "last_held": None}
+    store.set_setting("pause", state)
+    return state
+
+
+@app.post("/argus/resume")
+def resume(user: dict = Depends(require("developer", "lead"))):
+    store.set_setting("pause", {**pause_state(), "paused": False, "by": user["name"], "at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    return pause_state()
+
+
 # ---- live demo app (ShopFast) ---------------------------------------------------
 SHOP_URL = os.getenv("SHOP_URL", "http://localhost:8100").rstrip("/")
 
@@ -284,6 +316,13 @@ def live_break(user: dict = Depends(require("developer", "lead"))):
     return _shop("/admin/break", "POST")
 
 
+@app.get("/live/commits/{sha}")
+def live_commit(sha: str):
+    if not re.fullmatch(r"[0-9a-f]{4,40}", sha):
+        raise HTTPException(422, "bad sha")
+    return _shop(f"/api/commits/{sha}")
+
+
 @app.post("/live/reset")
 def live_reset(user: dict = Depends(require("developer", "lead"))):
     return _shop("/admin/reset", "POST")
@@ -298,6 +337,12 @@ def scenarios():
 @app.get("/metrics")
 def metrics():
     return store.metrics()
+
+
+@app.get("/notifications")
+def notifications(after: int = 0, limit: int = Query(20, le=50), user: dict = Depends(signed_in)):
+    """What Argus told people: new incidents, causes found, fixes waiting, deploys. Shown as in-app and desktop notifications."""
+    return store.notifications(after, limit)
 
 
 @app.get("/events/recent")
@@ -394,6 +439,25 @@ def comment(iid: int, body: CommentIn, user: dict = Depends(signed_in)):
     c = store.add_comment(iid, user, body.text)
     store.record_event(iid, {"actor": "human", "type": "comment", "payload": {"author": user["name"], "text": body.text}}, user)
     return c
+
+
+class AskIn(BaseModel):
+    question: str = Field(min_length=2, max_length=500)
+
+
+@app.post("/incidents/{iid}/ask")
+def ask(iid: int, body: AskIn, user: dict = Depends(signed_in)):
+    """Ask Argus about this incident. The answer comes only from the incident's record, with sources, and is kept in the audit log."""
+    from llm import LLMError
+    from orchestrator.ask import answer
+    inc = _incident_or_404(iid)
+    try:
+        reply = answer(inc, body.question.strip())
+    except LLMError as e:
+        raise HTTPException(503, f"No AI service could answer right now: {str(e)[:200]}")
+    eid = store.record_event(iid, {"actor": "human", "type": "question",
+                                   "payload": {"by": user["name"], "question": body.question.strip(), **reply}}, user)
+    return {"id": eid, **reply}
 
 
 @app.get("/incidents/{iid}/report")

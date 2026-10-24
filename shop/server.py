@@ -289,10 +289,13 @@ class Shop:
             req = urllib.request.Request(f"{ARGUS_URL}/alerts", data=json.dumps(body).encode(), method="POST",
                                          headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=10) as r:
-                a["incident"] = json.loads(r.read())
-            a["error"] = None
+                reply = json.loads(r.read())
+            if reply.get("paused"):  # held, not investigated; the alert is re-sent while it keeps firing
+                a["incident"], a["error"] = None, "Argus is paused, so no incident was opened"
+            else:
+                a["incident"], a["error"] = reply, None
         except Exception as e:
-            a["error"] = f"Could not reach Argus at {ARGUS_URL}: {e}"
+            a["error"] = f"it could not reach Argus at {ARGUS_URL} ({e})"
 
     # ---- demo controls -------------------------------------------------------
     def commits(self, n: int = 6) -> list[dict]:

@@ -108,3 +108,9 @@ CREATE TABLE IF NOT EXISTS on_call (
 );
 
 CREATE INDEX IF NOT EXISTS events_by_incident ON events (incident_id, id);
+
+-- Small key/value switches that must survive a restart (e.g. Argus paused).
+CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL              -- JSON
+);

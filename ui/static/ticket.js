@@ -378,8 +378,63 @@ function connect() {
     live.handle(e);
     live.render();
     if (SNAPSHOT_TYPES.has(e.type)) scheduleRefresh();
+    if (e.type === "question") showQuestion(e);
   };
 }
+
+// ---- Ask Argus -----------------------------------------------------------------
+const ASK_IDEAS = ["Why did it break?", "Who made the change?", "Is the fix safe to approve?", "What do I tell customers?", "What did this cost us?"];
+const asked = new Set();  // question event ids already on screen
+const pending = new Set();  // questions this page is waiting on, so the stream doesn't show them twice
+const cite = (html) => html.replace(/\[([^\[\]<>]{1,60})\]/g, '<span class="cite">$1</span>');
+function askBubble(q, by) {
+  const el = document.createElement("div");
+  el.className = "ask-q";
+  el.textContent = q;
+  if (by) el.title = `Asked by ${by}`;
+  $("ask-log").appendChild(el);
+  return el;
+}
+function answerBubble() {
+  const el = document.createElement("div");
+  el.className = "ask-a";
+  el.innerHTML = `<img src="/static/logo.svg" alt=""><div><div class="bubble"><span class="ask-typing"><span></span><span></span><span></span></span></div><div class="meta"></div></div>`;
+  $("ask-log").appendChild(el);
+  $("ask-log").scrollTop = $("ask-log").scrollHeight;
+  return el;
+}
+function fillAnswer(el, r, by) {
+  el.querySelector(".bubble").innerHTML = cite(renderMarkdown(r.answer));
+  el.querySelector(".meta").textContent = [by && `Asked by ${by}`, r.provider && `answered by ${r.provider}`].filter(Boolean).join(" · ");
+  $("ask-log").scrollTop = $("ask-log").scrollHeight;
+}
+function showQuestion(e) {  // from the audit log: earlier questions, or ones teammates ask while you watch
+  if (asked.has(e.id)) return;
+  asked.add(e.id);
+  if (pending.has(e.payload.question) && Session.user && e.payload.by === Session.user.name) return;
+  askBubble(e.payload.question, e.payload.by);
+  fillAnswer(answerBubble(), e.payload, e.payload.by);
+}
+async function ask(question) {
+  question = question.trim();
+  if (!question) return;
+  if (!Session.user) return toastMsg("Choose who you are first (top right)", "bad");
+  $("ask-input").value = "";
+  $("ask-btn").disabled = true;
+  askBubble(question);
+  const bubble = answerBubble();
+  pending.add(question);
+  try {
+    const r = await api(`/incidents/${iid}/ask`, { method: "POST", body: { question } });
+    asked.add(r.id);
+    fillAnswer(bubble, r);
+  } catch (err) {
+    bubble.querySelector(".bubble").textContent = `I couldn't answer that: ${err.message}`;
+  } finally { pending.delete(question); $("ask-btn").disabled = false; $("ask-input").focus(); }
+}
+$("ask-chips").innerHTML = ASK_IDEAS.map((q) => `<button type="button">${esc(q)}</button>`).join("");
+$("ask-chips").querySelectorAll("button").forEach((b) => b.onclick = () => ask(b.textContent));
+$("ask-form").onsubmit = (e) => { e.preventDefault(); ask($("ask-input").value); };
 
 // ---- controls ----------------------------------------------------------------
 document.querySelectorAll(".tab").forEach((t) => t.onclick = () => {

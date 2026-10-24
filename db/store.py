@@ -259,13 +259,15 @@ class Store:
         saved = hours = at_risk_now = 0
         currency = "INR"
         for i in ids:
-            imp = (self.get_incident(i) or {}).get("impact")
+            inc = self.get_incident(i) or {}
+            imp = inc.get("impact")
             if not imp:
                 continue
             currency = imp["currency"]
             saved += imp["saved_value"]
             hours += imp["engineer_hours_saved"]
-            if not imp["fixed"]:
+            # money at risk right now: only incidents still being worked on, like the "Open right now" count
+            if inc["status"] in ("open", "investigating", "awaiting_approval") and not inc.get("archived_at"):
                 at_risk_now += imp["at_risk_per_minute"]
         return {"saved_value": saved, "engineer_hours_saved": round(hours, 1), "at_risk_per_minute_now": at_risk_now, "currency": currency}
 
@@ -274,6 +276,24 @@ class Store:
             rows = c.execute("SELECT e.*, i.title FROM events e JOIN incidents i ON i.id = e.incident_id "
                              "WHERE e.type NOT IN ('llm_step', 'tool_call') ORDER BY e.id DESC LIMIT ?", (limit,)).fetchall()
         return [{**dict(r), "payload": json.loads(r["payload"])} for r in rows]
+
+    def notifications(self, after_id: int = 0, limit: int = 20) -> list[dict]:
+        """Messages Argus sent people (the 'notified' events), newest first."""
+        with self._conn() as c:
+            rows = c.execute("SELECT e.id, e.incident_id, e.ts, e.payload, i.title, i.severity FROM events e "
+                             "JOIN incidents i ON i.id = e.incident_id WHERE e.type='notified' AND e.id>? ORDER BY e.id DESC LIMIT ?",
+                             (after_id, limit)).fetchall()
+        return [{**dict(r), "payload": json.loads(r["payload"])} for r in rows]
+
+    # ---- settings --------------------------------------------------------
+    def get_setting(self, key: str, default=None):
+        with self._conn() as c:
+            r = c.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+        return json.loads(r[0]) if r else default
+
+    def set_setting(self, key: str, value) -> None:
+        self._write(lambda c: c.execute("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                                        (key, json.dumps(value))))
 
     # ---- events ----------------------------------------------------------
     def events_after(self, incident_id: int, after_id: int = 0, limit: int = 500) -> list[dict]:
