@@ -165,7 +165,10 @@ class Shop:
     def watch_deploys(self) -> None:
         while True:
             try:
-                if not self.resetting:
+                if not self.resetting and not (REPO / ".git").exists():  # the repo was lost: rebuild the healthy version
+                    print("deploy watcher: the shop's git repo is missing, rebuilding it", file=sys.stderr)
+                    self.reset()
+                elif not self.resetting:
                     self.deploy_if_changed()
             except Exception as e:
                 print("deploy watcher:", e, file=sys.stderr)
@@ -316,7 +319,10 @@ class Shop:
 
     def bad_change_live(self) -> bool:
         from scenarios.live_shop.history import BAD_CHANGE
-        return all((REPO / p).read_text(encoding="utf-8") == c for p, c in BAD_CHANGE["files"].items())
+        try:
+            return all((REPO / p).read_text(encoding="utf-8") == c for p, c in BAD_CHANGE["files"].items())
+        except OSError:  # mid-reset
+            return False
 
     def push_bad_change(self) -> dict:
         from scenarios.live_shop.history import BAD_CHANGE

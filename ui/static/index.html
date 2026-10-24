@@ -382,9 +382,10 @@ async function renderLiveApp() {
   $("la-open").href = s.url || "http://localhost:8100";
   const canAct = Session.user && Session.user.role !== "tester";
   if (!s.online) {
-    $("la-pill").className = "la-pill off"; $("la-pill").textContent = "Not running";
-    $("la-stats").innerHTML = `<p class="small">Start it in a terminal: <code>python -m shop.server</code></p>`;
-    $("la-commit").innerHTML = ""; $("la-break").disabled = $("la-reset").disabled = true;
+    $("la-pill").className = "la-pill off"; $("la-pill").textContent = s.error ? "Error" : "Not running";
+    $("la-stats").innerHTML = s.error ? `<p class="small">${esc(s.error)}</p>` : `<p class="small">Start it in a terminal: <code>python -m shop.server</code></p>`;
+    $("la-commit").innerHTML = ""; $("la-break").disabled = true;
+    $("la-reset").disabled = !s.error || !(Session.user && Session.user.role !== "tester");  // a reset can repair a broken shop
     return;
   }
   $("la-pill").className = `la-pill ${s.healthy ? "ok" : "bad"}`;

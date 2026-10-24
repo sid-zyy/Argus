@@ -298,7 +298,12 @@ def _shop(path: str, method: str = "GET") -> dict:
         with urllib.request.urlopen(req, timeout=15) as r:
             return json.loads(r.read())
     except urllib.error.HTTPError as e:
-        raise HTTPException(e.code, json.loads(e.read() or b"{}").get("detail", str(e)))
+        body = e.read() or b"{}"
+        try:
+            detail = json.loads(body).get("detail", str(e))
+        except ValueError:  # e.g. a plain-text "Internal Server Error"
+            detail = f"ShopFast had an error ({e.code}). Check its terminal, or click Reset."
+        raise HTTPException(e.code, detail)
     except OSError:
         raise HTTPException(503, f"ShopFast is not running. Start it with: python -m shop.server")
 
@@ -307,8 +312,8 @@ def _shop(path: str, method: str = "GET") -> dict:
 def live_status():
     try:
         return {**_shop("/api/status"), "url": SHOP_URL}
-    except HTTPException:
-        return {"online": False, "url": SHOP_URL}
+    except HTTPException as e:
+        return {"online": False, "url": SHOP_URL, "error": e.detail if e.status_code != 503 else None}
 
 
 @app.post("/live/break")

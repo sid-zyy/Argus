@@ -9,6 +9,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -26,14 +27,32 @@ def _force_remove(func, path, _exc):
     func(path)
 
 
+def _empty(repo: Path) -> None:
+    """Delete what is inside the repo folder, keeping the folder itself. On Windows the folder can't be removed while
+    another process (e.g. ShopFast's deploy watcher running git) has it as its working directory, so emptying it is
+    more reliable; a file that is briefly locked is retried."""
+    repo.mkdir(exist_ok=True)
+    for attempt in range(10):
+        try:
+            for child in repo.iterdir():
+                if child.is_dir() and not child.is_symlink():
+                    shutil.rmtree(child, onerror=_force_remove)
+                else:
+                    os.chmod(child, stat.S_IWRITE)
+                    child.unlink()
+            return
+        except PermissionError:
+            if attempt == 9:
+                raise
+            time.sleep(0.3)
+
+
 def build(name: str) -> dict:
     scenario = ROOT / name
     history = importlib.import_module(f"scenarios.{name}.history")
     gen = importlib.import_module(f"scenarios.{name}.generate_logs")
     repo = scenario / "repo"
-    if repo.exists():
-        shutil.rmtree(repo, onerror=_force_remove)
-    repo.mkdir()
+    _empty(repo)
     _git(repo, "init", "-q", "-b", "main")
     _git(repo, "config", "core.autocrlf", "false")
     shas = []
