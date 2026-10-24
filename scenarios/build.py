@@ -4,6 +4,7 @@ Usage: python -m scenarios.build incident1_conn_leak
 Commit dates and authors are fixed, so the shas are the same on every machine.
 """
 import importlib
+import importlib.util
 import os
 import shutil
 import stat
@@ -47,10 +48,19 @@ def _empty(repo: Path) -> None:
             time.sleep(0.3)
 
 
-def build(name: str) -> dict:
-    scenario = ROOT / name
-    history = importlib.import_module(f"scenarios.{name}.history")
-    gen = importlib.import_module(f"scenarios.{name}.generate_logs")
+def _module(scenario: Path, part: str):
+    if scenario.parent == ROOT:
+        return importlib.import_module(f"scenarios.{scenario.name}.{part}")
+    spec = importlib.util.spec_from_file_location(f"pack_{scenario.name}_{part}", scenario / f"{part}.py")  # a pack elsewhere
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def build(name: str, root: Path = ROOT) -> dict:
+    scenario = root / name
+    history = _module(scenario, "history")
+    gen = _module(scenario, "generate_logs")
     repo = scenario / "repo"
     _empty(repo)
     _git(repo, "init", "-q", "-b", "main")

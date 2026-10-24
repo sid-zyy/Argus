@@ -15,7 +15,7 @@
 <body>
 <header class="topbar">
   <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
-  <nav class="nav"><a href="/" class="on">Dashboard</a><a href="/results">Results</a></nav>
+  <nav class="nav"><a href="/" class="on">Dashboard</a><a href="/results">Results</a><a href="/value">Value</a><a href="/check">Health</a></nav>
   <span class="spacer"></span>
   <button class="icon-btn" id="theme-btn" type="button"></button>
   <div class="user-menu" id="user-menu"></div>
@@ -175,20 +175,25 @@ function money(v) {
   if (v >= 1e5) return `₹${(v / 1e5).toFixed(1)} L`;
   return `₹${Math.round(v).toLocaleString("en-IN")}`;
 }
+// AI costs are small, so they keep their paise
+const aiMoney = (v) => `₹${(v || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 function renderTiles(m) {
   const tiles = [
-    ["Revenue protected", money(m.saved_value), "Estimated, compared with a manual fix"],
-    ["Engineer time saved", `${m.engineer_hours_saved} h`, `${m.resolved} incident${m.resolved === 1 ? "" : "s"} fixed`],
+    ["Revenue protected", money(m.saved_value), `Estimated, vs a manual fix. Plus ${m.engineer_hours_saved} h of engineer time`],
+    ["Return on AI spend", m.roi_multiple ? `${m.roi_multiple.toLocaleString("en-IN")}×` : "–",
+      m.ai_cost ? `${money(m.saved_value + m.engineer_cost_saved)} saved for ${aiMoney(m.ai_cost)} of AI` : "No AI spend yet"],
     ["Open right now", m.open, m.at_risk_per_minute_now ? `${money(m.at_risk_per_minute_now)}/min at risk` : "Nothing at risk"],
-    ["Average time to fix", fmtDuration(m.mttr_seconds), "Including human approval"],
+    ["Average time to fix", fmtDuration(m.mttr_seconds), `Including human approval. ${m.resolved} fixed`],
     ["Wrong guesses caught", m.claims_refuted, "Before anyone acted on them"],
     ["Made-up evidence blocked", m.fabrications_blocked, `AI used: ≈${m.wh_estimate} Wh`],
   ];
-  const counts = [moneyCount(m.saved_value), { to: m.engineer_hours_saved, decimals: 1, suffix: " h" }, { to: m.open }, null,
+  const counts = [moneyCount(m.saved_value), m.roi_multiple ? { to: m.roi_multiple, separator: ",", suffix: "×" } : null, { to: m.open }, null,
     { to: m.claims_refuted }, { to: m.fabrications_blocked }];
   const box = $("tiles");
   if (box.children.length !== tiles.length) {
-    box.innerHTML = tiles.map(() => `<div class="tile"><div class="k"></div><div class="v"></div><div class="s"></div></div>`).join("");
+    box.innerHTML = tiles.map((_, i) => i < 2
+      ? `<a class="tile tile-link" href="/value" title="See every incident's value and AI cost"><div class="k"></div><div class="v"></div><div class="s"></div></a>`
+      : `<div class="tile"><div class="k"></div><div class="v"></div><div class="s"></div></div>`).join("");
     tileCounters = [];
   }
   tiles.forEach(([k, v, sub], i) => {

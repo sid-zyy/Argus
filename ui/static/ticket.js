@@ -28,7 +28,10 @@ async function refresh() {
   render();
   renderTabBadges();
   graph.load();
+  const key = `${inc.status}|${inc.claims.length}|${inc.patches.length}`;
+  if (key !== compareKey) { compareKey = key; loadCompare(); }
 }
+let compareKey = "";
 
 function render() {
   document.title = `${incKey(inc.id)} · ${inc.title} · Argus`;
@@ -101,11 +104,12 @@ function renderImpact() {
   $("impact-wrap").hidden = !m || inc.source === "tester_report";
   if (!m) return;
   const minutes = m.fixed ? m.minutes_so_far : m.minutes_so_far + (Date.now() - impactLoaded) / 60000;
+  const ai = inc.ai_usage.cost || 0, aiText = `₹${ai.toFixed(2)}`;
   const tiles = m.fixed ? [
     ["Revenue protected", money(m.saved_value), `Fixed ${Math.max(0, m.manual_minutes - m.minutes_so_far).toFixed(0)} min faster than a typical manual fix`, "good"],
     ["Fixed in", `${m.minutes_so_far.toFixed(0)} min`, `Typical manual fix: ${m.manual_minutes.toFixed(0)} min`],
-    ["Engineer time saved", `${m.engineer_hours_saved} h`, "People who didn't need to be paged"],
-    [`${m.unit[0].toUpperCase()}${m.unit.slice(1)} affected`, `${Math.round(m.affected_per_minute).toLocaleString("en-IN")}/min`, "While the problem lasted"],
+    ["Engineer time saved", `${m.engineer_hours_saved} h`, m.engineer_cost_saved ? `About ${money(m.engineer_cost_saved)} of people's time` : "People who didn't need to be paged"],
+    ["AI cost", aiText, ai ? `${Math.round((m.saved_value + m.engineer_cost_saved) / ai).toLocaleString("en-IN")}× return · ${inc.ai_usage.tokens.toLocaleString("en-IN")} tokens` : "No AI calls"],
   ] : [
     ["Revenue at risk", `${money(m.at_risk_per_minute)}/min`, `${Math.round(m.failure_share * 100)}% of ${m.unit} failing`, "bad"],
     ["Cost so far", money(m.at_risk_per_minute * minutes), `${minutes.toFixed(0)} min since the problem started`, "bad"],
@@ -294,7 +298,69 @@ function renderApproval() {
     box.innerHTML = `<p class="small muted" style="margin-top:0">Nothing to decide yet. Once Argus has a tested fix, you'll be able to approve it here.</p>
       <div class="small faint">${need.count === 2 ? "Serious issue: needs two approvals, one from a team lead." : "Needs one approval."}</div>`;
   }
+  box.insertAdjacentHTML("beforeend", policyLine());
 }
+
+// Which rule of policy.yaml governs this decision. Once decided, the rule recorded with the decision is shown.
+function policyLine() {
+  const decided = inc.approval && inc.approval.rule ? inc.approval : null;
+  const r = decided || inc.required_approvals;
+  if (!r.rule) return "";
+  return `<p class="policy-line"><a href="/check#policy" title="See the whole policy">Rule <code>${esc(r.rule)}</code></a>
+    ${decided ? "applied" : "applies"}, from ${esc(r.policy_file)} <span class="mono" title="Fingerprint of the policy file">${esc(r.policy_sha)}</span></p>`;
+}
+
+// ---- Argus vs a single chatbot prompt -------------------------------------------------------------------------
+let compareData = null, compareBusy = false;
+async function loadCompare() {
+  try { compareData = await api(`/incidents/${iid}/compare`); } catch { compareData = null; }
+  renderCompare();
+}
+function renderCompare() {
+  const d = compareData;
+  const done = inc && inc.claims.some((c) => c.verdict === "supported");
+  $("compare-panel").hidden = !d || !done;
+  $("compare-run").hidden = !Session.is("developer", "lead") || compareBusy;
+  if (!d || !done) return;
+  const mark = (v, yes, no) => v == null ? "" : `<li class="${v ? "yes" : "no"}"><span class="mark">${v ? "✓" : "✗"}</span>${esc(v ? yes : no)}</li>`;
+  const side = (title, s, kind) => !s ? `<div class="cmp-side"><h3>${title}</h3><p class="small faint">${kind === "chatbot"
+      ? "Not asked yet for this incident. A developer can ask one now (it uses one real AI call)." : ""}</p></div>` : `
+    <div class="cmp-side"><h3>${title}</h3><p class="cmp-cause">“${esc(s.root_cause)}”</p><ul class="cmp-checks">
+      ${mark(s.right_category, "Right kind of cause", "Wrong kind of cause")}
+      ${mark(s.named_culprit, "Named the change that caused it", "Didn't name the change that caused it")}
+      ${mark(s.evidence_total ? s.evidence_verified === s.evidence_total : null,
+        `All ${s.evidence_total} quotes match the real files`, `${s.evidence_total - s.evidence_verified} of ${s.evidence_total} quotes don't match the real files`)}
+      ${kind === "argus" ? mark(s.wrong_guess_caught || null, `Ruled out ${s.guesses_ruled_out.length} wrong guess${s.guesses_ruled_out.length === 1 ? "" : "es"} first`, "")
+        : mark(false, "", "Nothing checks its guess")}
+      ${mark(s.fix_passes, "Fix works on a safe copy", `Fix fails on a safe copy${s.fix_note && s.fix_note !== "passed" ? ` (${s.fix_note})` : ""}`)}
+      ${kind === "argus" ? mark(s.approved_by_person, "A person approved it", "Waiting for a person to approve") : ""}
+    </ul>${kind === "chatbot" ? `<p class="small faint" style="margin:8px 0 0">${s.source === "run" ? `Asked ${ago(s.ran_at)} by ${esc(s.by)}` : "Recorded run"} · ${esc(s.model)}</p>` : ""}</div>`;
+  $("compare").innerHTML = (d.trap ? `<p class="small" style="margin-top:0"><b>The misleading clue in this incident:</b> ${esc(d.trap)}.</p>` : "")
+    + `<div class="cmp-grid">${side("Argus", d.argus, "argus")}${side("A single chatbot prompt", d.chatbot, "chatbot")}</div>`;
+}
+$("compare-run").onclick = async () => {
+  compareBusy = true;
+  $("compare-run").hidden = true;
+  $("compare").insertAdjacentHTML("afterbegin", `<p class="note" id="compare-wait" style="margin-top:0">Asking a chatbot with the paste an engineer would make, then testing its fix…</p>`);
+  try { compareData = await api(`/incidents/${iid}/compare`, { method: "POST" }); toastMsg("Chatbot answer scored"); }
+  catch (e) { toastMsg(e.message, "bad"); }
+  finally { compareBusy = false; renderCompare(); }
+};
+
+// ---- tamper-evident audit trail -------------------------------------------------------------------------------
+async function verifyAudit() {
+  const el = $("audit-state");
+  el.className = "audit-state";
+  el.textContent = "Checking every event's hash…";
+  try {
+    const v = await api(`/audit/verify?incident=${iid}`);
+    el.className = `audit-state ${v.ok ? "ok" : "bad"}`;
+    el.innerHTML = v.ok
+      ? `<b>Intact.</b> All ${v.events.toLocaleString()} events (${v.incident_events} for this incident) match their hashes. Chain head <span class="mono">${esc(v.head)}</span>.`
+      : `<b>Changed after it was written:</b> event ${v.first_bad.id} of ${incKey(v.first_bad.incident_id)}. ${esc(v.first_bad.problem)}.`;
+  } catch (e) { el.textContent = e.message; }
+}
+$("audit-verify").onclick = verifyAudit;
 
 function renderSla() {
   const el = $("sla");
@@ -493,6 +559,7 @@ function showTab(name, push = true) {
   if (push) history.replaceState(null, "", `#${name}`);
   store.set("ic.tab", name);
   if (name === "impact") graph.show();
+  if (name === "timeline" && typeof verifyAudit === "function" && inc) verifyAudit();
   dispatchEvent(new Event("resize"));  // the sphere and the graph size themselves to what is visible
 }
 document.querySelectorAll("#inc-tabs [data-tab]").forEach((b) => b.onclick = () => showTab(b.dataset.tab));

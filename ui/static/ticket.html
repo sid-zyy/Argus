@@ -14,7 +14,7 @@
 <body>
 <header class="topbar">
   <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
-  <nav class="nav"><a href="/">Dashboard</a><a href="/results">Results</a></nav>
+  <nav class="nav"><a href="/">Dashboard</a><a href="/results">Results</a><a href="/value">Value</a><a href="/check">Health</a></nav>
   <span class="spacer"></span>
   <span id="live" class="small faint">Connecting…</span>
   <button class="icon-btn" id="theme-btn" type="button"></button>
@@ -76,6 +76,14 @@
           <p class="help">Every quote is checked against the real files.</p>
           <div id="claims"></div>
         </section>
+        <section class="panel" id="compare-panel" hidden>
+          <div class="row" style="justify-content: space-between; flex-wrap: wrap">
+            <h2 style="margin: 0">Argus vs a single chatbot</h2>
+            <button class="btn small" id="compare-run" hidden>Ask a chatbot now</button>
+          </div>
+          <p class="help" style="margin: 4px 0 0">The same incident data an engineer would paste into a chatbot, answered once with no tools and no fact checker. Both are scored the same way.</p>
+          <div id="compare" style="margin-top: 10px"></div>
+        </section>
         <section class="panel" id="suspects-panel" hidden>
           <h2>Change that caused it</h2>
           <div id="suspects" style="margin-top: 10px"></div>
@@ -98,6 +106,10 @@
             <label class="small row" style="margin: 0; gap: 6px; width: auto; font-weight: 400; color: var(--muted)"><input type="checkbox" id="show-steps" style="width: auto"> All steps</label>
           </div>
           <p class="help" style="margin: 4px 0 0">Every step, by every agent and person, in order. This is the audit trail.</p>
+          <div class="audit-box" id="audit-box">
+            <span class="audit-state" id="audit-state">Each event is sealed with a hash of the one before it, so a changed or deleted event shows up.</span>
+            <button class="btn small" id="audit-verify" type="button">Verify the audit trail</button>
+          </div>
           <div class="activity tall" id="activity" style="margin-top: 8px"></div>
         </section>
       </div>
