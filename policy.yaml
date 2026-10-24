@@ -1,0 +1,34 @@
+# Argus governance policy: the rules the AI and the people work under, in one reviewable file.
+# It is read again whenever it changes, so an edit applies to the next decision without a restart.
+# Every approval, block and stop records the rule that applied and this file's fingerprint in the audit log.
+version: 1
+
+# Who must approve a tested fix before anything changes. The AI never approves.
+approvals:
+  sev1: {people: 1}
+  sev2: {people: 1}
+  sev3: {people: 1}
+  sev4: {people: 1}
+  # The stricter rule for serious incidents: two different people, one of them a team lead.
+  # TWO_PERSON_APPROVAL=1 or 0 in the environment overrides 'enabled' (handy for solo rehearsals).
+  two_person:
+    enabled: false
+    severities: [sev1, sev2]
+    lead: true
+
+# When two people are needed, whoever reported the problem can't be one of them.
+separation_of_duties: true
+
+# What a fix may do. A fix that breaks these is sent back to the fixer; after 3 tries the incident goes to a person.
+fixes:
+  allowed_types: [patch, config_change, rollback]
+  protected_paths: [".env*", "**/secrets/**", "**/migrations/**", ".github/**"]
+  max_changed_lines: 80
+
+# AI spend per investigation run, in the business currency (estimated from tokens). Over it, Argus stops and hands over.
+ai:
+  budget_per_incident: 25
+  cost_per_1k_tokens: 0.05
+
+# Minutes a fix may wait for approval before the lead is pinged. APPROVAL_SLA_MINUTES overrides it.
+approval_sla_minutes: 10

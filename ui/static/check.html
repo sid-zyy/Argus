@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System check · Argus</title>
+<script>try { document.documentElement.dataset.theme = localStorage.getItem("argus.theme") || "light"; } catch (e) { document.documentElement.dataset.theme = "light"; }</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="icon" type="image/svg+xml" href="/static/logo.svg">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
+  <nav class="nav"><a href="/">Dashboard</a><a href="/results">Results</a><a href="/value">Value</a><a href="/check" class="on">Health</a></nav>
+  <span class="spacer"></span>
+  <button class="icon-btn" id="theme-btn" type="button"></button>
+  <div class="user-menu" id="user-menu"></div>
+</header>
+<main class="wrap">
+  <div class="dash-head">
+    <div>
+      <h1 id="verdict">Checking…</h1>
+      <p id="sub">Everything Argus needs before a demo or an on-call shift. The same checks run in a terminal: <code>python -m ui.health</code></p>
+    </div>
+    <div class="dash-actions"><button class="btn" id="recheck">Check again</button></div>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Readiness</h2>
+      <ul class="checks" id="checks" style="margin-top: 6px"></ul>
+    </section>
+    <aside class="stack">
+      <section class="panel" id="policy">
+        <h2>Policy</h2>
+        <p class="help" style="margin: 4px 0 0">The rules the agents and the people work under, from one file the team reviews like code.
+          Every approval and every stop records which rule applied and this fingerprint.</p>
+        <div id="policy-body" style="margin-top: 10px"></div>
+      </section>
+      <section class="panel">
+        <h2>Audit trail</h2>
+        <p class="help" style="margin: 4px 0 0">Each event is sealed with a hash of the event before it. Editing, deleting or reordering any past event breaks the chain from that point on.</p>
+        <div class="audit-box"><span class="audit-state" id="audit-state">Not checked yet.</span>
+          <button class="btn small" id="audit-verify" type="button">Verify</button></div>
+      </section>
+    </aside>
+  </div>
+</main>
+<script src="/static/common.js"></script>
+<script src="/static/palette.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const LABEL = { ok: "OK", warn: "Warning", bad: "Fix this" };
+const VERDICT = { ok: ["Ready", "Every check passed."], warn: ["Ready, with warnings", "Argus will work. The warnings say what would make it sturdier."],
+  bad: ["Not ready", "Fix the red lines first."] };
+
+function fixText(s) {  // commands in the advice become code
+  return esc(s).replace(/(python -m [\w.]+(?: [\w/.-]+)*|docker build[^.]*|python [\w.]+\.py)/g, "<code>$1</code>");
+}
+async function load() {
+  $("verdict").textContent = "Checking…";
+  try {
+    const h = await api("/health");
+    const [title, sub] = VERDICT[h.status];
+    $("verdict").textContent = title;
+    $("sub").innerHTML = `${esc(sub)} The same checks run in a terminal: <code>python -m ui.health</code>`;
+    $("checks").innerHTML = h.checks.map((c) => `<li class="${c.status}"><span class="st">${LABEL[c.status]}</span>
+      <div><b>${esc(c.name)}</b><div class="small">${esc(c.detail)}</div>${c.fix ? `<div class="fix">${fixText(c.fix)}</div>` : ""}</div></li>`).join("");
+  } catch (e) { $("verdict").textContent = "Could not run the checks"; $("sub").textContent = e.message; }
+}
+async function loadPolicy() {
+  try {
+    const p = await api("/policy");
+    $("policy-body").innerHTML = `<div class="small"><b>${esc(p.file)}</b> · version ${esc(p.version)} · fingerprint <span class="mono">${esc(p.sha)}</span></div>
+      <ul class="rules small">${p.rules.map((r) => `<li>${esc(r.text)} <span class="faint">· <code>${esc(r.rule)}</code></span></li>`).join("")}</ul>`;
+  } catch (e) { $("policy-body").textContent = e.message; }
+}
+async function verify() {
+  const el = $("audit-state");
+  el.className = "audit-state"; el.textContent = "Checking every event's hash…";
+  try {
+    const v = await api("/audit/verify");
+    el.className = `audit-state ${v.ok ? "ok" : "bad"}`;
+    el.innerHTML = v.ok ? `<b>Intact.</b> ${v.events.toLocaleString()} events match their hashes. Chain head <span class="mono">${esc(v.head)}</span>.`
+      : `<b>Changed after it was written:</b> event ${v.first_bad.id} of ${incKey(v.first_bad.incident_id)}. ${esc(v.first_bad.problem)}.`;
+  } catch (e) { el.textContent = e.message; }
+}
+$("recheck").onclick = () => { load(); verify(); };
+$("audit-verify").onclick = verify;
+mountThemeToggle($("theme-btn"));
+mountUserMenu($("user-menu"));
+Session.load().catch(() => {});
+load(); loadPolicy(); verify();
+</script>
+</body>
+</html>

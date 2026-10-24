@@ -6,7 +6,6 @@ run blocks at the approval gate until the required humans approve (or one reject
 from __future__ import annotations
 
 import json
-import os
 import re
 import textwrap
 import threading
@@ -16,6 +15,7 @@ from pathlib import Path
 
 from db.store import Store, required_approvals
 from llm import LLM
+from orchestrator import policy
 from orchestrator.pipeline import run_incident
 from orchestrator.report import build_report
 from orchestrator.trace import Trace
@@ -52,10 +52,12 @@ class IncidentRunner:
         self.llm_factory = llm_factory
         self._gates: dict[int, _Gate] = {}
         self._lock = threading.Lock()
-        # a fix waiting longer than this for approval is escalated to the lead (0 turns it off)
-        self.sla_minutes = float(os.getenv("APPROVAL_SLA_MINUTES", "10"))
-        if self.sla_minutes > 0:
-            threading.Thread(target=self._watch_sla, daemon=True, name="approval-sla").start()
+        threading.Thread(target=self._watch_sla, daemon=True, name="approval-sla").start()
+
+    @property
+    def sla_minutes(self) -> float:
+        """A fix waiting longer than this for approval is escalated to the lead (0 turns it off). From policy.yaml."""
+        return policy.sla_minutes()
 
     # ---- public ------------------------------------------------------------
     def scenarios(self) -> list[dict]:
@@ -144,12 +146,15 @@ class IncidentRunner:
         while True:
             time.sleep(10)
             try:
+                if self.sla_minutes <= 0:
+                    continue
                 for r in self.store.awaiting_approval():
                     waited = (datetime.now(timezone.utc) - datetime.fromisoformat(r["since"])).total_seconds() / 60
                     if not r["breached"] and waited >= self.sla_minutes:
                         lead = (self.store.lead() or {}).get("name", "the lead")
                         self.store.record_event(r["id"], {"actor": "orchestrator", "type": "sla_breach",
-                                                          "payload": {"minutes": self.sla_minutes, "escalated_to": lead}})
+                                                          "payload": {"minutes": self.sla_minutes, "escalated_to": lead,
+                                                                      **policy.ref("approval_sla_minutes")}})
                         self._send(r["id"], lead, f"{incKey(r['id'])}: fix has waited {self.sla_minutes:.0f} minutes for approval. Please review.", "sla")
             except Exception:
                 pass
@@ -174,7 +179,7 @@ class IncidentRunner:
         if user["role"] not in ("developer", "lead"):
             raise Denied("only a developer or lead can approve or reject a fix")
         need = required_approvals(inc["severity"])
-        if need["count"] > 1 and inc["reported_by"] == user["id"]:
+        if need["count"] > 1 and policy.separation_of_duties() and inc["reported_by"] == user["id"]:
             raise Denied("separation of duties: you reported this issue, so someone else must approve the fix")
         if any(v["user_id"] == user["id"] for v in inc["votes"]):
             raise Denied("you have already voted on this fix", 409)
@@ -183,18 +188,19 @@ class IncidentRunner:
         decision = "approved" if approved else "rejected"
         self.store.add_vote(iid, user, decision, reason)
         self.store.record_event(iid, {"actor": "human", "type": "approval_vote",
-                                      "payload": {"approver": user["name"], "role": user["role"], "decision": decision, "reason": reason}}, user)
+                                      "payload": {"approver": user["name"], "role": user["role"], "decision": decision, "reason": reason,
+                                                  **policy.ref(need["rule"])}}, user)
         votes = self.store.get_incident(iid)["votes"]
         gate = self._gate(iid)
         if not approved:
-            gate.decision = {"approved": False, "approver": user["name"], "role": user["role"], "reason": reason}
+            gate.decision = {"approved": False, "approver": user["name"], "role": user["role"], "reason": reason, **policy.ref(need["rule"])}
             gate.event.set()
             return {"complete": True, "approved": False}
         yes = [v for v in votes if v["decision"] == "approved"]
         if len(yes) >= need["count"] and (not need["lead"] or any(v["role"] == "lead" for v in yes)):
             gate.decision = {"approved": True, "approver": ", ".join(v["name"] for v in yes),
                              "role": " + ".join(v["role"] for v in yes), "reason": "; ".join(v["reason"] for v in yes if v["reason"]),
-                             "approvers": [{"name": v["name"], "role": v["role"]} for v in yes]}
+                             "approvers": [{"name": v["name"], "role": v["role"]} for v in yes], **policy.ref(need["rule"])}
             gate.event.set()
             return {"complete": True, "approved": True}
         return {"complete": False, "still_needed": "a team lead" if need["lead"] and not any(v["role"] == "lead" for v in yes) else "one more approver"}

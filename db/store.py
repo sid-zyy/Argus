@@ -1,14 +1,15 @@
 """SQLite store. record_event() appends to the audit log and updates the read tables from the event."""
 from __future__ import annotations
 
+import hashlib
 import json
-import os
 import sqlite3
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
 
-from db.business import impact
+from db.business import assumptions, impact
+from orchestrator import policy
 
 SCHEMA = Path(__file__).with_name("schema.sql")
 FIRST_ID = 101
@@ -24,8 +25,9 @@ MIGRATIONS = [
     ("incidents", "assignee_id", "INTEGER"), ("incidents", "repro_steps", "TEXT"), ("incidents", "expected", "TEXT"),
     ("incidents", "actual", "TEXT"), ("incidents", "environment", "TEXT"), ("incidents", "log_snippet", "TEXT"),
     ("events", "actor_id", "INTEGER"), ("events", "actor_role", "TEXT"), ("comments", "author_id", "INTEGER"),
-    ("incidents", "archived_at", "TEXT"),
+    ("incidents", "archived_at", "TEXT"), ("events", "prev_hash", "TEXT"), ("events", "hash", "TEXT"),
 ]
+EVENT_COLS = ("incident_id", "actor", "type", "payload", "ts", "actor_id", "actor_role")
 FABRICATION_HINTS = ("quote not found", "out of range", "unknown source")
 
 
@@ -41,6 +43,7 @@ class Store:
             c.execute("PRAGMA journal_mode=WAL")
             c.executescript(SCHEMA.read_text(encoding="utf-8"))
             self._migrate(c)
+            self._seal_unsealed(c)
             if not c.execute("SELECT 1 FROM sqlite_sequence WHERE name='incidents'").fetchone():
                 c.execute("INSERT INTO sqlite_sequence (name, seq) VALUES ('incidents', ?)", (FIRST_ID - 1,))
             if not c.execute("SELECT 1 FROM users LIMIT 1").fetchone():
@@ -165,7 +168,7 @@ class Store:
             inc["required_approvals"] = required_approvals(inc["severity"])
             tokens = sum(json.loads(r[0]).get("tokens", 0) or 0 for r in
                          c.execute("SELECT payload FROM events WHERE incident_id=? AND type='llm_step'", (incident_id,)))
-            inc["ai_usage"] = {"tokens": tokens, "wh_estimate": round(tokens / 1000 * WH_PER_1K_TOKENS, 1),
+            inc["ai_usage"] = {"tokens": tokens, "wh_estimate": round(tokens / 1000 * WH_PER_1K_TOKENS, 1), "cost": policy.ai_cost(tokens),
                                "calls": c.execute("SELECT COUNT(*) FROM events WHERE incident_id=? AND type='llm_step'", (incident_id,)).fetchone()[0]}
             waiting = c.execute("SELECT ts FROM events WHERE incident_id=? AND type='awaiting_approval' ORDER BY id DESC LIMIT 1", (incident_id,)).fetchone()
             breach = c.execute("SELECT 1 FROM events WHERE incident_id=? AND type='sla_breach' AND ts >= ? LIMIT 1",
@@ -227,8 +230,7 @@ class Store:
             ids = [r[0] for r in c.execute(f"SELECT id FROM incidents WHERE status IN {RUNNING_STATUSES}")]
             for i in ids:
                 c.execute("UPDATE incidents SET status='escalated', escalation=? WHERE id=?", (reason, i))
-                c.execute("INSERT INTO events (incident_id, actor, type, payload, ts) VALUES (?,?,?,?,?)",
-                          (i, "orchestrator", "escalated", json.dumps({"reason": reason}), now()))
+                self._insert_event(c, i, "orchestrator", "escalated", json.dumps({"reason": reason}), now())
             return len(ids)
         return self._write(tx)
 
@@ -263,20 +265,43 @@ class Store:
             }
 
     def _money(self, ids: list[int]) -> dict:
-        saved = hours = at_risk_now = 0
+        saved = hours = at_risk_now = people_cost = ai_cost = 0
         currency = "INR"
         for i in ids:
             inc = self.get_incident(i) or {}
+            ai_cost += inc.get("ai_usage", {}).get("cost", 0)
             imp = inc.get("impact")
-            if not imp:
+            if not imp or inc["source"] == "tester_report":  # a bug report has no measured failure rate to price
                 continue
             currency = imp["currency"]
             saved += imp["saved_value"]
             hours += imp["engineer_hours_saved"]
+            people_cost += imp["engineer_cost_saved"]
             # money at risk right now: only incidents still being worked on, like the "Open right now" count
             if inc["status"] in ("open", "investigating", "awaiting_approval") and not inc.get("archived_at"):
                 at_risk_now += imp["at_risk_per_minute"]
-        return {"saved_value": saved, "engineer_hours_saved": round(hours, 1), "at_risk_per_minute_now": at_risk_now, "currency": currency}
+        value = saved + people_cost
+        return {"saved_value": saved, "engineer_hours_saved": round(hours, 1), "engineer_cost_saved": people_cost,
+                "at_risk_per_minute_now": at_risk_now, "currency": currency, "ai_cost": round(ai_cost, 2),
+                "net_value": round(value - ai_cost), "roi_multiple": round(value / ai_cost) if ai_cost >= 0.01 else None}
+
+    def roi_ledger(self) -> dict:
+        """Every incident (archived ones too) with what it cost in AI and what it saved, plus the inputs behind each
+        figure, so the ROI page can recompute them when someone changes an assumption."""
+        with self._conn() as c:
+            ids = [r[0] for r in c.execute("SELECT id FROM incidents ORDER BY id DESC")]
+        rows, scenarios = [], {}
+        for i in ids:
+            inc = self.get_incident(i)
+            imp = inc["impact"]
+            if imp and inc["scenario"] not in scenarios:
+                scenarios[inc["scenario"]] = assumptions(inc["scenario"])
+            rows.append({"id": inc["id"], "title": inc["title"], "service": inc["service"], "status": inc["status"],
+                         "mode": inc["mode"], "created_at": inc["created_at"], "scenario": inc["scenario"],
+                         "tokens": inc["ai_usage"]["tokens"], "ai_cost": inc["ai_usage"]["cost"], "impact": imp,
+                         "counted": bool(imp) and inc["source"] != "tester_report"})
+        return {"rows": rows, "scenarios": scenarios, "totals": self._money(ids),
+                "ai_price": {"per_1k_tokens": policy.cost_per_1k_tokens(), "source": policy.load()["path"]}}
 
     def recent_events(self, limit: int = 40) -> list[dict]:
         with self._conn() as c:
@@ -308,13 +333,17 @@ class Store:
             rows = c.execute("SELECT * FROM events WHERE incident_id=? AND id>? ORDER BY id LIMIT ?", (incident_id, after_id, limit)).fetchall()
         return [{**dict(r), "payload": json.loads(r["payload"])} for r in rows]
 
+    def last_event(self, incident_id: int, type_: str) -> dict | None:
+        with self._conn() as c:
+            r = c.execute("SELECT * FROM events WHERE incident_id=? AND type=? ORDER BY id DESC LIMIT 1", (incident_id, type_)).fetchone()
+        return {**dict(r), "payload": json.loads(r["payload"])} if r else None
+
     def record_event(self, incident_id: int, event: dict, user: dict | None = None) -> int:
         t, p = event["type"], event["payload"]
 
         def tx(c):
-            eid = c.execute("INSERT INTO events (incident_id, actor, type, payload, ts, actor_id, actor_role) VALUES (?,?,?,?,?,?,?)",
-                            (incident_id, event["actor"], t, json.dumps(p, default=str), event.get("ts") or now(),
-                             user["id"] if user else None, user["role"] if user else None)).lastrowid
+            eid = self._insert_event(c, incident_id, event["actor"], t, json.dumps(p, default=str), event.get("ts") or now(),
+                                     user["id"] if user else None, user["role"] if user else None)
             if t == "attempt" and p.get("stage") == "investigate":
                 c.execute("UPDATE incidents SET status='investigating', attempts=? WHERE id=?", (p["n"], incident_id))
             elif t == "llm_step" and p.get("provider"):
@@ -349,17 +378,66 @@ class Store:
 
         return self._write(tx)
 
+    # ---- tamper-evident audit log ------------------------------------------
+    # Each event's hash covers its own fields and the previous event's hash, so editing, deleting or reordering any
+    # past event breaks every hash after it. verify_chain() recomputes the whole chain from the stored rows.
+    @staticmethod
+    def _insert_event(c, incident_id: int, actor: str, type_: str, payload: str, ts: str,
+                      actor_id: int | None = None, actor_role: str | None = None) -> int:
+        eid = c.execute("INSERT INTO events (incident_id, actor, type, payload, ts, actor_id, actor_role) VALUES (?,?,?,?,?,?,?)",
+                        (incident_id, actor, type_, payload, ts, actor_id, actor_role)).lastrowid
+        prev = c.execute("SELECT hash FROM events WHERE id<? ORDER BY id DESC LIMIT 1", (eid,)).fetchone()
+        prev_hash = prev[0] if prev else ""
+        row = dict(zip(EVENT_COLS, (incident_id, actor, type_, payload, ts, actor_id, actor_role)), id=eid)
+        c.execute("UPDATE events SET prev_hash=?, hash=? WHERE id=?", (prev_hash, event_hash(prev_hash, row), eid))
+        return eid
+
+    @staticmethod
+    def _seal_unsealed(c) -> None:
+        """Chain events written before the audit log was hashed (older databases), in their original order."""
+        first = c.execute("SELECT MIN(id) FROM events WHERE hash IS NULL").fetchone()[0]
+        if first is None:
+            return
+        prev = c.execute("SELECT hash FROM events WHERE id<? ORDER BY id DESC LIMIT 1", (first,)).fetchone()
+        prev_hash = (prev[0] if prev else "") or ""
+        for r in c.execute(f"SELECT id, {', '.join(EVENT_COLS)} FROM events WHERE id>=? ORDER BY id", (first,)).fetchall():
+            h = event_hash(prev_hash, dict(r))
+            c.execute("UPDATE events SET prev_hash=?, hash=? WHERE id=?", (prev_hash, h, r["id"]))
+            prev_hash = h
+
+    def verify_chain(self, incident_id: int | None = None) -> dict:
+        """Recompute every hash. ok=False names the first event that no longer matches what was written."""
+        checked, prev_hash, bad, head, mine = 0, "", None, "", 0
+        with self._conn() as c:
+            for r in c.execute(f"SELECT id, prev_hash, hash, {', '.join(EVENT_COLS)} FROM events ORDER BY id"):
+                checked += 1
+                mine += r["incident_id"] == incident_id
+                if bad is None:
+                    if (r["prev_hash"] or "") != prev_hash:
+                        bad = {"id": r["id"], "incident_id": r["incident_id"], "problem": "an earlier event was removed or changed"}
+                    elif r["hash"] != event_hash(prev_hash, dict(r)):
+                        bad = {"id": r["id"], "incident_id": r["incident_id"], "problem": "this event was changed after it was written"}
+                prev_hash = r["hash"] or ""
+                head = prev_hash
+        out = {"ok": bad is None, "events": checked, "head": head[:16], "first_bad": bad, "checked_at": now()}
+        if incident_id is not None:
+            out["incident_events"] = mine
+        return out
+
     @staticmethod
     def _evidence(c, claim_id: int, role: str, evidence: list[dict]) -> None:
         c.executemany("INSERT INTO evidence (claim_id, role, source, line, quote) VALUES (?,?,?,?,?)",
                       [(claim_id, role, e["source"], e["line"], e["quote"]) for e in evidence])
 
 
+def event_hash(prev_hash: str, row: dict) -> str:
+    body = json.dumps([prev_hash or "", row["id"], *(row[k] for k in EVENT_COLS)], ensure_ascii=False, separators=(",", ":"))
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
+
+
 def required_approvals(severity: str) -> dict:
-    """One developer or lead. With TWO_PERSON_APPROVAL=1, sev 1/2 need two distinct approvers, at least one a lead."""
-    if severity in ("sev1", "sev2") and os.getenv("TWO_PERSON_APPROVAL", "0").lower() in ("1", "true", "yes"):
-        return {"count": 2, "lead": True, "label": "Developer + Lead (two people)"}
-    return {"count": 1, "lead": False, "label": "One developer or lead"}
+    """Who must approve a fix at this severity, from policy.yaml (with the rule and the policy's fingerprint)."""
+    return policy.approval_rule(severity)
 
 
 def _ts(s: str) -> datetime:

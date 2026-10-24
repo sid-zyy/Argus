@@ -7,9 +7,11 @@
   "failure_share": "alert",
   "manual_mttr_minutes": 80,
   "engineers_paged": 3,
+  "engineer_cost_per_hour": 1500,
   "assumptions": [
     "The demo shop's traffic is scaled to a mid-sized store: 15 checkout orders per minute at ₹1,200 each",
     "Failed share of orders equals the live 5xx rate when the alert fired",
-    "A typical manual fix for this kind of incident takes about 80 minutes with 3 engineers paged"
+    "A typical manual fix for this kind of incident takes about 80 minutes with 3 engineers paged",
+    "An engineer's time costs about ₹1,500 an hour, fully loaded"
   ]
 }

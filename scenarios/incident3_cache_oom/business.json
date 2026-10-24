@@ -7,9 +7,11 @@
   "failure_share": 0.08,
   "manual_mttr_minutes": 90,
   "engineers_paged": 2,
+  "engineer_cost_per_hour": 1500,
   "assumptions": [
     "600 shopping sessions per minute; each is worth ₹30 on average (about 2.5% buy, ₹1,200 per order)",
     "About 8% of sessions are lost to crashes and slow pages during the restart loop",
-    "A typical manual fix for a memory leak takes about 90 minutes with 2 engineers paged"
+    "A typical manual fix for a memory leak takes about 90 minutes with 2 engineers paged",
+    "An engineer's time costs about ₹1,500 an hour, fully loaded"
   ]
 }
