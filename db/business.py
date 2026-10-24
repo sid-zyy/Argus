@@ -60,4 +60,5 @@ def impact(inc: dict, now: datetime | None = None) -> dict | None:
         "engineer_cost_saved": round(hours_saved * b.get("engineer_cost_per_hour", 0)),
         "detection_minutes": round(detection, 2),
         "assumptions": b["assumptions"],
+        "sources": b.get("sources", []),
     }

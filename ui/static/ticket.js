@@ -117,7 +117,8 @@ function renderImpact() {
     ["Typical manual fix", `${m.manual_minutes.toFixed(0)} min`, "Argus aims to beat this"],
   ];
   $("impact").innerHTML = tiles.map(([k, v, sub, kind]) => `<div class="tile ${kind || ""}"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div><div class="s">${esc(sub)}</div></div>`).join("");
-  $("impact-assumptions").innerHTML = m.assumptions.map((a) => `<li>${esc(a)}</li>`).join("");
+  $("impact-assumptions").innerHTML = m.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")
+    + ((m.sources || []).length ? `<li>Sources: ${m.sources.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(new URL(u).hostname.replace(/^www\./, ""))}</a>`).join(", ")}</li>` : "");
 }
 let impactLoaded = Date.now();
 

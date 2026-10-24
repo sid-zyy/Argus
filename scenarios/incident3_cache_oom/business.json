@@ -1,17 +1,24 @@
 {
   "service_label": "Product pages",
   "unit": "shopping sessions",
-  "units_per_minute": 600,
-  "value_per_unit": 30,
+  "units_per_minute": 100000,
+  "value_per_unit": 37,
   "currency": "INR",
   "failure_share": 0.08,
   "manual_mttr_minutes": 90,
   "engineers_paged": 2,
-  "engineer_cost_per_hour": 1500,
+  "engineer_cost_per_hour": 1070,
   "assumptions": [
-    "600 shopping sessions per minute; each is worth ₹30 on average (about 2.5% buy, ₹1,200 per order)",
-    "About 8% of sessions are lost to crashes and slow pages during the restart loop",
-    "A typical manual fix for a memory leak takes about 90 minutes with 2 engineers paged",
-    "An engineer's time costs about ₹1,500 an hour, fully loaded"
+    "A Flipkart-size store: about 2,000 orders a minute at ₹1,847 each, from yearly GMV of ₹1.75–2.1 lakh crore",
+    "About 2% of Indian mobile shopping sessions end in an order, so that is about 100,000 sessions a minute, each worth about ₹37",
+    "About 8% of sessions are lost to crashes and slow pages during the restart loop (our estimate)",
+    "A typical manual fix for a memory leak takes about 90 minutes with 2 engineers paged (our estimate)",
+    "An engineer costs about ₹1,070 an hour: the median Bengaluru SRE pay of ₹20.5 lakh a year over about 1,920 working hours (salary only; benefits and tools would add more)"
+  ],
+  "sources": [
+    "https://ecdb.com/resources/sample-data/retailer/flipkart",
+    "https://couponsly.in/flipkart-statistics/",
+    "https://events.gripsintelligence.com/insights/web-statistics/device-market-share/in",
+    "https://flexiple.com/salary/site-reliability-engineer/bengaluru"
   ]
 }

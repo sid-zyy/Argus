@@ -213,6 +213,7 @@ function renderTiles(m) {
 let tileCounters = [];
 // React Bits CountUp settings that show money the same way money() does
 function moneyCount(v) {
+  if (v >= 1e7) return { to: +(v / 1e7).toFixed(2), decimals: 2, prefix: "₹", suffix: " Cr" };
   if (v >= 1e5) return { to: +(v / 1e5).toFixed(1), decimals: 1, prefix: "₹", suffix: " L" };
   return { to: Math.round(v || 0), prefix: "₹", separator: "," };
 }

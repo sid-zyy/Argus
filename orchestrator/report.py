@@ -33,6 +33,26 @@ def incident_impact(scenario: str | None, alert: dict, state: dict, trace: Trace
                             "resolved_at": approval["ts"] if fixed else None, "status": "resolved" if fixed else state["status"]})
 
 
+def impact_section(impact: dict | None) -> list[str]:
+    """The '## Business impact' section. Replays rebuild it, so a recorded report shows today's assumptions."""
+    if not impact:
+        return []
+    cur = impact["currency"]
+    md = ["## Business impact", "",
+          "| | |", "|---|---|",
+          f"| Customers affected | about {impact['affected_per_minute']:,.0f} {impact['unit']} per minute |",
+          f"| Revenue at risk | {money(impact['at_risk_per_minute'], cur)} per minute |",
+          f"| Time to fix with Argus | {impact['minutes_so_far']:.0f} minutes (including detection and human approval) |",
+          f"| Typical manual fix | about {impact['manual_minutes']:.0f} minutes |"]
+    if impact["fixed"]:
+        md += [f"| Revenue protected | {money(impact['saved_value'], cur)} (estimate) |",
+               f"| Engineer time saved | about {impact['engineer_hours_saved']} hours |"]
+    md += ["", "Estimates, based on: " + "; ".join(impact["assumptions"]) + ".", ""]
+    if impact.get("sources"):
+        md += ["Sources: " + ", ".join(f"<{u}>" for u in impact["sources"]), ""]
+    return md
+
+
 def _record(alert: dict, state: dict, trace: Trace, impact: dict | None) -> dict:
     return {
         "alert": alert,
@@ -74,18 +94,7 @@ def build_report(alert: dict, state: dict, trace: Trace, llm, scenario: str | No
           f"- **Started:** {alert.get('started_at') or '–'} · **Alert sent:** {alert.get('fired_at') or '–'}", ""]
 
     md += ["## Business summary", narrative.business_summary if narrative else "_Summary unavailable; the facts below come straight from the record._", ""]
-    if impact:
-        cur = impact["currency"]
-        md += ["## Business impact", "",
-               "| | |", "|---|---|",
-               f"| Customers affected | about {impact['affected_per_minute']:,.0f} {impact['unit']} per minute |",
-               f"| Revenue at risk | {money(impact['at_risk_per_minute'], cur)} per minute |",
-               f"| Time to fix with Argus | {impact['minutes_so_far']:.0f} minutes (including detection and human approval) |",
-               f"| Typical manual fix | about {impact['manual_minutes']:.0f} minutes |"]
-        if impact["fixed"]:
-            md += [f"| Revenue protected | {money(impact['saved_value'], cur)} (estimate) |",
-                   f"| Engineer time saved | about {impact['engineer_hours_saved']} hours |"]
-        md += ["", "Estimates, based on: " + "; ".join(impact["assumptions"]) + ".", ""]
+    md += impact_section(impact)
 
     if narrative:
         md += ["## What happened", narrative.summary, "", "## Root cause", narrative.root_cause, ""]

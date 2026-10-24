@@ -257,12 +257,14 @@ sys.exit(0 if healthy else 1)
 
 
 def _business(service: str) -> dict:
-    return {"service_label": "Stock checks", "unit": "orders", "units_per_minute": 15, "value_per_unit": 1200, "currency": "INR",
-            "failure_share": "alert", "manual_mttr_minutes": 60, "engineers_paged": 2, "engineer_cost_per_hour": 1500,
-            "assumptions": [f"{service} answers every add-to-cart; 15 orders per minute at ₹1,200 each depend on it",
+    return {"service_label": "Stock checks", "unit": "orders", "units_per_minute": 2000, "value_per_unit": 1847, "currency": "INR",
+            "failure_share": "alert", "manual_mttr_minutes": 60, "engineers_paged": 2, "engineer_cost_per_hour": 1070,
+            "assumptions": [f"{service} answers every add-to-cart; at Flipkart size about 2,000 orders a minute at ₹1,847 each depend on it",
                             "Failed share of orders equals the alert's 5xx rate",
                             "A typical manual fix for a bad settings change takes about 60 minutes with 2 engineers paged",
-                            "An engineer's time costs about ₹1,500 an hour, fully loaded"]}
+                            "An engineer costs about ₹1,070 an hour (median Bengaluru SRE pay of ₹20.5 lakh a year)"],
+            "sources": ["https://ecdb.com/resources/sample-data/retailer/flipkart", "https://couponsly.in/flipkart-statistics/",
+                        "https://flexiple.com/salary/site-reliability-engineer/bengaluru"]}
 
 
 def _service_map(service: str) -> dict:

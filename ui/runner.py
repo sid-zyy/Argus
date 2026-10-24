@@ -17,7 +17,7 @@ from db.store import Store, required_approvals
 from llm import LLM
 from orchestrator import policy
 from orchestrator.pipeline import run_incident
-from orchestrator.report import build_report
+from orchestrator.report import build_report, impact_section
 from orchestrator.trace import Trace
 from scenarios.build import build
 from tools.workspace import Workspace
@@ -320,6 +320,8 @@ class IncidentRunner:
                 md = payload.get("markdown") or _report_text(payload.get("path"))
                 if md and decision:
                     md = _replace_approval(md, decision)
+                if md:
+                    md = _replace_impact(md, self.store.get_incident(iid)["impact"])
                 payload = {"markdown": (f"> Replayed from a recorded run ({path.name}).\n\n" + md) if md else None}
             self._record(iid, {"actor": e["actor"], "type": e["type"], "payload": payload})
 
@@ -329,6 +331,19 @@ def _report_text(path: str | None) -> str | None:
         return Path(path).read_text(encoding="utf-8") if path else None
     except OSError:
         return None
+
+
+def _replace_impact(md: str, impact: dict | None) -> str:
+    """A recorded report keeps the figures of the day it was recorded; show the current assumptions instead."""
+    header = "## Business impact"
+    if not impact or header not in md:
+        return md
+    section = "\n".join(impact_section(impact))
+    md = re.sub(re.escape(header) + r"\n.*?(?=\n## |\Z)", lambda _m: section.rstrip("\n") + "\n", md, flags=re.DOTALL)
+    # the recorded business summary quotes the old volume, e.g. "affecting 121.6 orders per minute"
+    volume = f"{impact['affected_per_minute']:,.0f} {impact['unit']} per minute"
+    return re.sub(r"(## Business summary\n.*?)(?=\n## |\Z)",
+                  lambda m: re.sub(rf"\d[\d,.]* {re.escape(impact['unit'])} per minute", volume, m.group(1)), md, count=1, flags=re.DOTALL)
 
 
 def _replace_approval(md: str, d: dict) -> str:

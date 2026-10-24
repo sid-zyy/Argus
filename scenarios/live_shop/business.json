@@ -1,17 +1,23 @@
 {
   "service_label": "ShopFast checkout",
   "unit": "orders",
-  "units_per_minute": 15,
-  "value_per_unit": 1200,
+  "units_per_minute": 2000,
+  "value_per_unit": 1847,
   "currency": "INR",
   "failure_share": "alert",
   "manual_mttr_minutes": 80,
   "engineers_paged": 3,
-  "engineer_cost_per_hour": 1500,
+  "engineer_cost_per_hour": 1070,
   "assumptions": [
-    "The demo shop's traffic is scaled to a mid-sized store: 15 checkout orders per minute at ₹1,200 each",
+    "The demo shop's traffic is scaled to a Flipkart-size store: about 2,000 orders a minute on an average day (yearly GMV of ₹1.75–2.1 lakh crore ÷ ₹1,847 per order ÷ 525,600 minutes), each worth ₹1,847 on average",
     "Failed share of orders equals the live 5xx rate when the alert fired",
-    "A typical manual fix for this kind of incident takes about 80 minutes with 3 engineers paged",
-    "An engineer's time costs about ₹1,500 an hour, fully loaded"
+    "Every failed order counts as revenue at risk; some customers retry later, so the money actually lost is lower",
+    "A typical manual fix for this kind of incident takes about 80 minutes with 3 engineers paged (our estimate)",
+    "An engineer costs about ₹1,070 an hour: the median Bengaluru SRE pay of ₹20.5 lakh a year over about 1,920 working hours (salary only; benefits and tools would add more)"
+  ],
+  "sources": [
+    "https://ecdb.com/resources/sample-data/retailer/flipkart",
+    "https://couponsly.in/flipkart-statistics/",
+    "https://flexiple.com/salary/site-reliability-engineer/bengaluru"
   ]
 }

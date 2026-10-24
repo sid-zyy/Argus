@@ -53,6 +53,7 @@ The answer key used by the evaluation and by the chatbot comparison on the ticke
 | `manual_mttr_minutes`, `engineers_paged` | A typical manual fix for this kind of incident |
 | `engineer_cost_per_hour` | Optional; prices the engineer time saved |
 | `assumptions` | Plain sentences shown next to every figure |
+| `sources` | Optional links behind the figures; the ticket and the report list them |
 
 ## What every pack gets for free
 

@@ -181,7 +181,7 @@ def test_api_governance_value_and_comparison(client):
 
     roi = c.get("/roi").json()
     row = next(r for r in roi["rows"] if r["id"] == iid)
-    assert row["counted"] and row["impact"]["fixed"] and row["impact"]["engineer_cost_saved"] == 3 * 80 / 60 * 1500
+    assert row["counted"] and row["impact"]["fixed"] and row["impact"]["engineer_cost_saved"] == round(3 * 80 / 60 * 1070)
     assert roi["totals"]["engineer_cost_saved"] >= row["impact"]["engineer_cost_saved"]
 
     cmp = c.get(f"/incidents/{iid}/compare").json()
@@ -241,3 +241,26 @@ def test_pack_check_names_what_is_missing(tmp_path):
     assert "no generate_logs.py" in problems and "no repro.py" in problems and "history.py: no CULPRIT_INDEX" in problems
     assert any(p.startswith("business.json is missing") for p in problems)
     assert all(pack.validate(n) == [] for n in pack.names()), "the shipped packs are valid"
+
+
+def test_replayed_report_uses_todays_business_figures(client):
+    c = client
+    c.post("/session", json={"user_id": next(u["id"] for u in c.get("/users").json() if u["name"] == "Siddhartha")})
+    iid = c.post("/demo/trigger/incident1_conn_leak?mode=replay").json()["id"]
+    for _ in range(300):
+        if c.get(f"/incidents/{iid}").json()["status"] == "awaiting_approval":
+            break
+        time.sleep(0.2)
+    c.post(f"/incidents/{iid}/approve", json={"reason": "ok"})
+    for _ in range(150):
+        inc = c.get(f"/incidents/{iid}").json()
+        if inc["report"]:
+            break
+        time.sleep(0.2)
+    imp = inc["impact"]
+    assert imp["sources"] and "Flipkart-size" in imp["assumptions"][0]
+    section = inc["report"].split("## Business impact", 1)[1].split("\n## ", 1)[0]
+    assert f"about {imp['affected_per_minute']:,.0f} orders per minute" in section and "Sources:" in section
+    assert "₹1,450" not in inc["report"], "the recorded run's old assumptions are replaced"
+    summary = inc["report"].split("## Business summary", 1)[1].split("\n## ", 1)[0]
+    assert "121.6 orders" not in summary and f"{imp['affected_per_minute']:,.0f} orders per minute" in summary

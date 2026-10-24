@@ -91,7 +91,11 @@ python -m scenarios.pack check                                           # valid
 
 ## Business impact
 Figures come from each scenario's `business.json` and are always labelled as estimates; the UI and report list the
-assumptions. Revenue at risk = units per minute × share failing × value per unit. Time to fix with Argus runs from the
+assumptions and their sources. They are scaled to a Flipkart-size store from public data: about 2,000 orders a minute
+on an average day (yearly GMV of ₹1.75–2.1 lakh crore ÷ an average order of ₹1,847), about 2% of mobile sessions ending
+in an order, and an engineer at ₹1,070 an hour (median Bengaluru SRE pay of ₹20.5 lakh). Neither Flipkart nor anyone
+else publishes orders per minute, so that figure is derived; the manual fix times are our own estimates. Every failed
+order counts as revenue at risk, although some customers retry later. Revenue at risk = units per minute × share failing × value per unit. Time to fix with Argus runs from the
 problem starting to the approval; it is compared with a typical manual fix time. Engineer time saved is priced with
 `engineer_cost_per_hour`. AI cost is estimated from tokens at the price in `policy.yaml` (`ai.cost_per_1k_tokens`), so
 every incident shows what it cost in AI next to what it saved; AI energy is a rough estimate at 0.3 Wh per 1,000 tokens.
