@@ -133,7 +133,7 @@ assumptions. Revenue at risk = units per minute × share failing × value per un
 problem starting to the approval; it is compared with a typical manual fix time. Engineer time saved is priced with
 `engineer_cost_per_hour`. AI cost is estimated from tokens at the price in `policy.yaml` (`ai.cost_per_1k_tokens`), so
 every incident shows what it cost in AI next to what it saved; AI energy is a rough estimate at 0.3 Wh per 1,000 tokens.
-The Value page (`/value`) lists every incident, archived ones too, and lets you change any assumption to see how the
+The Value tab of the Results page (`/results#value`) lists every incident, archived ones too, and lets you change any assumption to see how the
 totals move.
 
 ## Governance: policy.yaml and the audit trail
@@ -171,9 +171,12 @@ The chosen user is kept in a signed cookie and the server checks the role on eve
   it, the fix and test result, approvals (with the policy rule that applies), QA, report, timeline with the audit-trail
   check, and notes. Findings also put Argus next to a single chatbot prompt on this incident, scored the same way;
   a developer can ask a chatbot live (one real AI call, kept in the audit log).
-- Results (`/results`): Argus vs a single chatbot prompt on the same incidents, scored the same way: a head-to-head
-  scoreboard (including speed, where the chatbot wins), and per incident a race that plays both runs back on one clock.
-- Value (`/value`): every incident's value and AI cost, with editable assumptions.
+- Results (`/results`), two tabs:
+  - **Accuracy** (the recorded benchmark): Argus vs a single chatbot prompt on the same incidents, scored the same way:
+    a head-to-head scoreboard (including speed, where the chatbot wins), and per incident a race that plays both runs
+    back on one clock.
+  - **Value** (your incidents, `/results#value`; `/value` redirects there): every incident's value and AI cost, with
+    editable assumptions.
 - Health (`/check`): the self-check, the policy in plain words and the audit-trail check.
 - Everywhere: Ctrl/⌘ K opens a command palette (jump to an incident, start a demo, switch person, pause Argus), `?` lists
   the shortcuts, `g d` / `g r` jump to the dashboard or results. On the dashboard, **Take the tour** (or `T`) walks through

@@ -1151,7 +1151,7 @@ a.tile-link:hover { text-decoration: none; border-color: var(--border-strong); }
 .rules li { margin: 4px 0; }
 .rules code, .val-table code { font-size: 12px; }
 .val-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; margin-top: 16px; }
-@media (max-width: 1180px) { .val-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1180px) { .val-grid { grid-template-columns: minmax(0, 1fr); } }  /* minmax: the table scrolls in its box instead of widening the page */
 .val-table td:first-child { min-width: 220px; }
 .val-table td:nth-child(2) { white-space: nowrap; }
 .val-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }

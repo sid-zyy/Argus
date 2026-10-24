@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
@@ -193,7 +193,8 @@ def check_page():
 
 @app.get("/value", include_in_schema=False)
 def value_page():
-    return _page("value.html")
+    """Value is a tab of the Results page now; old links still land on it."""
+    return RedirectResponse("/results#value", status_code=308)
 
 
 # ---- readiness, governance, value ----------------------------------------------

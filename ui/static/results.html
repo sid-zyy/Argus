@@ -14,12 +14,18 @@
 <body>
 <header class="topbar">
   <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
-  <nav class="nav"><a href="/">Dashboard</a><a href="/results" class="on">Results</a><a href="/value">Value</a><a href="/check">Health</a><a href="/connect">Connect</a></nav>
+  <nav class="nav"><a href="/">Dashboard</a><a href="/results" class="on">Results</a><a href="/check">Health</a><a href="/connect">Connect</a></nav>
   <span class="spacer"></span>
   <button class="icon-btn" id="theme-btn" type="button"></button>
   <div class="user-menu" id="user-menu"></div>
 </header>
 <main class="wrap">
+  <nav class="tabs res-tabs" role="tablist" aria-label="Results">
+    <button class="tab" role="tab" type="button" data-tab="accuracy" aria-controls="tab-accuracy">Accuracy <span class="faint">· recorded benchmark</span></button>
+    <button class="tab" role="tab" type="button" data-tab="value" aria-controls="tab-value">Value <span class="faint">· your incidents</span></button>
+  </nav>
+
+  <div id="tab-accuracy" role="tabpanel">
   <section class="res-hero">
     <div class="res-particles" id="particles" aria-hidden="true"></div>
     <div class="res-hero-text">
@@ -48,10 +54,60 @@
   <div class="section-head" id="race"><h2>Incident by incident</h2><p>Press play to see both answer the same alert, sped up.</p></div>
   <div class="res-rows" id="rows"></div>
   <p class="small faint res-note" id="note"></p>
+  </div>
+
+  <div id="tab-value" role="tabpanel" hidden>
+    <div class="dash-head">
+      <div>
+        <h1 id="val-headline">Value</h1>
+        <p id="val-sub">What each of your incidents cost in AI and what it saved, compared with a typical manual fix. All figures are estimates; change any assumption to see how the result moves.</p>
+      </div>
+    </div>
+
+    <section class="val-tiles" id="val-tiles"></section>
+
+    <div class="val-grid">
+      <section class="panel">
+        <h2>Every incident</h2>
+        <p class="help" style="margin: 4px 0 0">Cleared incidents are included: clearing hides a card, it doesn't undo the value.</p>
+        <div class="val-scroll" style="margin-top: 8px"><table class="val-table" id="val-table"></table></div>
+      </section>
+      <aside class="panel val-form">
+        <h2>Assumptions</h2>
+        <p class="help" style="margin: 4px 0 0">Changes apply to this page only. The stored estimates come from each service's <code>business.json</code> and the AI price in <code>policy.yaml</code>.</p>
+        <div id="val-fields"></div>
+        <div class="row" style="margin-top: 14px"><button class="btn small ghost" id="val-reset" type="button">Back to the stored values</button></div>
+      </aside>
+    </div>
+  </div>
 </main>
 <script src="/static/common.js"></script>
 <script src="/static/palette.js"></script>
 <script src="/static/vendor/reactbits.js"></script>
 <script src="/static/results.js"></script>
+<script src="/static/value.js"></script>
+<script>
+// Accuracy and Value tabs; #value (and the old /value address, which redirects here) opens Value.
+(() => {
+  const tabs = document.querySelectorAll(".res-tabs .tab");
+  const show = () => {
+    const current = location.hash === "#value" ? "value" : "accuracy";
+    tabs.forEach((t) => {
+      const on = t.dataset.tab === current;
+      t.classList.toggle("active", on);
+      t.setAttribute("aria-selected", on);
+      document.getElementById(`tab-${t.dataset.tab}`).hidden = !on;
+    });
+    document.title = current === "value" ? "Value · Results · Argus" : "Results · Argus";
+  };
+  tabs.forEach((t) => t.onclick = () => {
+    if (t.dataset.tab === "value") location.hash = "value";
+    else history.replaceState(null, "", location.pathname);  // keep #race and #score for the accuracy anchors
+    show();
+  });
+  addEventListener("hashchange", show);
+  show();
+})();
+</script>
 </body>
 </html>
