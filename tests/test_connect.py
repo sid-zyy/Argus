@@ -246,3 +246,31 @@ def test_grafana_webhook_opens_a_quickbite_incident(tmp_path, monkeypatch):
     assert c.post("/connect/services/quickbite_orders/check?full=true").json()["ok"]
     t = c.post("/connect/services/incident1_conn_leak/test-alert")  # a recorded incident, never the live shop's repo
     assert t.status_code == 201 and t.json()["service_folder"] == "incident1_conn_leak" and t.json()["received_from"] == "alertmanager"
+
+
+# ---- the live demo's replay mode ---------------------------------------------------------
+def test_live_replay_maps_recorded_commits_and_knows_its_fix():
+    from ui.runner import IncidentRunner, _remap
+    payload = {"sha": "ba4fec2", "evidence": [{"source": "git:ba4fec2d1e2f3a4b", "quote": "x"}], "other": "ba4fec2x not a sha"}
+    out = _remap(payload, {"ba4fec2": "3749f0d"})
+    assert out["sha"] == "3749f0d" and out["evidence"][0]["source"] == "git:3749f0d" and out["other"] == payload["other"]
+    fix = IncidentRunner.recorded_fix(object.__new__(IncidentRunner), "live_shop")
+    assert fix and fix.fix_type == "patch" and fix.edits[0].file == "app/checkout.py"
+
+
+def test_demo_agents_switch_needs_a_developer(tmp_path, monkeypatch):
+    import importlib
+
+    from fastapi.testclient import TestClient
+
+    from tests.test_api import sign_in
+    monkeypatch.setenv("INCIDENT_DB", str(tmp_path / "t.db"))
+    monkeypatch.setenv("SHOP_URL", "http://127.0.0.1:9")  # no shop: status still reports the switch
+    import ui.app as appmod
+    c = TestClient(importlib.reload(appmod).app)
+    assert c.get("/live/status").json()["agents"] == {"mode": "live", "by": None, "replay_available": True}
+    sign_in(c, "Tara")
+    assert c.post("/demo/agents", json={"mode": "replay"}).status_code == 403
+    sign_in(c, "Siddhartha")
+    assert c.post("/demo/agents", json={"mode": "replay"}).json()["mode"] == "replay"
+    assert c.get("/live/status").json()["agents"]["mode"] == "replay"

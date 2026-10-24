@@ -44,6 +44,14 @@ uvicorn ui.app:app --port 8000 --reload     # Argus, http://localhost:8000
 
 `ARGUS_URL` (shop) and `SHOP_URL` (Argus) change the addresses; `SHOP_RPS` sets the simulated traffic.
 
+**Replay for a reliable demo.** Switch the ShopFast panel from **Live AI** to **Replay**, then run steps 2 to 5 as
+usual. The push, the broken checkout, the alert, your approval, the deploy and the recovery are all real; only the
+agents' steps are played back from `replay/live_shop.json`, a recorded real run of the same bug, so there are no AI
+calls, rate limits or waiting. Argus maps the recorded commit to the one you just pushed, deploys the recorded fix
+for real, and says in the report that the agents' work was replayed. If the code that's live isn't the recorded bug
+(e.g. you broke it by hand), the real agents investigate instead. Re-record with a real run of the demo and copy its
+`runs/live_shop-INC-*/trace.json` to `replay/live_shop.json`.
+
 ## Argus Connect: the same agents on any service
 Argus is not tied to ShopFast. Each service plugs in through **adapters** and one config file, `argus.yaml`, in its
 folder under `scenarios/`; the agents, prompts, evidence checker, sandbox and approval gate are the same for all of them.

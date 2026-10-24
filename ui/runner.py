@@ -22,8 +22,10 @@ from llm import LLM
 from orchestrator import policy
 from orchestrator.pipeline import run_incident
 from orchestrator.report import build_report
+from orchestrator.state import FixOutput
 from orchestrator.trace import Trace
 from scenarios.build import build
+from tools.sandbox import preview_fix
 from tools.workspace import Workspace
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -98,6 +100,20 @@ class IncidentRunner:
     def replay_file(self, scenario: str) -> Path | None:
         p = ROOT / "replay" / f"{scenario}.json"
         return p if p.is_file() else None
+
+    def recorded_fix(self, scenario: str) -> FixOutput | None:
+        """The fix a recorded run proposed (its last patch)."""
+        path = self.replay_file(scenario)
+        if not path:
+            return None
+        patch = next((e["payload"] for e in reversed(json.loads(path.read_text(encoding="utf-8"))) if e["type"] == "patch"), None)
+        return FixOutput.model_validate({k: patch[k] for k in ("fix_type", "rationale", "edits", "rollback_to") if k in patch}) if patch else None
+
+    def replay_fits(self, scenario: str) -> bool:
+        """A recorded run may stand in for the agents on a live app only if its fix applies to the code that is live now,
+        i.e. the same bug was pushed. Otherwise the real agents investigate."""
+        fix = self.recorded_fix(scenario)
+        return bool(fix) and not preview_fix(Workspace(ROOT / "scenarios" / scenario), fix)[1]
 
     def start(self, scenario: str, mode: str = "live", alert_override: dict | None = None,
               reporter: dict | None = None, report: dict | None = None) -> int:
@@ -333,17 +349,25 @@ class IncidentRunner:
             trace.emit("orchestrator", "error", {"message": f"Could not deploy the approved fix: {e}"})
 
     def _replay(self, iid: int, scenario_dir: Path, note: str) -> None:
+        """Play a recorded run back. On a live app (ShopFast) the shop, its alert and the deploy are real: the recorded
+        commit ids are mapped to the bad commit that is live now, and an approved fix is really committed and deployed."""
         path = self.replay_file(scenario_dir.name)
         events = json.loads(path.read_text(encoding="utf-8"))
+        live = self.live_app(scenario_dir.name)
+        ws = Workspace(scenario_dir) if live else None
+        shas = self._live_shas(ws, events) if live else {}
         prev = None
         decision = None
+        deployed = None
         for e in events:
             t = datetime.fromisoformat(e["ts"])
+            if live and e["type"] == "deployed":
+                continue  # the recorded deploy happened elsewhere; the real one runs right after the approval
             if prev is not None and self.replay_speed > 0:
                 gap = REPLAY_HANDOFF_GAP if e["type"] in HANDOFFS else REPLAY_MIN_GAP
                 time.sleep(min(REPLAY_DELAY_CAP, max(gap, (t - prev).total_seconds() / self.replay_speed)))
             prev = t
-            payload = dict(e["payload"])
+            payload = _remap(dict(e["payload"]), shas)
             if e["type"] == "approval":
                 decision = self._wait_for_human(iid)
                 payload = decision
@@ -351,9 +375,46 @@ class IncidentRunner:
             elif e["type"] == "report":
                 md = payload.get("markdown") or _report_text(payload.get("path"))
                 if md and decision:
-                    md = _replace_approval(md, decision)
-                payload = {"markdown": (f"> Replayed from a recorded run ({path.name}).\n\n" + md) if md else None}
+                    md = _replace_approval(md, decision, deployed)
+                if md and live:  # the title names this incident's alert, not the recorded one
+                    md = re.sub(r"^# Incident report: .*$", f"# Incident report: {self.store.get_incident(iid)['title']}", md, count=1, flags=re.M)
+                origin = (f"> The agents' work was replayed from a recorded run of this same bug ({path.name}); the app, its alert "
+                          "and the deploy were live." if live else f"> Replayed from a recorded run ({path.name}).")
+                payload = {"markdown": f"{origin}\n\n{md}" if md else None}
             self._record(iid, {"actor": e["actor"], "type": e["type"], "payload": payload})
+            if e["type"] == "approval" and live and live.get("deploy_on_approve") and decision.get("approved"):
+                deployed = self._deploy_recorded(iid, ws, scenario_dir.name, decision, live)
+
+    def _live_shas(self, ws: Workspace, events: list[dict]) -> dict[str, str]:
+        """Recorded commit id -> the commit that is live now, for the culprit the recorded run named."""
+        recorded = next((s["sha"] for e in events if e["type"] == "suspects" for s in e["payload"].get("suspects", [])), None)
+        fix = self.recorded_fix(ws.root.name)
+        if not recorded or not fix or not fix.edits:
+            return {}
+        try:
+            ws.git("rev-parse", "--verify", f"{recorded}^{{commit}}")
+            return {}  # the same commit exists here
+        except ValueError:
+            pass
+        rows = ws.git("log", "-20", "--format=%h%x1f%an", "--", fix.edits[0].file.removeprefix("repo/")).splitlines()
+        live_sha = next((sha for sha, author in (r.split("\x1f") for r in rows) if author != "Argus"), None)
+        return {recorded[:7]: live_sha} if live_sha else {}
+
+    def _deploy_recorded(self, iid: int, ws: Workspace, scenario: str, decision: dict, live: dict) -> str | None:
+        trace = Trace([lambda e: self._record(iid, e)])
+        self._deploy(iid, ws, {"fix": self.recorded_fix(scenario), "approval": decision}, trace, live)
+        done = trace.of_type("deployed")
+        return done[-1]["payload"]["commit"] if done else None
+
+
+def _remap(payload: dict, shas: dict[str, str]) -> dict:
+    """Replace recorded commit ids (short or full) with the live ones throughout an event."""
+    if not shas:
+        return payload
+    text = json.dumps(payload)
+    for old, new in shas.items():
+        text = re.sub(rf"\b{old}[0-9a-f]*\b", new, text)
+    return json.loads(text)
 
 
 def _report_text(path: str | None) -> str | None:
@@ -363,9 +424,11 @@ def _report_text(path: str | None) -> str | None:
         return None
 
 
-def _replace_approval(md: str, d: dict) -> str:
+def _replace_approval(md: str, d: dict, deployed: str | None = None) -> str:
+    applied = (f"The approved fix was committed and deployed as commit {deployed}." if deployed
+               else "This is a demo: applying the fix is simulated, no real system was changed.")
     section = (f"## Decisions made by people\n\n- Fix **{'approved' if d['approved'] else 'declined'}** by {d['approver']} ({d['role']}). "
-               f"{d.get('reason') or ''}\n- This is a demo: applying the fix is simulated, no real system was changed.\n")
+               f"{d.get('reason') or ''}\n- {applied}\n")
     for header in ("## Decisions made by people", "## Approval"):
         if header in md:
             return re.sub(re.escape(header) + r"\n.*?(?=\n## |\Z)", lambda _m: section, md, flags=re.DOTALL)

@@ -10,56 +10,53 @@
 <link rel="icon" type="image/svg+xml" href="/static/logo.svg">
 <link rel="stylesheet" href="/static/style.css">
 <style>
-  .cx-hero { margin: 4px 0 22px; }
+  .cx { max-width: 920px; margin: 0 auto; }
   .cx-eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
-  .cx-hero h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.1; margin: 8px 0 10px; letter-spacing: -.02em; }
-  .cx-hero p { max-width: 760px; color: var(--muted); font-size: 15.5px; margin: 0; }
+  .cx h1 { font-size: clamp(26px, 4vw, 36px); line-height: 1.15; margin: 8px 0 12px; letter-spacing: -.02em; }
+  .cx-lead { color: var(--muted); font-size: 16px; line-height: 1.6; margin: 0; }
+  .cx h2 { font-size: 20px; margin: 44px 0 6px; letter-spacing: -.01em; }
+  .cx h2 + p { color: var(--muted); margin: 0 0 16px; }
+  .cx code { font: 12.5px var(--mono); background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1px 5px; }
+  .cx pre { margin: 10px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--code-bg); border: 1px solid var(--border); font: 12.5px/1.6 var(--mono); overflow-x: auto; white-space: pre; }
+  .cx pre .c { color: var(--faint); }
 
-  .cx-flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1.25fr auto 1fr; align-items: stretch; gap: 10px; margin: 22px 0 8px; }
-  .cx-step { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; box-shadow: var(--shadow-sm); }
-  .cx-step b { display: block; font-size: 14px; margin-bottom: 4px; }
-  .cx-step span { font-size: 12.5px; color: var(--muted); }
-  .cx-step.core { border-color: var(--accent); background: var(--accent-soft); }
-  .cx-step .tag { display: inline-block; margin: 6px 4px 0 0; padding: 1px 8px; border-radius: 999px; font: 500 11.5px var(--mono); background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }
-  .cx-arrow { align-self: center; color: var(--faint); font-size: 18px; }
-  @media (max-width: 900px) { .cx-flow { grid-template-columns: 1fr; } .cx-arrow { transform: rotate(90deg); justify-self: center; } }
+  .cx-needs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 12px; }
+  .cx-need { padding: 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); }
+  .cx-need b { display: block; font-size: 15px; margin-bottom: 4px; }
+  .cx-need span { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+  .cx-need .k { display: block; margin-top: 10px; font: 12px var(--mono); color: var(--accent); }
 
-  .cx-compare { width: 100%; border-collapse: collapse; font-size: 14px; }
-  .cx-compare th, .cx-compare td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  .cx-compare th { font-size: 12.5px; color: var(--muted); font-weight: 600; }
-  .cx-compare td:first-child { color: var(--muted); width: 22%; }
-  .cx-compare tr.same td { background: var(--accent-soft); }
-  .cx-compare code, .cx-card code { font: 12.5px var(--mono); background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; word-break: break-all; }
-  .cx-scroll { overflow-x: auto; }
+  .cx-steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
+  .cx-steps > li { position: relative; padding: 0 0 26px 48px; counter-increment: step; }
+  .cx-steps > li::before { content: counter(step); position: absolute; left: 0; top: -2px; width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 700; font-size: 14px; background: var(--accent-soft); color: var(--accent); }
+  .cx-steps > li::after { content: ""; position: absolute; left: 14.5px; top: 34px; bottom: 6px; width: 1px; background: var(--border); }
+  .cx-steps > li:last-child::after { display: none; }
+  .cx-steps h3 { margin: 2px 0 4px; font-size: 16px; }
+  .cx-steps p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.6; }
 
-  .cx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 16px; }
-  .cx-card { display: flex; flex-direction: column; gap: 12px; }
-  .cx-card-head { display: flex; align-items: flex-start; gap: 10px; }
-  .cx-card-head h3 { margin: 0; font-size: 17px; }
-  .cx-card-head .small { margin-top: 2px; }
-  .cx-card-head .spacer { flex: 1; }
+  .cx-callout { margin-top: 12px; padding: 14px 16px; border-radius: 12px; background: var(--info-bg); color: var(--text); font-size: 14px; line-height: 1.6; }
+  .cx-callout b { color: var(--info); }
+
+  .cx-list { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); overflow: hidden; }
+  .cx-item { border-top: 1px solid var(--border); }
+  .cx-item:first-child { border-top: 0; }
+  .cx-item > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 14px 16px; }
+  .cx-item > summary::-webkit-details-marker { display: none; }
+  .cx-item > summary:hover { background: var(--surface-2); }
+  .cx-name b { font-size: 15px; }
+  .cx-name .small { margin-top: 2px; }
   .cx-state { padding: 3px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
   .cx-state.ok { background: var(--ok-bg); color: var(--ok); }
   .cx-state.bad { background: var(--bad-bg); color: var(--bad); }
-  .cx-rows { display: grid; grid-template-columns: 92px 1fr; gap: 7px 12px; font-size: 13.5px; margin: 0; }
-  .cx-rows dt { color: var(--faint); font-weight: 550; }
-  .cx-rows dd { margin: 0; min-width: 0; }
-  .cx-log { display: inline-flex; gap: 4px; align-items: baseline; margin: 0 8px 4px 0; }
-  .cx-log .a { font: 11.5px var(--mono); color: var(--accent); }
-  .cx-log .r { font-size: 11.5px; color: var(--faint); }
-  .cx-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
-  .cx-checks { list-style: none; margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); font-size: 13px; display: grid; gap: 5px; }
-  .cx-checks li { display: grid; grid-template-columns: 18px 82px 1fr; gap: 6px; }
-  .cx-checks .m { font-weight: 700; }
+  .cx-body { padding: 4px 16px 16px; display: grid; gap: 12px; }
+  .cx-rows { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; font-size: 13.5px; margin: 0; }
+  .cx-rows dt { color: var(--faint); }
+  .cx-rows dd { margin: 0; min-width: 0; word-break: break-word; }
+  .cx-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cx-checks { list-style: none; margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font-size: 13px; display: grid; gap: 4px; }
+  .cx-checks li { display: grid; grid-template-columns: 16px 1fr; gap: 6px; }
   .cx-checks .ok .m { color: var(--ok); } .cx-checks .warn .m { color: var(--warn); } .cx-checks .error .m { color: var(--bad); } .cx-checks .info .m { color: var(--info); }
-  .cx-checks .area { color: var(--faint); }
-  .cx-checks .msg { word-break: break-word; }
-
-  .cx-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
-  .cx-steps pre { margin: 8px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--code-bg); border: 1px solid var(--border); font: 12.5px/1.5 var(--mono); overflow-x: auto; white-space: pre; }
-  .cx-steps h3 { margin: 0 0 4px; font-size: 15px; }
-  .cx-steps p { margin: 0; color: var(--muted); font-size: 13.5px; }
-  .cx-schema td:first-child { font: 12.5px var(--mono); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -70,167 +67,148 @@
   <button class="icon-btn" id="theme-btn" type="button"></button>
   <div class="user-menu" id="user-menu"></div>
 </header>
-<main class="wrap">
-  <section class="cx-hero">
-    <div class="cx-eyebrow">Argus Connect</div>
-    <h1>Same agents. Any service.</h1>
-    <p>Each service plugs into Argus through adapters for its monitoring, its code and its logs, and an <code>argus.yaml</code>
-      that says how to reproduce a failure, how to test a fix and who must approve it. The agents and the pipeline never change.</p>
-    <div class="cx-flow" aria-label="How a service connects to Argus">
-      <div class="cx-step"><b>Alert adapters</b><span>Any monitoring tool, one shape</span><br>
-        <span class="tag">alertmanager</span><span class="tag">grafana</span><span class="tag">standard</span></div>
-      <div class="cx-arrow" aria-hidden="true">→</div>
-      <div class="cx-step"><b>Standard incident</b><span>Routed to the service whose labels match, severity set by its policy</span></div>
-      <div class="cx-arrow" aria-hidden="true">→</div>
-      <div class="cx-step core"><b>The Argus team, unchanged</b><span>Plan, investigate, fact-check, find the change, fix. Reads the code
-        and logs through adapters:</span><br><span class="tag">git</span><span class="tag">text</span><span class="tag">jsonl</span><span class="tag">csv</span><span class="tag">command</span></div>
-      <div class="cx-arrow" aria-hidden="true">→</div>
-      <div class="cx-step"><b>The service's own checks</b><span>Its repro and test commands in the sandbox, then its approval rule</span></div>
-    </div>
-  </section>
+<main class="wrap"><div class="cx">
+  <div class="cx-eyebrow">Argus Connect</div>
+  <h1>Point Argus at any application</h1>
+  <p class="cx-lead">Argus's agents are written once. To look after another application you don't change them: you describe the
+    application in one file, <code>argus.yaml</code>. ShopFast (Python) and QuickBite (Node.js) below are two very different
+    apps run by exactly the same agents.</p>
 
-  <section class="panel">
-    <h2 style="margin-top:0">One pipeline, two different apps</h2>
-    <p class="small faint" style="margin-top:-6px">Everything that differs below lives in each app's <code>argus.yaml</code>. The highlighted row is what they share.</p>
-    <div class="cx-scroll"><table class="cx-compare" id="compare"></table></div>
-  </section>
+  <h2>What Argus needs from your application</h2>
+  <p>Four things. Argus only reads them; it never changes your systems without a person's approval.</p>
+  <div class="cx-needs">
+    <div class="cx-need"><b>Its code</b><span>A git repo, so the agents can read the code and find the change that broke it.</span><span class="k">repo:</span></div>
+    <div class="cx-need"><b>Its alerts</b><span>Your monitoring tool sends a webhook to Argus when something crosses a threshold.</span><span class="k">alerts:</span></div>
+    <div class="cx-need"><b>Its logs</b><span>The app's logs, its metrics, deploy records, and the logs of what it depends on, like its database.</span><span class="k">logs:</span></div>
+    <div class="cx-need"><b>A health check</b><span>A command that fails while the problem is happening and passes once it's fixed. Fixes are tested with it.</span><span class="k">commands:</span></div>
+  </div>
 
-  <div class="section-head"><h2>Connected services</h2><p>Every incident starts only if its service passes these checks.</p></div>
-  <div class="cx-grid" id="services"><div class="panel small faint">Loading…</div></div>
+  <h2>Connect a new application, step by step</h2>
+  <p>About ten minutes. The example is a billing service with a Postgres database.</p>
+  <ol class="cx-steps">
+    <li><h3>Start the wizard</h3>
+      <p>It asks for the repo, the monitoring tool, each log file and the health-check command, detects JSON and CSV log formats,
+        and writes <code>scenarios/billing_api/argus.yaml</code>. You can also copy an existing one and edit it.</p>
+      <pre>python -m connect.wizard new billing_api</pre></li>
+    <li><h3>Say where the code is</h3>
+      <p>A local checkout, or a URL that Argus clones on first use.</p>
+      <pre>repo:
+  path: C:/code/billing-api        <span class="c"># or  url: https://github.com/acme/billing-api.git</span></pre></li>
+    <li><h3>Add the logs, including the database</h3>
+      <p>Give each log a name and say what it is. The role matters: the fact checker won't confirm "the database is the problem"
+        from your app's errors alone; it needs the database's own log.</p>
+      <pre>logs:
+  - {name: app.log,     adapter: jsonl, path: logs/app.jsonl,     role: service}   <span class="c"># your app</span>
+  - {name: metrics.log, adapter: csv,   path: logs/metrics.csv,   role: metrics}
+  - {name: deploy.log,  adapter: jsonl, path: logs/deploys.jsonl, role: deploy}    <span class="c"># CI records</span>
+  - name: db.log                                                                 <span class="c"># the database</span>
+    adapter: command
+    run: docker logs billing-postgres --since 2h
+    role: dependency
+    dependency: Billing database</pre>
+      <div class="cx-callout"><b>Connecting a database.</b> Argus doesn't log in to your database or run queries on it. It reads the
+        database's own log: slow queries, connection counts, locks, errors. Use <code>adapter: text</code> with a <code>path</code> if
+        the log is a file, or <code>adapter: command</code> to read it from <code>docker logs</code>, <code>kubectl logs</code> or a
+        cloud CLI. Name it as a <code>dependency</code> and the agents can prove or rule out the database.</div></li>
+    <li><h3>Write the health check</h3>
+      <p>A small script that replays the failing request against the repo: exit 0 when healthy, non-zero while broken. Argus runs it
+        on a throwaway copy before and after a fix, then your tests. A fix only reaches a person if the check goes from failing to passing.</p>
+      <pre>commands:
+  files: [checks/repro.py]
+  repro: python checks/repro.py {repo}       <span class="c"># {repo} is the sandbox copy</span>
+  test: python -m pytest -q {repo}/tests</pre></li>
+    <li><h3>Check it</h3>
+      <p>Every adapter is validated, and <code>--full</code> runs the health check and tests once in the sandbox. Argus refuses to
+        start an incident for a service whose check has errors.</p>
+      <pre>python -m connect.wizard check billing_api --full</pre></li>
+    <li><h3>Send its alerts to Argus</h3>
+      <p>Add Argus as a webhook in your monitoring tool. The alert's <code>service</code> label picks the application.</p>
+      <pre id="webhooks"></pre></li>
+  </ol>
+  <p class="small faint">Full reference: <code>docs/CONNECT.md</code> · the incident format every alert becomes: <a href="/connect/schema">JSON Schema</a></p>
 
-  <div class="section-head"><h2>Connect your own service</h2><p>Three steps, no change to Argus itself.</p></div>
-  <section class="cx-steps">
-    <div class="panel"><h3>1. Describe it</h3><p>The wizard asks for the repo, the monitoring tool, the log files (it detects JSON and CSV formats) and the repro and test commands, then writes <code>argus.yaml</code>.</p>
-      <pre>python -m connect.wizard new my_service</pre></div>
-    <div class="panel"><h3>2. Check it</h3><p>Validates every adapter and, with <code>--full</code>, runs the repro and tests once in the sandbox, exactly as a fix will be tested.</p>
-      <pre>python -m connect.wizard check my_service --full</pre></div>
-    <div class="panel"><h3>3. Point alerts at Argus</h3><p>Add a webhook to Alertmanager or a Grafana contact point, or post the standard format from any script.</p>
-      <pre id="webhook">POST /alerts</pre></div>
-  </section>
-
-  <div class="section-head"><h2>The standard incident</h2><p>What every alert adapter produces. <a href="/connect/schema">JSON Schema</a></p></div>
-  <section class="panel cx-scroll"><table class="cx-compare cx-schema" id="schema"></table></section>
-</main>
+  <h2>Connected applications</h2>
+  <p>Open one to see what it's connected to, run its checks, or send it a sample alert.</p>
+  <div class="cx-list" id="services"><div class="cx-body small faint">Loading…</div></div>
+</div></main>
 <script src="/static/common.js"></script>
+<script src="/static/palette.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
-const TOOL = { alertmanager: "Prometheus Alertmanager", grafana: "Grafana Alerting", standard: "Standard JSON" };
+const TOOL = { alertmanager: "Prometheus Alertmanager", grafana: "Grafana", standard: "JSON webhook" };
+const LANG = { python: "Python", javascript: "Node.js", go: "Go" };
 const MARK = { ok: "✓", info: "i", warn: "!", error: "✗" };
+const FIRST = ["live_shop", "quickbite_orders"];  // the two sample apps, then the recorded incidents
 let services = [];
-const reports = {};
+const reports = {}, open = new Set();
 
-const logList = (s) => s.logs.map((l) => `<span class="cx-log"><span>${esc(l.name)}</span><span class="a">${esc(l.adapter)}</span><span class="r">${esc(l.role)}</span></span>`).join("");
-const policy = (s) => {
-  const rules = (s.severity.rules || []).map((r) => `${r.metric} ≥ ${r.above} → ${r.severity}`);
-  const appr = Object.entries(s.severity.approvals || {}).map(([k, v]) => `${k}: ${v.lead ? (v.count > 1 ? `${v.count} people incl. a lead` : "a team lead") : `${v.count} approver${v.count > 1 ? "s" : ""}`}`);
-  return { rules: rules.join("; ") || "The alert's own severity", approvals: appr.join("; ") || "Argus default (one developer or lead)" };
-};
+const approvals = (s) => Object.entries(s.severity.approvals || {}).map(([k, v]) => `${k === "default" ? "other severities" : k}: ${v.lead ? (v.count > 1 ? `${v.count} people incl. a lead` : "a team lead") : `${v.count} approver${v.count > 1 ? "s" : ""}`}`).join("; ");
 
-function renderCompare() {
-  const a = services.find((s) => s.key === "live_shop"), b = services.find((s) => s.key === "quickbite_orders");
-  if (!a || !b) { $("compare").innerHTML = ""; return; }
-  const fmt = (s) => [...new Set(s.logs.map((l) => l.adapter))].join(", ");
-  const deploy = (s) => { const d = s.logs.find((l) => l.role === "deploy"); return d ? `${esc(d.name)} <span class="faint">(${esc(d.adapter)}${d.path ? `, ${esc(d.path)}` : ""})</span>` : "–"; };
-  const rows = [
-    ["App", `<b>${esc(a.label)}</b> <span class="faint">${esc(a.service)}</span>`, `<b>${esc(b.label)}</b> <span class="faint">${esc(b.service)}</span>`],
-    ["Language", esc(a.language), esc(b.language)],
-    ["Monitoring", esc(TOOL[a.alerts]), esc(TOOL[b.alerts])],
-    ["Log formats", esc(fmt(a)), esc(fmt(b))],
-    ["Deploy records", deploy(a), deploy(b)],
-    ["Repro check", `<code>${esc(a.commands.repro)}</code>`, `<code>${esc(b.commands.repro)}</code>`],
-    ["Tests", `<code>${esc(a.commands.test || "–")}</code>`, `<code>${esc(b.commands.test || "–")}</code>`],
-    ["Severity", esc(policy(a).rules), esc(policy(b).rules)],
-    ["Approval", esc(policy(a).approvals), esc(policy(b).approvals)],
-    ["On call", esc(a.on_call || "–"), esc(b.on_call || "–")],
-  ];
-  $("compare").innerHTML = `<thead><tr><th></th><th>ShopFast</th><th>QuickBite</th></tr></thead><tbody>` +
-    rows.map(([k, x, y]) => `<tr><td>${k}</td><td>${x}</td><td>${y}</td></tr>`).join("") +
-    `<tr class="same"><td>Agents and pipeline</td><td colspan="2"><b>Identical</b>: the same seven agents, prompts, evidence checker, sandbox and approval gate</td></tr></tbody>`;
+function item(s) {
+  const r = reports[s.key] || s.check, can = Session.is("developer", "lead");
+  const state = r.ok ? `<span class="cx-state ok">Ready</span>` : `<span class="cx-state bad">${r.errors} problem${r.errors > 1 ? "s" : ""}</span>`;
+  const logs = s.logs.map((l) => `${esc(l.name)} <span class="faint">(${esc(l.role)}${l.dependency ? `: ${esc(l.dependency)}` : ""})</span>`).join(", ");
+  return `<details class="cx-item" data-key="${esc(s.key)}" ${open.has(s.key) ? "open" : ""}>
+    <summary><div class="cx-name"><b>${esc(s.label || s.service)}</b>
+      <div class="small faint">${esc(LANG[s.language] || s.language || "")} · alerts from ${esc(TOOL[s.alerts] || s.alerts)} · ${s.logs.length} log sources</div></div>${state}</summary>
+    <div class="cx-body">
+      <dl class="cx-rows">
+        <dt>Service</dt><dd>${esc(s.service)} <span class="faint">· folder <code>scenarios/${esc(s.key)}</code></span></dd>
+        <dt>Logs</dt><dd>${logs || "–"}</dd>
+        <dt>Health check</dt><dd><code>${esc(s.commands.repro)}</code></dd>
+        ${s.commands.test ? `<dt>Tests</dt><dd><code>${esc(s.commands.test)}</code></dd>` : ""}
+        ${approvals(s) ? `<dt>Approval</dt><dd>${esc(approvals(s))} <span class="faint">(its own rule)</span></dd>` : ""}
+        ${s.on_call ? `<dt>On call</dt><dd>${esc(s.on_call)}</dd>` : ""}
+      </dl>
+      ${reports[s.key] ? `<ul class="cx-checks">${r.checks.map((c) => `<li class="${esc(c.status)}"><span class="m">${MARK[c.status]}</span><span>${esc(c.message)}</span></li>`).join("")}</ul>` : ""}
+      <div class="cx-actions">
+        <button class="btn small" data-act="full" type="button" ${can ? "" : 'disabled title="Developers and leads can run this"'}>Run the checks</button>
+        ${s.sample_alert ? `<button class="btn small primary" data-act="alert" type="button" ${can && r.ok ? "" : `disabled title="${r.ok ? "Developers and leads can send this" : "Fix the problems first"}"`}>Send a sample alert</button>` : ""}
+      </div>
+    </div></details>`;
 }
 
-function checksHtml(r) {
-  return `<ul class="cx-checks">${r.checks.map((c) => `<li class="${esc(c.status)}"><span class="m">${MARK[c.status]}</span><span class="area">${esc(c.area)}</span><span class="msg">${esc(c.message)}</span></li>`).join("")}</ul>`;
-}
-
-function card(s) {
-  const r = reports[s.key] || s.check;
-  const can = Session.is("developer", "lead");
-  const deps = (s.dependencies || []).map((d) => `${esc(d.name)}${d.logs && d.logs.length ? ` <span class="faint">(${d.logs.map(esc).join(", ")})</span>` : ""}`).join("; ");
-  const p = policy(s);
-  const state = r.ok ? `<span class="cx-state ok">Ready${r.warnings ? ` · ${r.warnings} warning${r.warnings > 1 ? "s" : ""}` : ""}</span>`
-                     : `<span class="cx-state bad">${r.errors} error${r.errors > 1 ? "s" : ""}</span>`;
-  return `<section class="panel cx-card" data-key="${esc(s.key)}">
-    <div class="cx-card-head"><div><h3>${esc(s.label || s.service)}</h3><div class="small faint">${esc(s.service)} · folder <code>${esc(s.key)}</code>${s.configured ? "" : " · built-in layout"}</div></div>
-      <span class="spacer"></span>${state}</div>
-    <div class="chips" style="margin:0">${s.language ? `<span class="chip">${esc(s.language)}</span>` : ""}${s.team ? `<span class="chip">${esc(s.team)}</span>` : ""}${s.on_call ? `<span class="chip"><span class="faint">on call</span> ${esc(s.on_call)}</span>` : ""}${s.live_app ? `<span class="chip">live app: ${esc(s.live_app.app)}</span>` : ""}</div>
-    <dl class="cx-rows">
-      <dt>Code</dt><dd>${esc(s.repo)} repo</dd>
-      <dt>Alerts</dt><dd>${esc(TOOL[s.alerts] || s.alerts)}${s.sample_alert ? ` <span class="faint">· sample payload ready</span>` : ""}</dd>
-      <dt>Logs</dt><dd>${logList(s) || "–"}</dd>
-      ${deps ? `<dt>Depends on</dt><dd>${deps}</dd>` : ""}
-      <dt>Repro</dt><dd><code>${esc(s.commands.repro)}</code></dd>
-      ${s.commands.test ? `<dt>Tests</dt><dd><code>${esc(s.commands.test)}</code></dd>` : ""}
-      <dt>Severity</dt><dd>${esc(p.rules)}</dd>
-      <dt>Approval</dt><dd>${esc(p.approvals)}</dd>
-    </dl>
-    <div class="cx-out">${reports[s.key] ? checksHtml(r) : ""}</div>
-    <div class="cx-actions">
-      <button class="btn small" data-act="show" type="button">${reports[s.key] ? "Hide checks" : "Show checks"}</button>
-      <button class="btn small" data-act="full" type="button" ${can ? "" : "disabled title=\"Developers and leads can run this\""}>Full check (runs repro and tests)</button>
-      ${s.sample_alert ? `<button class="btn small primary" data-act="alert" type="button" ${can && r.ok ? "" : `disabled title="${r.ok ? "Developers and leads can send this" : "Fix the config errors first"}"`}>Send test ${esc(s.sample_alert.adapter)} alert</button>` : ""}
-    </div></section>`;
-}
-
-function renderServices() {
-  $("services").innerHTML = services.map(card).join("");
-  $("services").querySelectorAll(".cx-card").forEach((el) => {
+function render() {
+  $("services").innerHTML = services.map(item).join("");
+  $("services").querySelectorAll(".cx-item").forEach((el) => {
     const s = services.find((x) => x.key === el.dataset.key);
+    el.addEventListener("toggle", () => el.open ? open.add(s.key) : open.delete(s.key));
     el.querySelectorAll("button[data-act]").forEach((b) => b.onclick = async () => {
-      const act = b.dataset.act;
-      if (act === "show") {
-        if (reports[s.key]) delete reports[s.key]; else reports[s.key] = s.check;
-        return renderServices();
-      }
-      b.disabled = true;
       const label = b.textContent;
-      b.textContent = act === "full" ? "Running in the sandbox…" : "Sending…";
+      b.disabled = true;
+      b.textContent = b.dataset.act === "full" ? "Checking in the sandbox…" : "Sending…";
       try {
-        if (act === "full") {
+        if (b.dataset.act === "full") {
           reports[s.key] = await api(`/connect/services/${encodeURIComponent(s.key)}/check?full=true`, { method: "POST" });
-          toastMsg(reports[s.key].ok ? `${s.label}: ready` : `${s.label}: ${reports[s.key].errors} error(s)`, reports[s.key].ok ? "" : "bad");
-          renderServices();
+          toastMsg(reports[s.key].ok ? `${s.label}: ready` : `${s.label}: ${reports[s.key].errors} problem(s)`, reports[s.key].ok ? "" : "bad");
+          render();
         } else {
           const r = await api(`/connect/services/${encodeURIComponent(s.key)}/test-alert`, { method: "POST" });
-          toastMsg(`${TOOL[r.received_from]} alert routed to ${r.service_folder}: ${r.key} opened`);
+          toastMsg(`${TOOL[r.received_from]} alert opened ${r.key}`);
           setTimeout(() => { location.href = r.url; }, 700);
         }
-      } catch (e) {
-        toastMsg(e.message, "bad");
-        b.disabled = false;
-        b.textContent = label;
-      }
+      } catch (e) { toastMsg(e.message, "bad"); b.disabled = false; b.textContent = label; }
     });
   });
 }
 
-function renderSchema(schema) {
-  const req = new Set(schema.required || []);
-  const type = (p) => p.type || (p.anyOf || []).map((x) => x.type).filter((t) => t && t !== "null").join(" | ") || (p.enum ? p.enum.join(" | ") : "");
-  $("schema").innerHTML = `<thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead><tbody>` +
-    Object.entries(schema.properties).map(([k, p]) => `<tr><td>${esc(k)}${req.has(k) ? "" : ' <span class="faint">?</span>'}</td>
-      <td class="small">${esc(p.enum ? p.enum.join(" | ") : type(p))}</td><td class="small">${esc(p.description || "")}</td></tr>`).join("") + "</tbody>";
-}
+$("webhooks").innerHTML = esc(`# Prometheus Alertmanager (alertmanager.yml)
+receivers:
+  - name: argus
+    webhook_configs: [{url: ${location.origin}/alerts}]
 
-$("webhook").textContent = `POST ${location.origin}/alerts`;
+# Grafana: Alerting → Contact points → Webhook → URL
+${location.origin}/alerts
+
+# Anything else: post the standard format
+curl -X POST ${location.origin}/alerts -H "content-type: application/json" \\
+  -d '{"service": "billing-api", "title": "billing-api 5xx rate 20%", "severity": "high"}'`).replace(/^(#.*)$/gm, '<span class="c">$1</span>');
 mountThemeToggle($("theme-btn"));
 mountUserMenu($("user-menu"));
-Session.onChange(() => services.length && renderServices());
-Promise.all([Session.load(), api("/connect/services"), api("/connect/schema")]).then(([, list, schema]) => {
-  const first = ["live_shop", "quickbite_orders"];  // the two sample apps, then the recorded incidents
-  services = list.sort((a, b) => ((first.indexOf(a.key) + 1) || 9) - ((first.indexOf(b.key) + 1) || 9) || a.key.localeCompare(b.key));
-  renderCompare();
-  renderServices();
-  renderSchema(schema);
+Session.onChange(() => services.length && render());
+Promise.all([Session.load(), api("/connect/services")]).then(([, list]) => {
+  services = list.sort((a, b) => ((FIRST.indexOf(a.key) + 1) || 9) - ((FIRST.indexOf(b.key) + 1) || 9) || a.key.localeCompare(b.key));
+  render();
 }).catch((e) => toastMsg(e.message, "bad"));
 </script>
 </body>

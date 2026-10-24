@@ -96,9 +96,10 @@ def check(cfg: ServiceConfig, full: bool = False, users: list[str] | None = None
                 add("warn", "repo", "only one commit: the change finder has no history to compare against")
         except ValueError as e:
             add("error", "repo", f"{repo.path} has no commits: {e}")
+    elif (cfg.base_dir / "history.py").is_file():  # a sample app: Argus builds its repo on first use
+        add("info", "repo", f"the sample repo is built from history.py on first use (or: python -m scenarios.build {cfg.key})")
     elif not cfg.repo.url:
-        hint = " (build it with python -m scenarios.build " + cfg.key + ")" if (cfg.base_dir / "history.py").is_file() else ""
-        add("error", "repo", f"no git repo at {repo.path}{hint}")
+        add("error", "repo", f"no git repo at {repo.path}")
 
     # ---- alerts ----------------------------------------------------------------
     try:
