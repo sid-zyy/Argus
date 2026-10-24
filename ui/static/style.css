@@ -1183,3 +1183,66 @@ a.tile-link:hover { text-decoration: none; border-color: var(--border-strong); }
 .val-form .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
 .val-form h3 { font-size: 14px; margin: 16px 0 0; }
 .val-form h3:first-of-type { margin-top: 4px; }
+
+/* ---- impact graph, light theme: a white canvas like Figma or Datadog's service map; dark mode keeps the console ---- */
+:root:not([data-theme="dark"]) :is(.igx-canvas, .igx-side, .igx-layer) {
+  --c-bg: #f7f8fb; --c-panel: #ffffff; --c-line: #e2e5ee; --c-text: #1d2026; --c-muted: #697085;
+  --c-dep: #b9c1d6; --c-crit: #d6453b; --c-inf: #b7791f; --c-ok: #1f8a5b; --c-root: #6a5ce0;
+}
+:root:not([data-theme="dark"]) .igx-canvas { box-shadow: var(--shadow);
+  background: radial-gradient(circle at 1px 1px, rgba(60,70,110,.13) 1px, transparent 0) 0 0 / 24px 24px,
+    radial-gradient(70% 60% at 30% 30%, rgba(80,72,216,.05), transparent 60%), radial-gradient(60% 50% at 85% 80%, rgba(214,69,59,.04), transparent 60%), #f7f8fb; }
+:root:not([data-theme="dark"]) :is(.igx-toolbar, .igx-zoom, .igx-mini, .igx-legend, .igx-time) {
+  background: rgba(255,255,255,.92); border-color: var(--c-line); box-shadow: 0 4px 16px -8px rgba(30,30,60,.18); }
+:root:not([data-theme="dark"]) :is(.igx-tool, .igx-zoom button):hover { background: rgba(20,30,60,.06); }
+:root:not([data-theme="dark"]) .igx-tool.on { color: var(--accent); background: var(--accent-soft); }
+:root:not([data-theme="dark"]) .igx-node { filter: drop-shadow(0 1px 2px rgba(30,30,60,.08)); }
+:root:not([data-theme="dark"]) .igx-box { fill: #fff; stroke: var(--c-line); }
+:root:not([data-theme="dark"]) .igx-node:hover .igx-box, :root:not([data-theme="dark"]) .igx-node:focus .igx-box { stroke: #b4bccf; }
+:root:not([data-theme="dark"]) .igx-node.sel .igx-box { stroke: var(--accent); stroke-width: 2; }
+:root:not([data-theme="dark"]) .igx-ic { fill: #f1f3f8; }
+:root:not([data-theme="dark"]) .igx-icg { color: #5d6785; }
+:root:not([data-theme="dark"]) .igx-label { fill: #1d2026; }
+:root:not([data-theme="dark"]) .igx-sub { fill: #697085; }
+:root:not([data-theme="dark"]) .igx-node.s-obs .igx-box { fill: #fff5f3; stroke: rgba(214,69,59,.45); }
+:root:not([data-theme="dark"]) .igx-node.s-obs .igx-ic { fill: rgba(214,69,59,.1); }
+:root:not([data-theme="dark"]) .igx-node.s-obs .igx-icg, :root:not([data-theme="dark"]) .igx-node.s-obs .igx-sub { color: #c4362f; fill: #c4362f; }
+:root:not([data-theme="dark"]) .igx-node.s-inf .igx-box { fill: #fffaf1; stroke: rgba(183,121,31,.4); }
+:root:not([data-theme="dark"]) .igx-node.s-inf .igx-ic { fill: rgba(183,121,31,.1); }
+:root:not([data-theme="dark"]) .igx-node.s-inf .igx-icg, :root:not([data-theme="dark"]) .igx-node.s-inf .igx-sub { color: #9a5b00; fill: #9a5b00; }
+:root:not([data-theme="dark"]) .igx-node.s-soon .igx-box { stroke: rgba(183,121,31,.3); }
+:root:not([data-theme="dark"]) .igx-node.s-soon .igx-sub { fill: #9a5b00; }
+:root:not([data-theme="dark"]) .igx-node.s-rec .igx-box { fill: #f5fbf8; stroke: rgba(31,138,91,.35); }
+:root:not([data-theme="dark"]) .igx-node.s-rec .igx-sub { fill: #18794e; }
+:root:not([data-theme="dark"]) .igx-node.k-business .igx-ic { fill: rgba(31,138,91,.08); }
+:root:not([data-theme="dark"]) .igx-node.k-business.s-ok .igx-icg { color: #18794e; }
+:root:not([data-theme="dark"]) .igx-node.crit .igx-box { stroke: rgba(214,69,59,.8); stroke-width: 1.6; }
+:root:not([data-theme="dark"]) .igx-edge.dep { opacity: 1; }
+:root:not([data-theme="dark"]) .igx-edge.obs { stroke: rgba(214,69,59,.55); }
+:root:not([data-theme="dark"]) .igx-edge.inf { stroke: rgba(183,121,31,.65); }
+:root:not([data-theme="dark"]) .igx-dot { fill: var(--c-crit); }
+:root:not([data-theme="dark"]) .igx-pill { fill: #fdecea; }
+:root:not([data-theme="dark"]) .igx-pill-t { fill: #c4362f; }
+:root:not([data-theme="dark"]) .igx-mini-svg rect { fill: #d9deea; }
+:root:not([data-theme="dark"]) .igx-mini-svg .mm-obs { fill: #e0675c; }
+:root:not([data-theme="dark"]) .igx-mini-svg .mm-inf { fill: #d9a54a; }
+:root:not([data-theme="dark"]) .igx-mini-svg .mm-view { fill: rgba(80,72,216,.06); stroke: var(--accent); }
+:root:not([data-theme="dark"]) .igx-range::-webkit-slider-runnable-track { background: linear-gradient(90deg, var(--c-crit) var(--fill, 0%), #e2e5ee var(--fill, 0%)); }
+:root:not([data-theme="dark"]) .igx-range::-moz-range-track { background: linear-gradient(90deg, var(--c-crit) var(--fill, 0%), #e2e5ee var(--fill, 0%)); }
+:root:not([data-theme="dark"]) .igx-range::-webkit-slider-thumb { box-shadow: 0 0 0 5px rgba(214,69,59,.15), 0 1px 3px rgba(30,30,60,.25); }
+:root:not([data-theme="dark"]) .igx-now { background: #fff; }
+:root:not([data-theme="dark"]) .igx-now:hover { background: #f1f3f8; }
+:root:not([data-theme="dark"]) :is(.igx-side, .igx-layer) { background: #fff; box-shadow: var(--shadow); }
+:root:not([data-theme="dark"]) .igx-card { background: #f8f9fc; }
+:root:not([data-theme="dark"]) .igx-x:hover { color: #1d2026; }
+:root:not([data-theme="dark"]) .igx-chip.bad { color: #c4362f; background: #fdecea; border-color: rgba(196,54,47,.3); }
+:root:not([data-theme="dark"]) .igx-chip.warn { color: #9a5b00; background: #fdf1db; border-color: rgba(154,91,0,.25); }
+:root:not([data-theme="dark"]) .igx-chip.ok { color: #18794e; background: #e5f5ec; border-color: rgba(24,121,78,.25); }
+:root:not([data-theme="dark"]) .igx-chip.root { color: #5a4bd6; background: #eeedfd; border-color: rgba(90,75,214,.3); }
+:root:not([data-theme="dark"]) .igx-path span { color: #a3a9b6; }
+:root:not([data-theme="dark"]) .igx-meter { background: #e9ecf3; }
+:root:not([data-theme="dark"]) .igx-meter i { background: linear-gradient(90deg, #5048d8, #2b9fc4); }
+:root:not([data-theme="dark"]) .igx-avatar { color: #18794e; background: #e5f5ec; border-color: rgba(24,121,78,.3); }
+:root:not([data-theme="dark"]) .l-code .igx-layer-ic { color: #6a5ce0; background: #eeedfd; }
+:root:not([data-theme="dark"]) .l-infra .igx-layer-ic { color: #3b5bd6; background: #e8eefc; }
+:root:not([data-theme="dark"]) .l-biz .igx-layer-ic { color: #18794e; background: #e5f5ec; }
