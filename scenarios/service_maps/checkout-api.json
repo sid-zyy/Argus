@@ -6,7 +6,7 @@
      "signals": ["PaymentTimeout", "did not respond within", "payments\\.internal"], "note": "Charges customers' cards"},
     {"id": "postgres", "label": "Orders database", "kind": "data", "col": 0, "code": [],
      "signals": ["deadlock", "database is down"], "note": "Stores orders and order history"},
-    {"id": "pool", "label": "DB connection pool", "kind": "infra", "col": 1, "code": ["app/db.py"],
+    {"id": "pool", "label": "Connection pool", "kind": "infra", "col": 1, "code": ["app/db.py"],
      "signals": ["pool exhausted", "DBConnectionTimeout", "pool usage high", "pool\\.release\\(", "pool\\.acquire\\("], "note": "20 shared connections to the database"},
     {"id": "checkout", "label": "checkout-api", "kind": "service", "col": 2, "code": ["app/checkout.py", "app/main.py", "app/config.py", "app/http.py"],
      "signals": ["5xx", "status=50[234]", "error_rate"], "note": "Takes payment and creates the order"},

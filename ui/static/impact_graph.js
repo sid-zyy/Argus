@@ -3,7 +3,7 @@
 // toolbar, zoom, minimap and legend, a blast-radius side panel, and code / infrastructure / business layer cards.
 // Data: GET /incidents/{id}/impact-graph.
 const ImpactGraph = (() => {
-  const NW = 178, NH = 64, COL = 206, ROW = 112, PAD = 34;
+  const NW = 196, NH = 62, COL = 252, ROW = 120, PAD = 36;
   const KIND = { external: "External", data: "Data store", infra: "Infrastructure", service: "Service", frontend: "Customer-facing", business: "Business" };
   const ICON = {
     data: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
@@ -41,7 +41,7 @@ const ImpactGraph = (() => {
           <div class="igx-toolbar">${toolBtn("select", "Select: click a part to see details")}${toolBtn("pan", "Pan: drag to move, scroll to zoom")}${toolBtn("fit", "Fit the whole graph")}${toolBtn("focus", "Show only the critical path")}</div>
           <div class="igx-zoom"><button type="button" data-z="-1" aria-label="Zoom out">−</button><span class="igx-pct">100%</span><button type="button" data-z="1" aria-label="Zoom in">+</button></div>
           <svg class="igx-svg"><defs>
-            <filter id="igx-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="igx-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <marker id="igx-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="context-stroke"/></marker>
           </defs><g class="igx-world"></g></svg>
           <div class="igx-mini"><svg class="igx-mini-svg"></svg></div>
@@ -109,7 +109,15 @@ const ImpactGraph = (() => {
     addEventListener("resize", () => { if (data && canvas.clientWidth) fit(); });
 
     // ---- drawing ----
-    const failing = (n) => n.fails_at_min != null && n.fails_at_min <= T;
+    // a fixed incident shows as recovered until the slider is moved; then it shows how far it would have spread
+    const recovered = () => data.fixed && !touched;
+    const failing = (n) => !recovered() && n.fails_at_min != null && n.fails_at_min <= T;
+    // shorten a text element until it fits its width
+    function fitText(el, max) {
+      if (el.getComputedTextLength() <= max) return;
+      let s = el.textContent;
+      while (s.length > 3 && el.getComputedTextLength() > max) { s = s.slice(0, -1); el.textContent = `${s.trimEnd()}…`; }
+    }
     function paint() {
       const L = layout(data.nodes);
       world = { W: L.W, H: L.H };
@@ -117,35 +125,36 @@ const ImpactGraph = (() => {
       const path = data.critical_path || [], onPath = new Set(path);
       const pathEdge = new Set(path.slice(1).map((b, i) => `${path[i]}>${b}`));
       const edges = data.edges.map((e) => {
-        const a = pos[e.from], b = pos[e.to], x1 = a.x + NW, y1 = a.y + NH / 2, x2 = b.x - 4, y2 = b.y + NH / 2, mx = (x1 + x2) / 2;
+        const a = pos[e.from], b = pos[e.to], x1 = a.x + NW + 4, y1 = a.y + NH / 2, x2 = b.x - 8, y2 = b.y + NH / 2, mx = (x1 + x2) / 2;
         const d = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
         const live = failing(byId[e.from]) && failing(byId[e.to]);
         const crit = live && pathEdge.has(`${e.from}>${e.to}`);
         const cls = crit ? "crit" : live ? (e.observed ? "obs" : "inf") : "dep";
         const dim = focus && !crit ? " dim" : "";
-        return `<path class="igx-edge ${cls}${dim}" d="${d}" marker-end="url(#igx-arrow)" ${crit ? 'filter="url(#igx-glow)"' : ""}/>`
-          + (live && !dim ? `<circle class="igx-dot ${cls}" r="${crit ? 4 : 3}"><animateMotion dur="${crit ? 1.4 : 2.2}s" repeatCount="indefinite" path="${d}"/></circle>` : "");
+        return `<path class="igx-edge ${cls}${dim}" d="${d}"${crit ? ' marker-end="url(#igx-arrow)" filter="url(#igx-glow)"' : ""}/>`
+          + (crit && !dim ? `<circle class="igx-dot" r="2.6"><animateMotion dur="2.4s" repeatCount="indefinite" path="${d}"/></circle>` : "");
       }).join("");
       const nodes = data.nodes.map((n) => {
-        const p = pos[n.id], on = failing(n), soon = !on && n.fails_at_min != null;
-        const state = on ? (n.status === "observed" ? "obs" : "inf") : soon ? "soon" : "ok";
+        const p = pos[n.id], on = failing(n), soon = !recovered() && !on && n.fails_at_min != null;
+        const was = recovered() && n.status !== "healthy";
+        const state = on ? (n.status === "observed" ? "obs" : "inf") : soon ? "soon" : was ? "rec" : "ok";
         const crit = on && onPath.has(n.id);
-        const sub = on ? (n.value || (n.status === "observed" ? "Failing · seen in evidence" : "Affected · inferred"))
-          : soon ? `Fails in ${Math.round(n.fails_at_min - T)} min` : KIND[n.kind] || n.kind;
+        const sub = on ? (n.value || (n.status === "observed" ? "Seen failing" : "Likely affected"))
+          : soon ? `Fails in ${Math.round(n.fails_at_min - T)} min` : was ? "Recovered" : KIND[n.kind] || n.kind;
         const dim = focus && !onPath.has(n.id) ? " dim" : "";
         return `<g class="igx-node s-${state} k-${n.kind}${crit ? " crit" : ""}${n.origin ? " origin" : ""}${sel === n.id ? " sel" : ""}${dim}" data-id="${n.id}" transform="translate(${p.x},${p.y})" tabindex="0">
           <title>${esc(n.label)}: ${esc(n.note)}</title>
-          <rect class="igx-box" width="${NW}" height="${NH}" rx="12" ${crit ? 'filter="url(#igx-glow)"' : ""}/>
-          <rect class="igx-ic" x="11" y="${(NH - 36) / 2}" width="36" height="36" rx="9"/>
+          <rect class="igx-box" width="${NW}" height="${NH}" rx="12"/>
+          ${on || was ? `<rect class="igx-bar" x="0" y="12" width="3" height="${NH - 24}" rx="1.5"/>` : ""}
+          <rect class="igx-ic" x="12" y="${(NH - 34) / 2}" width="34" height="34" rx="9"/>
           <g class="igx-icg" transform="translate(20,${(NH - 18) / 2})">${svgIcon(n.kind)}</g>
-          <text class="igx-label" x="56" y="${NH / 2 - 3}">${esc(n.label)}</text>
-          <text class="igx-sub" x="56" y="${NH / 2 + 15}">${esc(sub.length > 21 ? sub.slice(0, 20) + "…" : sub)}</text>
-          ${crit ? `<g transform="translate(${NW / 2 - 32},${NH - 9})"><rect class="igx-pill" width="64" height="17" rx="5"/><text class="igx-pill-t" x="32" y="12">CRITICAL</text></g>` : ""}
-          ${n.origin ? `<g transform="translate(${NW - 4},-4)"><circle class="igx-bang" r="10"/><text class="igx-bang-t" y="4.5">!</text></g>
-            <text class="igx-root" x="${NW / 2}" y="-9">ROOT CAUSE · FIX GOES HERE</text>` : ""}
+          <text class="igx-label" x="58" y="${NH / 2 - 3}">${esc(n.label)}</text>
+          <text class="igx-sub" x="58" y="${NH / 2 + 15}">${esc(sub)}</text>
+          ${n.origin ? `<text class="igx-root" x="0" y="-9">ROOT CAUSE</text>` : ""}
         </g>`;
       }).join("");
       gw.innerHTML = edges + nodes;
+      gw.querySelectorAll(".igx-label, .igx-sub").forEach((t) => fitText(t, NW - 58 - 12));
       gw.querySelectorAll(".igx-node").forEach((g) => {
         g.onclick = () => { sel = sel === g.dataset.id ? null : g.dataset.id; paint(); side(); };
         g.onkeydown = (e) => { if (e.key === "Enter") g.onclick(); };
@@ -153,7 +162,7 @@ const ImpactGraph = (() => {
       q(".igx-t").textContent = T ? `${T} min` : "now";
       const down = data.nodes.filter(failing);
       const next = data.nodes.filter((n) => n.fails_at_min != null && n.fails_at_min > T).sort((a, b) => a.fails_at_min - b.fails_at_min)[0];
-      q(".igx-proj").innerHTML = data.fixed && !touched ? `<span class="igx-ok">Fixed.</span> Drag to see how far it would have spread.`
+      q(".igx-proj").innerHTML = recovered() ? `<span class="igx-ok">Fixed.</span> Drag to see how far it would have spread without the fix.`
         : `<b>${rupees(data.at_risk_per_minute * T)}</b> lost · <b>${down.length}/${data.nodes.length}</b> parts down${next ? ` · next: <b>${esc(next.label)}</b> in ${Math.round(next.fails_at_min - T)} min` : ""}`;
       if (!fitted) fit(); else apply();
     }
@@ -194,9 +203,9 @@ const ImpactGraph = (() => {
       const series = Array.from({ length: 19 }, (_, i) => data.nodes.filter((n) => n.fails_at_min != null && n.fails_at_min <= i * 5).length);
       const spark = series.map((v, i) => `${(i / 18) * 120},${34 - (v / data.nodes.length) * 32}`).join(" ");
       box.innerHTML = `<div class="igx-side-head"><h3>Blast radius analysis</h3></div>
-        <span class="igx-chip ${path.length > 1 ? "bad" : "ok"}">${path.length > 1 ? "CRITICAL PATH DETECTED" : "NO CRITICAL PATH"}</span>
+        <span class="igx-chip ${data.fixed ? "ok" : path.length > 1 ? "bad" : "ok"}">${data.fixed ? "RESOLVED" : path.length > 1 ? "CRITICAL PATH DETECTED" : "NO CRITICAL PATH"}</span>
         ${path.length > 1 ? `<div class="igx-path">${path.map(esc).join(' <span>→</span> ')}</div>` : ""}
-        <p class="igx-desc">${path.length > 1 ? `While this path is broken, about <b>${rupees(data.at_risk_per_minute)}</b> is lost every minute.` : "Nothing on the way to the business is failing right now."}</p>
+        <p class="igx-desc">${data.fixed ? `This was the path to the money. While it was broken, about <b>${rupees(data.at_risk_per_minute)}</b> was lost every minute.` : path.length > 1 ? `While this path is broken, about <b>${rupees(data.at_risk_per_minute)}</b> is lost every minute.` : "Nothing on the way to the business is failing right now."}</p>
         <div class="igx-card"><div class="igx-card-top"><small>Confidence</small><span class="igx-i" title="${esc(c.reasons.join(". "))}">?</span></div>
           <b class="igx-big">${c.value}%</b><div class="igx-meter"><i style="width:${c.value}%"></i></div>
           <small class="${c.value >= 80 ? "t-ok" : "t-warn"}">${c.value >= 80 ? "High" : c.value >= 60 ? "Medium" : "Low"} · ${esc(c.reasons[0] || "Early evidence only")}</small></div>
@@ -254,7 +263,7 @@ const ImpactGraph = (() => {
       b.textContent = !data ? "" : crit ? "Critical" : data.fixed ? "Fixed" : "";
       b.className = `tb-badge ${crit ? "bad" : data && data.fixed ? "ok" : ""}`;
     }
-    return { load, show() { fitted = false; if (data) requestAnimationFrame(() => { fit(); minimap(); }); } };
+    return { load, show() { fitted = false; if (data) requestAnimationFrame(() => paint()); } };  // labels can only be measured once visible
   }
   return { mount };
 })();

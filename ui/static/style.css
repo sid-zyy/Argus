@@ -866,3 +866,40 @@ body::after {
 @media (max-width: 900px) { .igx-ways { grid-template-columns: 1fr; } }
 .igx-note { margin-top: 10px; }
 @media (prefers-reduced-motion: reduce) { .igx-edge.inf, .igx-bang { animation: none; } .igx-dot { display: none; } }
+
+/* impact graph, calmer: muted colours, solid outlines, a thin status bar instead of loud borders */
+.igx-canvas, .igx-side, .igx-layer { --c-dep: #3a4768; --c-crit: #e0675c; --c-inf: #c8a35f; --c-ok: #52b48c; --c-root: #9d93ea; --c-panel: #121726; --c-line: #222a3f; }
+.igx-canvas { background: radial-gradient(circle at 1px 1px, rgba(140,150,200,.08) 1px, transparent 0) 0 0 / 24px 24px,
+  radial-gradient(70% 60% at 30% 30%, rgba(77,111,224,.07), transparent 60%), #0b0e17; }
+.igx-box { fill: var(--c-panel); stroke: var(--c-line); stroke-width: 1.2; }
+.igx-ic { fill: rgba(255,255,255,.035); }
+.igx-icg { color: #8d97b5; }
+.igx-label { font: 600 14px Inter, sans-serif; fill: #e3e6f1; }
+.igx-sub { font: 500 12px Inter, sans-serif; fill: #7f88a3; }
+.igx-bar { fill: var(--c-dep); }
+.igx-node.s-obs .igx-box { fill: #16131a; stroke: rgba(224,103,92,.42); stroke-width: 1.2; }
+.igx-node.s-obs .igx-bar { fill: var(--c-crit); } .igx-node.s-obs .igx-icg { color: #e8958c; } .igx-node.s-obs .igx-sub { fill: #d98a81; }
+.igx-node.s-obs .igx-ic { fill: rgba(224,103,92,.1); }
+.igx-node.s-inf .igx-box { fill: #15151a; stroke: rgba(200,163,95,.3); stroke-dasharray: none; stroke-width: 1.2; }
+.igx-node.s-inf .igx-bar { fill: var(--c-inf); } .igx-node.s-inf .igx-icg { color: #cdb07a; } .igx-node.s-inf .igx-sub { fill: #bfa676; }
+.igx-node.s-inf .igx-ic { fill: rgba(200,163,95,.08); }
+.igx-node.s-soon .igx-box { stroke: rgba(200,163,95,.22); stroke-dasharray: none; } .igx-node.s-soon .igx-sub { fill: #a9946c; }
+.igx-node.s-rec .igx-box { stroke: rgba(82,180,140,.3); } .igx-node.s-rec .igx-bar { fill: var(--c-ok); } .igx-node.s-rec .igx-sub { fill: #6fbf9c; }
+.igx-node.k-business .igx-ic { fill: rgba(82,180,140,.08); } .igx-node.k-business.s-ok .igx-icg { color: #6fbf9c; }
+.igx-node.crit .igx-box { stroke: rgba(224,103,92,.75); stroke-width: 1.5; stroke-dasharray: none; }
+.igx-node.origin .igx-box { stroke: var(--c-root); stroke-width: 1.6; stroke-dasharray: none; }
+.igx-node.sel .igx-box { stroke: #cfd5ea; stroke-width: 1.6; }
+.igx-root { font: 700 9.5px Inter, sans-serif; letter-spacing: .1em; fill: var(--c-root); text-anchor: start; }
+.igx-edge { stroke-width: 1.3; }
+.igx-edge.dep { stroke: var(--c-dep); opacity: .75; }
+.igx-edge.obs { stroke: rgba(224,103,92,.5); opacity: 1; }
+.igx-edge.inf { stroke: rgba(200,163,95,.5); stroke-dasharray: 4 5; animation: igx-flow 2.2s linear infinite; }
+.igx-edge.crit { stroke: var(--c-crit); stroke-width: 2; }
+.igx-dot { fill: #f3c2bb; }
+.l-crit { box-shadow: none; }
+.igx-chip.bad { color: #e8958c; background: rgba(224,103,92,.08); border-color: rgba(224,103,92,.3); }
+.igx-chip.warn { color: #cdb07a; background: rgba(200,163,95,.08); border-color: rgba(200,163,95,.3); }
+.igx-chip.ok { color: #6fbf9c; background: rgba(82,180,140,.08); border-color: rgba(82,180,140,.3); }
+.igx-path span { color: #a7afc6; }
+.igx-spark polyline { stroke: var(--c-crit); filter: none; }
+.igx-mini-svg rect { fill: #262e46; } .igx-mini-svg .mm-obs { fill: #b4574f; } .igx-mini-svg .mm-inf { fill: #9f8550; }
