@@ -15,7 +15,7 @@ import os
 import re
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
@@ -359,6 +359,14 @@ def recent_events(limit: int = Query(40, le=200)):
 @app.get("/incidents")
 def list_incidents():
     return store.list_incidents()
+
+
+@app.get("/incidents/history")
+def incident_history(days: int = Query(30, ge=1, le=90)):
+    """Each service's incidents over the last `days` days, archived ones included, for the dashboard's health strip."""
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    services = sorted({s["service"] for s in runner.scenarios()})
+    return {"days": days, "services": services, "incidents": store.incident_history(since)}
 
 
 @app.get("/incidents/{iid}")

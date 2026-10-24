@@ -99,6 +99,10 @@ The chosen user is kept in a signed cookie and the server checks the role on eve
   helper, its reasoning, free-tier waits, what it read, AI usage), causes with checked evidence, the change that caused
   it, the fix and test result, approvals, QA, report, timeline and notes.
 - Results (`/results`): Argus vs a single chatbot prompt on the same incidents, scored the same way.
+- Everywhere: Ctrl/⌘ K opens a command palette (jump to an incident, start a demo, switch person, pause Argus), `?` lists
+  the shortcuts, `g d` / `g r` jump to the dashboard or results. On the dashboard, **Take the tour** (or `T`) walks through
+  each part, and a service health strip shows 30 days per service like a status page. Open incidents tick a live clock;
+  a fix going through sets off confetti.
 
 ## Layout
 - `llm.py`: Groq / Gemini / Ollama through OpenAI-compatible APIs, with failover, waits and cooldowns.

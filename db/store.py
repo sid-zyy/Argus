@@ -99,6 +99,13 @@ class Store:
             sets = ", ".join(f"{k}=?" for k in fields)
             self._write(lambda c: c.execute(f"UPDATE incidents SET {sets} WHERE id=?", (*fields.values(), incident_id)))
 
+    def incident_history(self, since: str) -> list[dict]:
+        """Every incident opened since `since` (ISO time), archived ones too: the service health strip's history."""
+        with self._conn() as c:
+            return [dict(r) for r in c.execute(
+                "SELECT id, title, service, severity, status, created_at, resolved_at FROM incidents "
+                "WHERE created_at >= ? ORDER BY id", (since,))]
+
     def list_incidents(self) -> list[dict]:
         with self._conn() as c:
             rows = [dict(r) for r in c.execute(
