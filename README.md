@@ -98,7 +98,8 @@ The chosen user is kept in a signed cookie and the server checks the role on eve
 - Ticket (`/incidents/{id}/view`): progress steps, business impact, the Argus sphere, live progress (plan, current
   helper, its reasoning, free-tier waits, what it read, AI usage), causes with checked evidence, the change that caused
   it, the fix and test result, approvals, QA, report, timeline and notes.
-- Results (`/results`): Argus vs a single chatbot prompt on the same incidents, scored the same way.
+- Results (`/results`): Argus vs a single chatbot prompt on the same incidents, scored the same way: a head-to-head
+  scoreboard (including speed, where the chatbot wins), and per incident a race that plays both runs back on one clock.
 - Everywhere: Ctrl/⌘ K opens a command palette (jump to an incident, start a demo, switch person, pause Argus), `?` lists
   the shortcuts, `g d` / `g r` jump to the dashboard or results. On the dashboard, **Take the tour** (or `T`) walks through
   each part, and a service health strip shows 30 days per service like a status page. Open incidents tick a live clock;

@@ -1063,3 +1063,68 @@ kbd { font: 600 11px var(--mono); color: var(--muted); background: var(--surface
 /* ---- confetti ---- */
 .confetti { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 95; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .card.fresh, .act.new, .svc-bars.grow i, .tour-card.in { animation: none; } .tour-hole, .tour-card { transition: none; } }
+
+/* ---- results: headline, stat placeholders, head to head, the race ---- */
+#headline span { display: inline-block; animation: word-up .6s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i) * 70ms); }
+@keyframes word-up { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } }
+.res-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; pointer-events: auto; }
+.res-hero-actions .btn:hover { text-decoration: none; }
+#score, #race { scroll-margin-top: 80px; }
+.res-skel { height: 168px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: linear-gradient(100deg, var(--surface) 30%, var(--surface-2) 50%, var(--surface) 70%) 0 0 / 300% 100%; animation: skel 1.4s linear infinite; }
+@keyframes skel { to { background-position: -150% 0; } }
+.res-score { margin-top: 16px; }
+.res-score-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.res-score-head h2 { margin: 0; }
+.res-key { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.res-key i { width: 10px; height: 10px; border-radius: 3px; margin-left: 8px; }
+.k-argus { background: var(--accent); } .k-bot { background: var(--faint); }
+.sc-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 8px 24px; align-items: center; padding: 14px 0; border-top: 1px solid var(--border); }
+.sc-row:first-child { border-top: none; }
+@media (max-width: 760px) { .sc-row { grid-template-columns: 1fr; } }
+.sc-what b { font-weight: 600; font-size: 14.5px; margin-right: 8px; }
+.sc-what small { display: block; color: var(--faint); font-size: 12.5px; line-height: 1.45; margin-top: 2px; }
+.sc-win { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; white-space: nowrap; vertical-align: 1px; }
+.sc-win.argus { color: var(--accent); background: var(--accent-soft); }
+.sc-win.bot { color: var(--muted); background: var(--surface-3); }
+.sc-win.tie { color: var(--faint); background: var(--surface-2); }
+.sc-bars { display: grid; gap: 6px; }
+.sc-bar { display: grid; grid-template-columns: 1fr 92px; align-items: center; gap: 10px; }
+.sc-bar b { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 600; }
+.sc-bar.win b { color: var(--text); }
+.sc-track { height: 12px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.sc-track i { display: block; height: 100%; width: 0; border-radius: 99px; transition: width 1.1s cubic-bezier(.2,.8,.2,1); }
+.sc-bar.argus .sc-track i { background: linear-gradient(90deg, var(--accent), #2b9fc4); }
+.sc-bar.bot .sc-track i { background: var(--faint); }
+.res-score.go .sc-track i { width: var(--w); }
+.sc-row:nth-child(2) .sc-track i { transition-delay: .12s; } .sc-row:nth-child(3) .sc-track i { transition-delay: .24s; }
+.sc-row:nth-child(4) .sc-track i { transition-delay: .36s; } .sc-row:nth-child(5) .sc-track i { transition-delay: .48s; }
+.res-table tbody tr { transition: opacity .5s, transform .5s cubic-bezier(.2,.8,.2,1); transition-delay: calc(var(--i) * 80ms); }
+.res-table:not(.go) tbody tr { opacity: 0; transform: translateX(-10px); }
+.res-table .res-yes { transition: transform .4s cubic-bezier(.3,1.6,.5,1); transition-delay: calc(var(--i) * 80ms + .25s); }
+.res-table:not(.go) .res-yes { transform: scale(0); }
+.res-row-head .spacer { flex: 1; }
+.res-row-head .btn { display: inline-flex; align-items: center; gap: 6px; }
+.race-play svg { width: 12px; height: 12px; fill: currentColor; }
+.race { margin-top: 14px; padding: 14px 16px 10px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
+.race-lane { display: grid; grid-template-columns: 76px minmax(0, 1fr) 96px; gap: 4px 12px; align-items: center; }
+.race-lane + .race-lane { margin-top: 12px; }
+.race-who { font-size: 13px; font-weight: 700; color: var(--muted); }
+.race-lane.argus .race-who { color: var(--accent); }
+.race-track { height: 10px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.race-fill { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--faint); }
+.race-lane.argus .race-fill { background: linear-gradient(90deg, var(--accent), #2b9fc4); }
+.race-time { font: 600 13px var(--mono); font-variant-numeric: tabular-nums; text-align: right; color: var(--muted); }
+.race-steps { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 4px; }
+.race-steps span { font-size: 11.5px; font-weight: 600; padding: 1px 8px; border-radius: 999px; color: var(--faint); background: var(--surface); border: 1px solid var(--border); transition: all .25s; }
+.race-steps span.on { color: var(--text); border-color: var(--border-strong); }
+.race-lane.argus .race-steps span.on { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+.race-note { font-size: 11.5px; color: var(--faint); margin-top: 8px; }
+.res-row.done-bot .res-side.bot, .res-row.done-argus .res-side.argus { animation: side-in .5s cubic-bezier(.2,.8,.2,1); }
+.res-row.racing:not(.done-bot) .res-side.bot, .res-row.racing:not(.done-argus) .res-side.argus { opacity: .35; }
+.res-side { transition: opacity .3s; }
+@keyframes side-in { from { transform: translateY(6px); } }
+.res-cause.open { -webkit-line-clamp: unset; display: block; }
+.res-more { border: 0; background: none; padding: 0; margin: -6px 0 10px; color: var(--accent); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+@media (max-width: 640px) { .race-lane { grid-template-columns: 64px minmax(0, 1fr) 80px; } }
+@media (prefers-reduced-motion: reduce) { #headline span, .res-skel { animation: none; } .sc-track i, .res-table tbody tr, .res-table .res-yes { transition: none; } }
