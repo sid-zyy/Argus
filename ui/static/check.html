@@ -13,7 +13,7 @@
 <body>
 <header class="topbar">
   <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
-  <nav class="nav"><a href="/">Dashboard</a><a href="/results">Results</a><a href="/value">Value</a><a href="/check" class="on">Health</a></nav>
+  <nav class="nav"><a href="/">Dashboard</a><a href="/results">Results</a><a href="/check" class="on">Health</a><a href="/connect">Connect</a></nav>
   <span class="spacer"></span>
   <button class="icon-btn" id="theme-btn" type="button"></button>
   <div class="user-menu" id="user-menu"></div>
@@ -35,9 +35,8 @@
     <aside class="stack">
       <section class="panel" id="policy">
         <h2>Policy</h2>
-        <p class="help" style="margin: 4px 0 0">The rules the agents and the people work under, from one file the team reviews like code.
-          Every approval and every stop records which rule applied and this fingerprint.</p>
-        <div id="policy-body" style="margin-top: 10px"></div>
+        <p class="help" style="margin: 4px 0 0">The rules Argus works under, from <code>policy.yaml</code>. Every decision records the rule it used.</p>
+        <div id="policy-body"></div>
       </section>
       <section class="panel">
         <h2>Audit trail</h2>
@@ -49,6 +48,7 @@
   </div>
 </main>
 <script src="/static/common.js"></script>
+<script src="/static/palette.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const LABEL = { ok: "OK", warn: "Warning", bad: "Fix this" };
@@ -69,11 +69,32 @@ async function load() {
       <div><b>${esc(c.name)}</b><div class="small">${esc(c.detail)}</div>${c.fix ? `<div class="fix">${fixText(c.fix)}</div>` : ""}</div></li>`).join("");
   } catch (e) { $("verdict").textContent = "Could not run the checks"; $("sub").textContent = e.message; }
 }
+const SEV_RANGE = (sevs) => sevs.length === 4 ? "every severity" : sevs.length === 1 ? sevs[0] : `${sevs[0]}–${sevs[sevs.length - 1].slice(3)}`;
+const FIX_NAME = { patch: "a code patch", config_change: "a settings change", rollback: "a rollback" };
+const listOr = (xs) => xs.length > 1 ? `${xs.slice(0, -1).join(", ")} or ${xs[xs.length - 1]}` : xs[0] || "nothing";
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const compact = (n) => n >= 1e6 ? `${+(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n);
+
 async function loadPolicy() {
   try {
-    const p = await api("/policy");
-    $("policy-body").innerHTML = `<div class="small"><b>${esc(p.file)}</b> · version ${esc(p.version)} · fingerprint <span class="mono">${esc(p.sha)}</span></div>
-      <ul class="rules small">${p.rules.map((r) => `<li>${esc(r.text)} <span class="faint">· <code>${esc(r.rule)}</code></span></li>`).join("")}</ul>`;
+    const p = await api("/policy"), d = p.details;
+    const groups = {};  // severities that share a rule, so four identical lines become one
+    Object.entries(d.approvals).forEach(([sev, label]) => (groups[label] = groups[label] || []).push(sev));
+    const approvals = Object.entries(groups).map(([label, sevs]) => `${esc(label)} <span class="faint">for ${esc(SEV_RANGE(sevs))}</span>`).join("<br>");
+    const twoNeeded = Object.keys(groups).some((l) => !/^One /.test(l)) || p.overrides.some((o) => /people/.test(o.who));
+    const tokens = d.cost_per_1k_tokens ? Math.round(d.ai_budget / d.cost_per_1k_tokens * 1000) : 0;
+    const paths = d.fixes.protected_paths || [];
+    const row = (label, value, rule, note = "") => `<div class="pol-row" title="In policy.yaml: ${esc(rule)}"><dt>${label}</dt><dd>${value}${note ? `<div class="pol-note">${note}</div>` : ""}</dd></div>`;
+    $("policy-body").innerHTML = `<dl class="pol">
+      ${row("Approval", approvals, "approvals", twoNeeded && d.separation_of_duties ? "When two people are needed, the person who reported it can't be one." : "")}
+      ${p.overrides.filter((o) => o.who !== "one developer or lead").map((o) => row("", `<b>${esc(o.service)}</b>: ${esc(o.who)} for ${esc(o.severity === "default" ? "other severities" : o.severity)}`,
+          `${o.folder}/argus.yaml severity.approvals`, "")).join("")}
+      ${row("Fixes", `${esc(cap(listOr((d.fixes.allowed_types || []).map((t) => FIX_NAME[t] || t))))}${d.fixes.max_changed_lines ? `, up to ${d.fixes.max_changed_lines} lines` : ""}`, "fixes",
+          paths.length ? `<details><summary>Never touches ${paths.length} protected path${paths.length > 1 ? "s" : ""}</summary>${paths.map((x) => `<code>${esc(x)}</code>`).join(" ")}</details>` : "")}
+      ${d.ai_budget ? row("AI budget", `₹${d.ai_budget.toLocaleString("en-IN")} per run`, "ai.budget_per_incident", tokens ? `About ${compact(tokens)} tokens, then Argus hands over to a person.` : "") : ""}
+      ${d.sla_minutes ? row("Reminder", `Lead pinged after ${d.sla_minutes} min waiting`, "approval_sla_minutes") : ""}
+    </dl>
+    <div class="pol-foot" title="The first 12 characters of policy.yaml's SHA-256. Each decision in the audit log carries it, so you can tell which version of the rules applied.">${esc(p.file)} · v${esc(p.version)} · <span class="mono">${esc(p.sha)}</span></div>`;
   } catch (e) { $("policy-body").textContent = e.message; }
 }
 async function verify() {

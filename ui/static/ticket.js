@@ -23,9 +23,16 @@ function scheduleRefresh() {
 }
 
 async function refresh() {
+  const was = inc && inc.status;
   inc = await api(`/incidents/${iid}`);
   impactLoaded = Date.now();
   render();
+  // the fix went through while this page was open: a short cheer from the status badge
+  if (was && was !== inc.status && ["resolved", "closed"].includes(inc.status)) {
+    const r = $("status").getBoundingClientRect();
+    confetti(r.top > 0 && r.top < innerHeight ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : {});
+    toastMsg(inc.status === "closed" ? "Fixed and confirmed by a tester" : "Fix approved and applied", "good");
+  }
   renderTabBadges();
   graph.load();
   const key = `${inc.status}|${inc.claims.length}|${inc.patches.length}`;

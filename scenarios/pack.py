@@ -57,9 +57,18 @@ def validate(name: str, root: Path = ROOT) -> list[str]:
     d = root / name
     live = (d / "live.json").is_file()
     problems = []
-    for f in ("history.py", "generate_logs.py", "repro.py", "business.json"):
+    # a pack with an argus.yaml (Argus Connect) names its own sandbox check files, in any language
+    connected = (d / "argus.yaml").is_file()
+    for f in ("history.py", "generate_logs.py", "business.json") if connected else ("history.py", "generate_logs.py", "repro.py", "business.json"):
         if not (d / f).is_file():
             problems.append(f"no {f}")
+    if connected:
+        from connect.config import ConfigError, load
+        try:
+            cfg = load(d)
+            problems += [f"argus.yaml: commands.files: no {f}" for f in cfg.commands.files if not cfg.resolve(f).is_file()]
+        except ConfigError as e:
+            problems.append(f"argus.yaml: {e}")
     if (d / "history.py").is_file():
         problems += [f"history.py: no {w}" if not w.startswith("syntax") else f"history.py: {w}"
                      for w in _defines(d / "history.py", "COMMITS", "CULPRIT_INDEX")]

@@ -1,0 +1,7 @@
+{
+  "category": "code",
+  "culprit_sha": "d9cece1",
+  "file": "src/pricing.js",
+  "trap": "PayRail (the payment gateway) is failing, or the marketing push overloaded the service",
+  "fix_hint": "divide promo.percent by 100 in src/pricing.js, or roll back to 39c3e51"
+}

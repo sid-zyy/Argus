@@ -20,7 +20,7 @@ off), and the dashboard lists it. Replace its service, bug and telemetry with yo
 | `__init__.py` | yes | Empty; makes the folder importable |
 | `history.py` | yes | `COMMITS`: list of `(iso_date, "Name <email>", message, {path: content})`, oldest first. `CULPRIT_INDEX`: the commit that causes the incident. Fixed dates and authors keep the shas the same on every machine |
 | `generate_logs.py` | yes | `generate(out_dir, shas, culprit_index) -> dict`. Writes `logs/*.log`, `alert.json` and `expected.json`. Must be deterministic (seeded random) |
-| `repro.py` | yes | `python repro.py <repo_dir>`: exit 0 when healthy, 1 when the failure reproduces. The sandbox runs it before and after a fix, with no network |
+| `repro.py` | yes, unless `argus.yaml` names its own | `python repro.py <repo_dir>`: exit 0 when healthy, 1 when the failure reproduces. The sandbox runs it before and after a fix, with no network. A pack with an `argus.yaml` ([CONNECT.md](CONNECT.md)) sets its own repro command and files in any language instead |
 | `business.json` | yes | What an outage costs; see below |
 | `live.json` | no | `{"app", "url", "deploy_on_approve"}` for a service backed by a running app (like ShopFast): approved fixes are committed to its repo |
 | `../service_maps/<service>.json` | no | Nodes and edges for the impact graph. Without one, the Impact graph tab says there is no map |

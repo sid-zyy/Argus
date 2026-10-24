@@ -88,6 +88,8 @@
   .alert.firing { background: var(--bad-bg); color: var(--bad); border-color: rgba(204,54,48,.2); }
   .alert.ok { background: var(--good-bg); color: var(--good); border-color: rgba(24,140,84,.2); }
   .alert a { color: inherit; font-weight: 700; }
+  .agents { margin-top: 12px; padding: 10px 12px; border-radius: 12px; font-size: 13px; line-height: 1.45; background: var(--ops-2); border: 1px solid var(--ops-line); color: var(--ops-muted); }
+  .agents b { color: var(--ops-text); }
   .commit { width: 100%; text-align: left; background: none; border: 0; color: inherit; display: grid; grid-template-columns: 62px 1fr; gap: 1px 10px; padding: 9px 8px; border-radius: 10px; font-size: 13px; }
   .commit:hover { background: var(--ops-2); }
   .commit .sha { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ops-muted); padding-top: 1px; }
@@ -200,6 +202,7 @@
         <button class="btn danger" id="break">Push a bad change</button>
         <button class="btn" id="reset">Reset shop</button>
       </div>
+      <div class="agents" id="agents" hidden></div>
       <p class="hint">Or change it yourself: edit <code>app/checkout.py</code> in <code>scenarios/live_shop/repo</code> and <code>git commit</code>. Every commit is deployed within seconds. Click any change above to see its code.</p>
     </div>
   </aside>
@@ -324,15 +327,20 @@ async function refresh() {
   $("pool").style.width = `${Math.max(2, share * 100)}%`;
   $("pool").style.background = share > .8 ? "#e0574f" : share > .5 ? "#f0a33a" : "#3fb27f";
   drawChart(s.series, s.deploys);
-  const a = s.alert, inc = a.incident, link = inc ? `<a href="${esc(s.argus_url + inc.url)}" target="_blank">${esc(inc.key)}</a>` : "";
+  const a = s.alert, inc = a.incident, link = inc ? `<a href="${esc(s.argus_url + inc.url)}">${esc(inc.key)}</a>` : "";
   $("alert").className = `alert ${a.firing ? "firing" : inc ? "ok" : ""}`;
   $("alert").innerHTML = a.error ? `Alert firing, but ${esc(a.error)}.`
-    : a.firing ? `Alert sent. Argus opened ${link || "an incident"} and is investigating.`
+    : a.firing ? `Alert sent. Argus opened ${link || "an incident"} and is ${inc && inc.mode === "replay" ? "replaying a recorded investigation" : "investigating"}.${link ? " Click it to watch." : ""}`
     : inc ? `Recovered. Argus handled ${link}.` : "Watching. Nothing wrong right now.";
   $("commits").innerHTML = s.commits.map((c, i) => `<button class="commit ${i === 0 ? "live" : ""} ${c.author === "Argus" ? "argus" : ""}" data-sha="${esc(c.sha)}">
     <span class="sha">${esc(c.sha)}</span><span class="msg">${esc(c.message)}</span><span class="who">${esc(c.author)} · ${ago(c.date)}${i === 0 ? " · Live" : ""}</span></button>`).join("");
   document.querySelectorAll(".commit").forEach((b) => b.onclick = () => showCommit(b.dataset.sha));
   $("break").disabled = s.broken_change_live || pushing;
+  const ag = s.argus_agents;
+  $("agents").hidden = !ag;
+  if (ag) $("agents").innerHTML = ag.mode === "replay"
+    ? "<b>Argus will replay a recorded run.</b> The failure, the alert and the fix are real; the agents' steps are a recorded investigation of this same bug, so nothing waits on an AI service."
+    : "<b>Argus will investigate live.</b> The agents call the AI models as you watch. Switch to Replay on the Argus dashboard for a run that can't stall.";
 }
 
 // ---- the push: who, the command, the diff, then the deploy pipeline ----

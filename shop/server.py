@@ -315,7 +315,21 @@ class Shop:
                 "start_error": rel.error if rel else None, "deployed_at": iso(self.deployed_at) if self.deployed_at else None,
                 "commits": self.commits(), "series": list(self.series), "deploys": list(self.deploys),
                 "alert": {k: self.alert[k] for k in ("firing", "since", "incident", "error")},
-                "broken_change_live": self.bad_change_live(), "argus_url": ARGUS_URL}
+                "broken_change_live": self.bad_change_live(), "argus_url": ARGUS_URL, "argus_agents": self.argus_agents()}
+
+    def argus_agents(self) -> dict | None:
+        """What will answer the next alert: Argus's live agents or a replay of a recorded run. Cached for a few seconds,
+        since the page polls; None while Argus can't be reached."""
+        cached = getattr(self, "_agents", None)
+        if cached and time.time() - cached[0] < 5:
+            return cached[1]
+        try:
+            with urllib.request.urlopen(f"{ARGUS_URL}/demo/agents", timeout=2) as r:
+                value = json.loads(r.read())
+        except Exception:  # noqa: BLE001 - Argus is down or older; the page just doesn't show the mode
+            value = None
+        self._agents = (time.time(), value)
+        return value
 
     def bad_change_live(self) -> bool:
         from scenarios.live_shop.history import BAD_CHANGE

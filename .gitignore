@@ -3,6 +3,7 @@
 __pycache__/
 *.pyc
 *.db
+*.db.lock
 .pytest_cache/
 runs/
 scenarios/*/repo/

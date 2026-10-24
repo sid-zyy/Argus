@@ -15,15 +15,19 @@ import os
 import re
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
+from connect.adapters import alerts as alert_adapters
+from connect.config import ConfigError
+from connect.schema import IncidentInput
+from connect.validate import check as check_config
 from db import lock as db_lock
 from db.store import Store
 from tools.workspace import Workspace
@@ -189,7 +193,8 @@ def check_page():
 
 @app.get("/value", include_in_schema=False)
 def value_page():
-    return _page("value.html")
+    """Value is a tab of the Results page now; old links still land on it."""
+    return RedirectResponse("/results#value", status_code=308)
 
 
 # ---- readiness, governance, value ----------------------------------------------
@@ -202,8 +207,18 @@ def health_check():
 
 @app.get("/policy")
 def get_policy():
+    """policy.yaml in plain words, plus the services whose argus.yaml sets its own approval rule."""
     from orchestrator import policy
-    return policy.summary()
+    overrides = []
+    for s in runner.scenarios():
+        try:
+            cfg = runner.config(s["name"])
+        except ConfigError:
+            continue
+        for sev, rule in cfg.severity.approvals.items():
+            who = f"{rule.count} people" + (", one a team lead" if rule.lead else "") if rule.count > 1 else ("a team lead" if rule.lead else "one developer or lead")
+            overrides.append({"service": cfg.service.label or cfg.service.name, "folder": cfg.key, "severity": sev, "who": who})
+    return {**policy.summary(), "overrides": overrides}
 
 
 @app.get("/audit/verify")
@@ -224,7 +239,8 @@ def results_data():
     baseline = json.loads(BASELINE.read_text(encoding="utf-8")) if BASELINE.is_file() else {"rows": []}
     by_name = {r["scenario"]: r for r in baseline["rows"]}
     rows = []
-    for s in (s for s in runner.scenarios() if not s["live_app"]):
+    # only incidents the chatbot was also run on, so the two columns stay a like-for-like comparison
+    for s in (s for s in runner.scenarios() if not s["live_app"] and s["name"] in by_name):
         rows.append({"scenario": s["name"], "service": s["service"], "title": s["title"],
                      "argus": argus_from_replay(s["name"]), "chatbot": by_name.get(s["name"])})
     return {"rows": rows, "baseline_recorded_at": baseline.get("recorded_at")}
@@ -237,47 +253,45 @@ def ticket_page(iid: int):
 
 
 # ---- intake --------------------------------------------------------------------
-AM_SEVERITY = {"critical": "sev1", "page": "sev1", "high": "sev2", "error": "sev2", "warning": "sev3", "info": "sev4"}
-
-
 @app.post("/alerts", status_code=201)
 def post_alert(body: dict):
-    """Webhook intake from monitoring. Accepts Prometheus Alertmanager's webhook format, or {"scenario": ..., "alert": {...}}.
-    Unauthenticated, like a real alert webhook on an internal network. While Argus is paused, alerts are counted and ignored."""
+    """Webhook intake from monitoring. Argus Connect's alert adapters accept Prometheus Alertmanager, Grafana Alerting and
+    the standard incident format, and route the alert to the connected service whose argus.yaml matches its labels; the
+    older {"scenario": ..., "alert": {...}} shape still works. Unauthenticated, like a real alert webhook on an internal
+    network. While Argus is paused, alerts are counted and ignored."""
     state = pause_state()
     if state["paused"]:
         first = next(iter(body.get("alerts") or []), {})
-        title = (first.get("annotations") or {}).get("summary") or (body.get("alert") or {}).get("title") or body.get("scenario") or "Alert"
+        title = (first.get("annotations") or {}).get("summary") or (body.get("alert") or {}).get("title") or body.get("title")             or body.get("scenario") or "Alert"
         store.set_setting("pause", {**state, "held": state["held"] + 1,
                                     "last_held": {"title": title, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")}})
         return JSONResponse({"paused": True, "detail": "Argus is paused, so no incident was opened"}, status_code=202)
-    if "alerts" in body:  # Alertmanager
-        firing = [a for a in body.get("alerts", []) if a.get("status", "firing") == "firing"]
-        if not firing:
-            raise HTTPException(422, "no firing alerts in the payload")
-        a = firing[0]
-        labels, notes = a.get("labels", {}), a.get("annotations", {})
-        names = {s["name"]: s for s in runner.scenarios()}
-        scenario = labels.get("scenario") if labels.get("scenario") in names else next(
-            (n for n, s in names.items() if s["service"] == labels.get("service")), None)
-        if not scenario:
-            raise HTTPException(404, f"no environment for service {labels.get('service')!r}")
-        override = {"id": f"AM-{labels.get('alertname', 'alert')}-{a.get('fingerprint', '')[:6]}".rstrip("-"),
-                    "title": notes.get("summary") or labels.get("alertname") or "Alert",
-                    "severity": AM_SEVERITY.get(str(labels.get("severity", "")).lower(), "sev2"),
-                    "source": "Prometheus Alertmanager",
-                    "fired_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
-        if a.get("startsAt"):
-            override["started_at"] = a["startsAt"]
-        for key in ("metric", "value", "threshold", "window"):  # optional measurements in the annotations
-            if key in notes:
-                override[key] = notes[key]
-        return {**_start(scenario, "live", override), "received_from": "alertmanager"}
+    if alert_adapters.detect(body):
+        return _route(body)
     try:
         parsed = AlertIn.model_validate(body)
     except ValueError as e:
-        raise HTTPException(422, f"not an Alertmanager payload or {{scenario, alert}}: {e}")
+        raise HTTPException(422, f"not an Alertmanager, Grafana or standard incident payload, or {{scenario, alert}}: {e}")
     return _start(parsed.scenario, parsed.mode, parsed.alert)
+
+
+def _route(payload: dict) -> dict:
+    """Normalise a monitoring payload with its adapter and open an incident on the service it belongs to."""
+    services = []
+    for s in runner.scenarios():
+        try:
+            services.append(runner.config(s["name"]))
+        except ConfigError:
+            pass
+    try:
+        cfg, inc, fmt = alert_adapters.route(payload, services)
+    except alert_adapters.RouteError as e:
+        raise HTTPException(e.status, str(e))
+    mode = "live"
+    # demo setting: a live app's alert can be answered by a recorded run of the same bug instead of live AI calls
+    if runner.live_app(cfg.key) and demo_agents()["mode"] == "replay" and runner.replay_file(cfg.key) and runner.replay_fits(cfg.key):
+        mode = "replay"
+    return {**_start(cfg.key, mode, inc.as_alert()), "received_from": fmt, "service_folder": cfg.key, "mode": mode}
 
 
 @app.post("/demo/trigger/{scenario}", status_code=201)
@@ -301,6 +315,8 @@ def _start(scenario: str, mode: str, override: dict | None, reporter: dict | Non
         iid = runner.start(scenario, mode, override, reporter=reporter, report=report)
     except FileNotFoundError as e:
         raise HTTPException(409, str(e))
+    except Denied as e:  # e.g. the service's argus.yaml fails its checks
+        _denied(e)
     return {"id": iid, "key": f"INC-{iid}", "url": f"/incidents/{iid}/view"}
 
 
@@ -351,10 +367,37 @@ def _shop(path: str, method: str = "GET") -> dict:
 
 @app.get("/live/status")
 def live_status():
+    agents = {**demo_agents(), "replay_available": runner.replay_file("live_shop") is not None}
     try:
-        return {**_shop("/api/status"), "url": SHOP_URL}
+        return {**_shop("/api/status"), "url": SHOP_URL, "agents": agents}
     except HTTPException as e:
-        return {"online": False, "url": SHOP_URL, "error": e.detail if e.status_code != 503 else None}
+        return {"online": False, "url": SHOP_URL, "error": e.detail if e.status_code != 503 else None, "agents": agents}
+
+
+# For demos: who answers ShopFast's alerts. 'replay' (the default when a recording exists) plays back a recorded real run of
+# the same bug, so the demo never waits on an AI service; the shop, its alert, the approval and the deploy stay real.
+# 'live' calls the AI models.
+def demo_agents() -> dict:
+    default = "replay" if runner.replay_file("live_shop") else "live"
+    return {"mode": default, "by": None, **(store.get_setting("demo_agents") or {})}
+
+
+@app.get("/demo/agents")
+def get_demo_agents():
+    """Read by the ShopFast page, so the presenter sees what will answer the next push."""
+    return demo_agents()
+
+
+class AgentsIn(BaseModel):
+    mode: str = Field(pattern="^(live|replay)$")
+
+
+@app.post("/demo/agents")
+def set_demo_agents(body: AgentsIn, user: dict = Depends(require("developer", "lead"))):
+    if body.mode == "replay" and not runner.replay_file("live_shop"):
+        raise HTTPException(409, "there is no recorded ShopFast run to replay")
+    store.set_setting("demo_agents", {"mode": body.mode, "by": user["name"]})
+    return demo_agents()
 
 
 @app.post("/live/break")
@@ -379,6 +422,77 @@ def scenarios():
     return runner.scenarios()
 
 
+# ---- Argus Connect: connected services, their config checks, test alerts ------------------
+@app.get("/connect", include_in_schema=False)
+def connect_page():
+    return _page("connect.html")
+
+
+def _config_or_404(key: str):
+    if key not in {s["name"] for s in runner.scenarios()}:
+        raise HTTPException(404, f"no service folder {key!r}")
+    try:
+        return runner.config(key)
+    except ConfigError as e:
+        raise HTTPException(422, str(e))
+
+
+@app.get("/connect/services")
+def connect_services():
+    """Every service with its adapters and the result of the quick checks that gate each incident."""
+    users = [u["name"] for u in store.users()]
+    out = []
+    for s in runner.scenarios():
+        if s.get("config_error"):
+            out.append({"key": s["name"], "service": s["name"], "check": {"ok": False, "errors": 1, "warnings": 0,
+                        "checks": [{"status": "error", "area": "config", "message": s["config_error"]}]}})
+            continue
+        cfg = runner.config(s["name"])
+        sample = None
+        if cfg.alerts.sample:
+            try:
+                sample = cfg.sample_payload()
+            except (OSError, ValueError):
+                pass
+        out.append({**cfg.summary(), "title": s["title"], "replay_available": s["replay_available"], "live_app": s["live_app"],
+                    "commands": cfg.commands.model_dump(include={"repro", "test", "image"}),
+                    "severity": cfg.severity.model_dump(), "metrics_source": cfg.metrics_source,
+                    "logs": [l.model_dump(include={"name", "adapter", "role", "path", "run", "dependency"}) for l in cfg.logs],
+                    "dependencies": [d.model_dump() for d in cfg.dependencies],
+                    "sample_alert": {"adapter": alert_adapters.detect(sample), "payload": sample} if sample else None,
+                    "check": check_config(cfg, users=users).as_dict()})
+    return out
+
+
+@app.post("/connect/services/{key}/check")
+def connect_check(key: str, full: bool = False, user: dict = Depends(require("developer", "lead"))):
+    """Run the setup wizard's checks. full=true also runs the repro and tests once in the sandbox."""
+    cfg = _config_or_404(key)
+    return check_config(cfg, full=full, users=[u["name"] for u in store.users()]).as_dict()
+
+
+@app.post("/connect/services/{key}/test-alert", status_code=201)
+def connect_test_alert(key: str, user: dict = Depends(require("developer", "lead"))):
+    """Send the service's sample payload through the same adapter and routing a real webhook uses, and open the incident.
+    Started by hand, so it runs even while monitoring alerts are paused."""
+    cfg = _config_or_404(key)
+    if not cfg.alerts.sample:
+        raise HTTPException(409, f"{key} has no alerts.sample payload in its argus.yaml")
+    payload = cfg.sample_payload()
+    # several folders can watch the same service (e.g. ShopFast's recorded incidents), so name this one explicitly
+    if isinstance(payload.get("alerts"), list):
+        payload = {**payload, "alerts": [{**a, "labels": {**a.get("labels", {}), "scenario": key}} for a in payload["alerts"]]}
+    else:
+        payload = {**payload, "labels": {**payload.get("labels", {}), "scenario": key}}
+    return _route(payload)
+
+
+@app.get("/connect/schema")
+def connect_schema():
+    """The standard incident input every alert adapter produces, as JSON Schema."""
+    return IncidentInput.model_json_schema()
+
+
 # ---- dashboard -----------------------------------------------------------------
 @app.get("/metrics")
 def metrics():
@@ -400,6 +514,14 @@ def recent_events(limit: int = Query(40, le=200)):
 @app.get("/incidents")
 def list_incidents():
     return store.list_incidents()
+
+
+@app.get("/incidents/history")
+def incident_history(days: int = Query(30, ge=1, le=90)):
+    """Each service's incidents over the last `days` days, archived ones included, for the dashboard's health strip."""
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    services = sorted({s["service"] for s in runner.scenarios()})
+    return {"days": days, "services": services, "incidents": store.incident_history(since)}
 
 
 @app.get("/incidents/{iid}")

@@ -44,6 +44,52 @@ uvicorn ui.app:app --port 8000 --reload     # Argus, http://localhost:8000
 
 `ARGUS_URL` (shop) and `SHOP_URL` (Argus) change the addresses; `SHOP_RPS` sets the simulated traffic.
 
+**Replay: a demo that can't stall.** By default ShopFast's alerts are answered by a replay, so the demo never waits
+on an AI service. Open the shop, click **Push a bad change** (on the shop page or the dashboard), and follow the INC link
+in the shop's Argus box to the incident. The push, the broken checkout, the alert, your approval, the deploy and the
+recovery are all real; only the agents' steps are played back from `replay/live_shop.json`, a recorded real run of the
+same bug. Argus maps the recorded commit to the one you just pushed, deploys the recorded fix for real when you approve,
+and says in the report that the agents' work was replayed. The shop page shows which mode will answer; switch to
+**Live AI** on the dashboard's ShopFast panel to watch the agents call the models. If the live code isn't the recorded
+bug (e.g. you broke it by hand), the real agents investigate. **Reset** the shop before a demo. Re-record with a real
+run and copy its `runs/live_shop-INC-*/trace.json` to `replay/live_shop.json`.
+
+## Argus Connect: the same agents on any service
+Argus is not tied to ShopFast. Each service plugs in through **adapters** and one config file, `argus.yaml`, in its
+folder under `scenarios/`; the agents, prompts, evidence checker, sandbox and approval gate are the same for all of them.
+
+| Piece | What it does |
+|---|---|
+| Standard incident (`connect/schema.py`) | The one shape every alert becomes: service, title, severity, metric, value, threshold, window, times, labels |
+| Alert adapters | `alertmanager`, `grafana`, `standard`: webhooks to `POST /alerts` are normalised and routed to the service whose `alerts.match` labels they carry |
+| Repo adapter | `git`: a local checkout or a URL cloned on first use |
+| Log adapters | `text`, `jsonl` (pino, bunyan, CI records), `csv` (metrics exports), `command` (`docker logs`, `kubectl logs`): all rendered as the same numbered, timestamped lines the agents search and quote |
+| Service config (`argus.yaml`) | Log roles (service, metrics, dependency, deploy), dependencies, repro and test commands, sandbox image, severity rules, approval policy, on-call, deploy-on-approve |
+| Setup wizard (`connect/wizard.py`) | Writes a config from a few questions, then validates it; the same checks gate every incident in the web app and the terminal |
+
+Two different sample apps run through the unchanged pipeline:
+
+| | ShopFast (`live_shop`) | QuickBite (`quickbite_orders`) |
+|---|---|---|
+| Language | Python | Node.js |
+| Monitoring | Prometheus Alertmanager | Grafana Alerting |
+| Logs | Plain text | pino JSON lines, CSV metrics, CI deploy records in JSON |
+| Repro and tests | `python repro.py`, pytest | `node checks/repro.js`, `node --test` |
+| Policy | Global approval rule | Failure rate ≥ 25% is sev1, and sev1 fixes need a team lead |
+
+QuickBite's bug: commit `d9cece1` moves promo codes to `promos.json` with whole-number percentages but still multiplies by
+the value, so WEEKEND20 orders go negative and the payment gateway rejects them. The trap: every error says
+`GatewayError`, the gateway client changed the day before, and a marketing push started minutes earlier.
+```
+python -m connect.wizard list                          # every service and whether its config passes
+python -m connect.wizard check quickbite_orders --full # validate it, and run the repro and tests once in the sandbox
+python -m connect.wizard new my_service                # connect a new service: answer a few questions
+python -m connect.wizard route payload.json            # which service an alert would open an incident for
+python -m orchestrator.main scenarios/quickbite_orders --alert scenarios/quickbite_orders/alerts/grafana_alert.json
+```
+The dashboard's **Connect** page (`/connect`) shows each service's adapters and checks, compares the two apps, and
+sends a service's sample alert through its adapter. Config reference: [docs/CONNECT.md](docs/CONNECT.md).
+
 ## Setup
 ```
 python -m venv .venv
@@ -62,9 +108,10 @@ python -m eval.compare                                          # Argus vs a sin
 python -m eval.run_eval                                         # scorecard across all scenarios (real model calls)
 python -m pytest -q tests                                       # offline tests with a scripted fake model
 ```
-Send a real Alertmanager webhook:
+Send a real Alertmanager or Grafana webhook:
 ```
 curl -X POST http://localhost:8000/alerts -H "content-type: application/json" -d @examples/alertmanager_webhook.json
+curl -X POST http://localhost:8000/alerts -H "content-type: application/json" -d @scenarios/quickbite_orders/alerts/grafana_alert.json
 ```
 Only one Argus server can use a database: it holds a lock on `incidents.db.lock` while it runs, and a second server
 on the same file refuses to start (it would otherwise escalate the first one's open incidents). Use `INCIDENT_DB=<path>`
@@ -79,6 +126,7 @@ always shows the latest UI. Restart the server after Python changes (or use `--r
 | `incident1_conn_leak` | checkout-api | early `return` skips `pool.release()` (code) | "database overloaded" |
 | `incident2_timeout` | checkout-api | `REQUEST_TIMEOUT` lowered 30 → 3 s (config) | "payment provider is slow" |
 | `incident3_cache_oom` | catalog-api | unbounded page cache keyed by full URL (resource) | "marketing traffic spike" |
+| `quickbite_orders` | orders-service (Node.js) | promo percentages stored as 20, still multiplied (code) | "the payment gateway is failing" |
 
 Each folder is a **service pack**: `history.py` (commits), `generate_logs.py` (deterministic telemetry), `repro.py` (the
 sandbox check), `expected.json` and `business.json` (the business assumptions behind the impact figures); `repo/` and
@@ -99,7 +147,7 @@ order counts as revenue at risk, although some customers retry later. Revenue at
 problem starting to the approval; it is compared with a typical manual fix time. Engineer time saved is priced with
 `engineer_cost_per_hour`. AI cost is estimated from tokens at the price in `policy.yaml` (`ai.cost_per_1k_tokens`), so
 every incident shows what it cost in AI next to what it saved; AI energy is a rough estimate at 0.3 Wh per 1,000 tokens.
-The Value page (`/value`) lists every incident, archived ones too, and lets you change any assumption to see how the
+The Value tab of the Results page (`/results#value`) lists every incident, archived ones too, and lets you change any assumption to see how the
 totals move.
 
 ## Governance: policy.yaml and the audit trail
@@ -111,7 +159,8 @@ totals move.
 - the approval SLA.
 
 Every approval, block and stop records the rule that applied and the policy file's fingerprint. `GET /policy` and the
-Health page show the rules in plain words.
+Health page show the rules in plain words. A service whose `argus.yaml` has its own `severity.approvals` rule uses that
+instead for its incidents (QuickBite: a team lead approves sev1 fixes), recorded the same way with that file's fingerprint.
 
 The audit log is hash-chained: each event's hash covers its fields and the previous event's hash, so editing, deleting
 or reordering any past event breaks the chain from there on. Older databases are sealed when first opened.
@@ -136,14 +185,23 @@ The chosen user is kept in a signed cookie and the server checks the role on eve
   it, the fix and test result, approvals (with the policy rule that applies), QA, report, timeline with the audit-trail
   check, and notes. Findings also put Argus next to a single chatbot prompt on this incident, scored the same way;
   a developer can ask a chatbot live (one real AI call, kept in the audit log).
-- Results (`/results`): Argus vs a single chatbot prompt on the same incidents, scored the same way.
-- Value (`/value`): every incident's value and AI cost, with editable assumptions.
+- Results (`/results`), two tabs:
+  - **Accuracy** (the recorded benchmark): Argus vs a single chatbot prompt on the same incidents, scored the same way:
+    a head-to-head scoreboard (including speed, where the chatbot wins), and per incident a race that plays both runs
+    back on one clock.
+  - **Value** (your incidents, `/results#value`; `/value` redirects there): every incident's value and AI cost, with
+    editable assumptions.
 - Health (`/check`): the self-check, the policy in plain words and the audit-trail check.
+- Everywhere: Ctrl/⌘ K opens a command palette (jump to an incident, start a demo, switch person, pause Argus), `?` lists
+  the shortcuts, `g d` / `g r` jump to the dashboard or results. On the dashboard, **Take the tour** (or `T`) walks through
+  each part, and a service health strip shows 30 days per service like a status page. Open incidents tick a live clock;
+  a fix going through sets off confetti.
 
 ## Layout
 - `llm.py`: Groq / Gemini / Ollama through OpenAI-compatible APIs, with failover, waits and cooldowns.
 - `agents/`: shared tool-calling loop (`base.py`), the agents including the Commander (`investigators.py`), prompts.
-- `tools/`: read-only log, metrics and git tools; `evidence_check.py`; `sandbox.py`.
+- `connect/`: Argus Connect: incident schema, alert/repo/log adapters, `argus.yaml` loader, severity and approval policy, checks, wizard.
+- `tools/`: read-only log, metrics and git tools over a service's adapters; `evidence_check.py`; `sandbox.py` (runs the service's own commands).
 - `orchestrator/`: state machine (`pipeline.py`), contracts, approval gate, terminal view, report, replay.
 - `db/`: schema, store (with the hash-chained audit log), business impact, the single-server lock (`lock.py`).
 - `policy.yaml` and `orchestrator/policy.py`: the governance rules. `ui/health.py`: the self-check. `run_demo.py`: one-command start.

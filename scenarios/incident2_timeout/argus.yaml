@@ -1,0 +1,22 @@
+# Argus Connect: recorded incident 2 on ShopFast's checkout-api (timeout lowered in config).
+version: 1
+service: {name: checkout-api, label: "ShopFast checkout (recorded: payment timeouts)", team: Payments & Checkout team, language: python, on_call: Siddhartha}
+repo: {adapter: git, path: repo}
+alerts: {adapter: standard, base: alert.json}
+logs:
+  - {name: app.log, path: logs/app.log, role: service}
+  - {name: metrics.log, path: logs/metrics.log, role: metrics}
+  - {name: payments.log, path: logs/payments.log, role: dependency, dependency: Payment provider}
+  - {name: deploy.log, path: logs/deploy.log, role: deploy}
+metrics:
+  source: metrics.log
+  description: >-
+    checkout-api metrics per 30s bucket (rps, error_rate_5xx, p95_ms, payment_p95_ms, payment_timeouts, mem_mb, restarts).
+    The payment provider's own status is in payments.log; use search_logs for it.
+dependencies:
+  - {name: Payment provider, kind: external, logs: [payments.log]}
+commands:
+  files: [repro.py]
+  repro: python repro.py {repo}
+  test: python -m pytest -q -p no:cacheprovider {repo}/tests
+  test_if_exists: "{repo}/tests"
