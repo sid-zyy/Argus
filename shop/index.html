@@ -111,6 +111,7 @@
   /* the push: terminal, diff, deploy pipeline */
   .overlay { position: fixed; inset: 0; z-index: 20; background: rgba(12,12,18,.55); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 20px; opacity: 0; transition: opacity .3s; }
   .overlay.show { opacity: 1; }
+  [hidden] { display: none !important; }  /* the push popup and others stay out of the way until opened */
   .push { --ops: #17181f; --ops-2: #1f2029; --ops-line: #2c2e39; --ops-text: #e9eaf0; --ops-muted: #8e93a3;
     width: min(760px, 100%); max-height: calc(100vh - 40px); overflow: auto; background: var(--ops); color: var(--ops-text); border-radius: 18px; border: 1px solid var(--ops-line);
     box-shadow: 0 40px 80px -30px rgba(0,0,0,.7); transform: translateY(14px) scale(.98); transition: transform .45s cubic-bezier(.2,.7,.2,1); }
