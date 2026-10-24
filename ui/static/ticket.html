@@ -37,6 +37,16 @@
     <details class="impact-note"><summary>How these estimates are worked out</summary><ul id="impact-assumptions"></ul></details>
   </section>
 
+  <form class="ask-bar" id="ask-bar" autocomplete="off">
+    <div class="ask-bar-row">
+      <img src="/static/logo.svg" alt="">
+      <input id="ask-bar-input" maxlength="500" placeholder="Ask Argus anything about this incident" aria-label="Ask Argus a question about this incident">
+      <kbd title="Press / to ask from anywhere on the page">/</kbd>
+      <button class="btn primary" id="ask-bar-btn">Ask Argus</button>
+    </div>
+    <div class="ask-bar-foot"><span class="ask-chips" id="ask-bar-chips"></span><button type="button" class="ask-open" id="ask-open" hidden></button></div>
+  </form>
+
   <nav class="inc-tabs" id="inc-tabs" role="tablist">
     <button role="tab" data-tab="live"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8M8.5 8.5a4.5 4.5 0 0 0 0 7M15.5 8.5a4.5 4.5 0 0 1 0 7"/></svg>Live<span class="tb-badge" id="tb-live"></span></button>
     <button role="tab" data-tab="impact"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7.4 11 16.6 6M7.4 13l9.2 5"/></svg>Impact graph<span class="tb-badge" id="tb-impact"></span></button>
@@ -108,16 +118,6 @@
         <h2>Your decision</h2>
         <div id="approval" style="margin-top: 8px"></div>
       </section>
-      <section class="panel" id="ask-panel">
-        <h2>Ask Argus</h2>
-        <p class="help" style="margin-bottom: 0">Answers come only from this incident's record, with the source of each fact.</p>
-        <div class="ask-log" id="ask-log"></div>
-        <div class="ask-chips" id="ask-chips"></div>
-        <form class="ask-form" id="ask-form" autocomplete="off">
-          <input id="ask-input" maxlength="500" placeholder="Ask anything about this incident">
-          <button class="btn primary" id="ask-btn">Ask</button>
-        </form>
-      </section>
       <section class="panel">
         <h2>Details</h2>
         <label for="assignee">Assigned to</label>
@@ -136,6 +136,20 @@
     </aside>
   </div>
 </main>
+<button type="button" class="ask-fab" id="ask-fab"><img src="/static/logo.svg" alt="">Ask Argus<span class="ask-fab-n" id="ask-fab-n"></span></button>
+<aside class="ask-drawer" id="ask-drawer" aria-label="Ask Argus" aria-hidden="true">
+  <div class="ask-drawer-head">
+    <img src="/static/logo.svg" alt="">
+    <div><b>Ask Argus</b><small>Answers come only from this incident's record, with the source of each fact.</small></div>
+    <button type="button" class="ask-close" id="ask-close" aria-label="Close">×</button>
+  </div>
+  <div class="ask-log" id="ask-log"><p class="ask-empty" id="ask-empty">Ask about the cause, the fix, who changed what, or what to tell customers.</p></div>
+  <div class="ask-chips" id="ask-chips"></div>
+  <form class="ask-form" id="ask-form" autocomplete="off">
+    <input id="ask-input" maxlength="500" placeholder="Ask a follow-up">
+    <button class="btn primary" id="ask-btn">Ask</button>
+  </form>
+</aside>
 <script src="/static/common.js"></script>
 <script src="/static/argus.js"></script>
 <script src="/static/live.js"></script>

@@ -41,7 +41,8 @@ const ImpactGraph = (() => {
           <div class="igx-toolbar">${toolBtn("select", "Select: click a part to see details")}${toolBtn("pan", "Pan: drag to move, scroll to zoom")}${toolBtn("fit", "Fit the whole graph")}${toolBtn("focus", "Show only the critical path")}</div>
           <div class="igx-zoom"><button type="button" data-z="-1" aria-label="Zoom out">−</button><span class="igx-pct">100%</span><button type="button" data-z="1" aria-label="Zoom in">+</button></div>
           <svg class="igx-svg"><defs>
-            <filter id="igx-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <!-- sized in user space: a box relative to the line would be zero-high for a straight line and hide it -->
+            <filter id="igx-glow" filterUnits="userSpaceOnUse" x="-4000" y="-4000" width="9000" height="9000"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <marker id="igx-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="context-stroke"/></marker>
           </defs><g class="igx-world"></g></svg>
           <div class="igx-mini"><svg class="igx-mini-svg"></svg></div>
@@ -49,9 +50,11 @@ const ImpactGraph = (() => {
             <div><i class="l-crit"></i>Critical path</div><div><i class="l-dep"></i>Dependency</div>
             <div><i class="l-inf"></i>Inferred spread</div><div><i class="l-root"></i>Root cause</div>
           </div>
-          <div class="igx-time"><span>If nothing is done for <b class="igx-t">now</b></span><input type="range" min="0" max="90" step="1" class="igx-range" aria-label="Minutes if nothing is done"><span class="igx-proj"></span></div>
+          <div class="igx-time"><span class="igx-tl">If nothing is done for <b class="igx-t">now</b></span>
+            <input type="range" min="0" max="90" step="1" class="igx-range" autocomplete="off" aria-label="Minutes if nothing is done">
+            <span class="igx-proj"></span><button type="button" class="igx-now">Back to now</button></div>
         </div>
-        <aside class="igx-side"></aside>
+        <aside class="igx-side"><p class="igx-desc">Loading…</p></aside>
       </div>
       <div class="igx-layers"></div>
       <div class="igx-ways"></div>
@@ -105,7 +108,12 @@ const ImpactGraph = (() => {
     });
     canvas.dataset.mode = mode;
     q('[data-tool="select"]').classList.add("on");
-    range.oninput = () => { touched = true; T = +range.value; paint(); };
+    // repaint at most once a frame while the slider is dragged
+    let raf = 0;
+    const repaint = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; paint(); }); };
+    const now = () => data.fixed ? 0 : Math.min(90, Math.round(data.minutes_so_far));
+    range.oninput = () => { touched = true; T = +range.value; repaint(); };
+    q(".igx-now").onclick = () => { touched = false; T = now(); range.value = T; paint(); };
     addEventListener("resize", () => { if (data && canvas.clientWidth) fit(); });
 
     // ---- drawing ----
@@ -162,8 +170,10 @@ const ImpactGraph = (() => {
       q(".igx-t").textContent = T ? `${T} min` : "now";
       const down = data.nodes.filter(failing);
       const next = data.nodes.filter((n) => n.fails_at_min != null && n.fails_at_min > T).sort((a, b) => a.fails_at_min - b.fails_at_min)[0];
-      q(".igx-proj").innerHTML = recovered() ? `<span class="igx-ok">Fixed.</span> Drag to see how far it would have spread without the fix.`
-        : `<b>${rupees(data.at_risk_per_minute * T)}</b> lost · <b>${down.length}/${data.nodes.length}</b> parts down${next ? ` · next: <b>${esc(next.label)}</b> in ${Math.round(next.fails_at_min - T)} min` : ""}`;
+      q(".igx-proj").innerHTML = recovered() ? `<span class="igx-ok">Fixed.</span> Drag to replay it without the fix.`
+        : `<b>${rupees(data.at_risk_per_minute * T)}</b> lost · <b>${down.length}/${data.nodes.length}</b> down${next ? ` · next <b>${esc(next.label)}</b> in ${Math.round(next.fails_at_min - T)} min` : ""}`;
+      q(".igx-now").style.visibility = touched ? "visible" : "hidden";  // keeps its space, so the slider never changes width
+      range.style.setProperty("--fill", `${T / 90 * 100}%`);
       if (!fitted) fit(); else apply();
     }
     function minimap() {
@@ -194,15 +204,17 @@ const ImpactGraph = (() => {
           ${n.value ? `<div class="igx-card"><small>Right now</small><b>${esc(n.value)}</b></div>` : ""}
           <div class="igx-card"><small>Depends on</small><div>${ups.map(esc).join(", ") || "Nothing in this map"}</div></div>
           <div class="igx-card"><small>If it fails, it affects</small><div>${downs.map(esc).join(", ") || "Nothing further"}</div></div>
-          ${n.code.length ? `<div class="igx-card"><small>Code</small><div class="mono">${n.code.map(esc).join("<br>")}</div></div>` : ""}`;
+          ${n.code.length ? `<div class="igx-card"><small>Code</small><div class="mono">${n.code.map(esc).join("<br>")}</div></div>` : ""}
+          <div class="igx-actions"><button class="btn primary" data-ask="What happens to ${esc(n.label)} in this incident, and why?">Ask Argus about this part</button></div>`;
         box.querySelector(".igx-x").onclick = () => { sel = null; paint(); side(); };
+        askButtons(box);
         return;
       }
       const path = (data.critical_path || []).map((id) => byId[id].label);
       const c = data.confidence, pi = data.potential_impact, L = data.layers.business, o = data.owner;
       const series = Array.from({ length: 19 }, (_, i) => data.nodes.filter((n) => n.fails_at_min != null && n.fails_at_min <= i * 5).length);
       const spark = series.map((v, i) => `${(i / 18) * 120},${34 - (v / data.nodes.length) * 32}`).join(" ");
-      box.innerHTML = `<div class="igx-side-head"><h3>Blast radius analysis</h3></div>
+      box.innerHTML = `<div class="igx-side-head"><div><h3>Blast radius</h3><small>How far this reaches and what it costs. Click any part of the graph for its details.</small></div></div>
         <span class="igx-chip ${data.fixed ? "ok" : path.length > 1 ? "bad" : "ok"}">${data.fixed ? "RESOLVED" : path.length > 1 ? "CRITICAL PATH DETECTED" : "NO CRITICAL PATH"}</span>
         ${path.length > 1 ? `<div class="igx-path">${path.map(esc).join(' <span>→</span> ')}</div>` : ""}
         <p class="igx-desc">${data.fixed ? `This was the path to the money. While it was broken, about <b>${rupees(data.at_risk_per_minute)}</b> was lost every minute.` : path.length > 1 ? `While this path is broken, about <b>${rupees(data.at_risk_per_minute)}</b> is lost every minute.` : "Nothing on the way to the business is failing right now."}</p>
@@ -215,12 +227,14 @@ const ImpactGraph = (() => {
           <span class="igx-avatar">${esc((o.person || o.team).slice(0, 1))}</span></div>
         <div class="igx-card"><div class="igx-card-top"><small>Potential impact</small><span class="igx-chip sm ${pi.level === "High" ? "bad" : pi.level === "Medium" ? "warn" : "ok"}">${pi.level}</span></div>
           <div>${pi.business_parts.length ? `Hits ${pi.business_parts.map(esc).join(", ")}` : "No business operations affected yet"}</div></div>
-        <div class="igx-actions"><button class="btn primary" data-go="live">Review the fix and decide</button><button class="btn" data-go="report">Report</button></div>`;
+        <div class="igx-actions"><button class="btn primary" data-go="live">Review the fix and decide</button><button class="btn" data-ask="Explain the blast radius: what is broken, how it spreads, and what it costs.">Ask Argus</button></div>`;
       box.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => {
         if (window.showTab) window.showTab(b.dataset.go);
         if (b.dataset.go === "live") setTimeout(() => document.getElementById("approval-panel").scrollIntoView({ behavior: "smooth", block: "center" }), 50);
       });
+      askButtons(box);
     }
+    const askButtons = (box) => box.querySelectorAll("[data-ask]").forEach((b) => b.onclick = () => window.openAsk && window.openAsk(b.dataset.ask));
 
     // ---- layer cards and ways out ----
     function below() {
@@ -253,8 +267,10 @@ const ImpactGraph = (() => {
 
     async function load() {
       try { data = await api(`/incidents/${iid}/impact-graph`); } catch { data = null; return badge(); }
-      if (!touched) { T = data.fixed ? 0 : Math.min(90, Math.round(data.minutes_so_far)); range.value = T; }
-      paint(); side(); below(); badge();
+      if (!touched) { T = now(); range.value = T; }
+      paint();
+      try { side(); } catch (e) { q(".igx-side").innerHTML = `<p class="igx-desc">Couldn't show the blast radius: ${esc(e.message)}</p>`; }
+      below(); badge();
     }
     function badge() {
       const b = document.getElementById("tb-impact");

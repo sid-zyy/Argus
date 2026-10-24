@@ -396,8 +396,17 @@ function askBubble(q, by) {
   el.className = "ask-q";
   el.textContent = q;
   if (by) el.title = `Asked by ${by}`;
+  $("ask-empty").hidden = true;
   $("ask-log").appendChild(el);
+  askCount();
   return el;
+}
+// how many questions this incident has, on the floating button and under the ask bar
+function askCount() {
+  const n = $("ask-log").querySelectorAll(".ask-q").length;
+  $("ask-fab-n").textContent = n || "";
+  $("ask-open").hidden = !n;
+  $("ask-open").textContent = `Open the conversation (${n})`;
 }
 function answerBubble() {
   const el = document.createElement("div");
@@ -423,8 +432,9 @@ async function ask(question) {
   question = question.trim();
   if (!question) return;
   if (!Session.user) return toastMsg("Choose who you are first (top right)", "bad");
-  $("ask-input").value = "";
-  $("ask-btn").disabled = true;
+  openAsk();
+  $("ask-input").value = $("ask-bar-input").value = "";
+  $("ask-btn").disabled = $("ask-bar-btn").disabled = true;
   askBubble(question);
   const bubble = answerBubble();
   pending.add(question);
@@ -434,11 +444,39 @@ async function ask(question) {
     fillAnswer(bubble, r);
   } catch (err) {
     bubble.querySelector(".bubble").textContent = `I couldn't answer that: ${err.message}`;
-  } finally { pending.delete(question); $("ask-btn").disabled = false; $("ask-input").focus(); }
+  } finally { pending.delete(question); $("ask-btn").disabled = $("ask-bar-btn").disabled = false; $("ask-input").focus(); }
 }
-$("ask-chips").innerHTML = ASK_IDEAS.map((q) => `<button type="button">${esc(q)}</button>`).join("");
-$("ask-chips").querySelectorAll("button").forEach((b) => b.onclick = () => ask(b.textContent));
+// The conversation lives in a drawer that opens over any tab: from the ask bar, the floating button, "/" or the graph.
+function openAsk(prefill) {
+  $("ask-drawer").classList.add("open");
+  $("ask-drawer").setAttribute("aria-hidden", "false");
+  $("ask-fab").hidden = true;
+  if (prefill) $("ask-input").value = prefill;
+  $("ask-log").scrollTop = $("ask-log").scrollHeight;
+  setTimeout(() => $("ask-input").focus(), 50);
+}
+function closeAsk() {
+  $("ask-drawer").classList.remove("open");
+  $("ask-drawer").setAttribute("aria-hidden", "true");
+  $("ask-fab").hidden = false;
+}
+window.openAsk = openAsk;  // the impact graph's "Ask Argus" buttons
+const chips = ASK_IDEAS.map((q) => `<button type="button">${esc(q)}</button>`).join("");
+$("ask-chips").innerHTML = $("ask-bar-chips").innerHTML = chips;
+document.querySelectorAll("#ask-chips button, #ask-bar-chips button").forEach((b) => b.onclick = () => ask(b.textContent));
 $("ask-form").onsubmit = (e) => { e.preventDefault(); ask($("ask-input").value); };
+$("ask-bar").onsubmit = (e) => { e.preventDefault(); ask($("ask-bar-input").value); };
+$("ask-fab").onclick = () => openAsk();
+// the floating button only shows once the ask bar has scrolled away
+new IntersectionObserver(([en]) => $("ask-fab").classList.toggle("away", en.isIntersecting)).observe($("ask-bar"));
+$("ask-open").onclick = () => openAsk();
+$("ask-close").onclick = closeAsk;
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && $("ask-drawer").classList.contains("open")) return closeAsk();
+  if (e.key !== "/" || (e.target.closest && e.target.closest("input, textarea, select")) || e.metaKey || e.ctrlKey || e.altKey) return;
+  e.preventDefault();
+  openAsk();
+});
 
 // ---- controls ----------------------------------------------------------------
 // ---- tabs: Live, Impact graph, Findings, Timeline, Report (the decision column stays beside all but the graph) ----
