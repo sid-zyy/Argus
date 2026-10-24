@@ -1,11 +1,11 @@
 // Live progress panel: what Argus is doing right now and what it plans to do next, so a run never looks frozen.
 // Fed with every audit-log event (history first, then live); a 1 s ticker keeps timers and countdowns moving.
 const LiveProgress = (() => {
-  const PROVIDER = { groq: "Groq", gemini: "Gemini", ollama: "Local model", scripted: "Test model" };
+  const PROVIDER = { groq: "Groq", gemini: "Gemini", openrouter: "OpenRouter", ollama: "Local model", scripted: "Test model" };
   // which result event completes a plan step for each agent
   const PLAN_AGENT = {
-    investigator: ["triage", "claim", "Investigator"], fact_checker: ["verifier", "verdict", "Fact checker"],
-    change_finder: ["code_history", "suspects", "Change finder"], fixer: ["fix", "patch", "Fixer"], test_lab: ["sandbox", "sandbox", "Test lab"],
+    investigator: ["triage", "claim", "Theia"], fact_checker: ["verifier", "verdict", "Themis"],
+    change_finder: ["code_history", "suspects", "Chronos"], fixer: ["fix", "patch", "Hephaestus"], test_lab: ["sandbox", "sandbox", "Talos"],
   };
   const fmt = (ms) => {
     const s = Math.max(0, Math.round(ms / 1000));
@@ -91,6 +91,9 @@ const LiveProgress = (() => {
         }
         case "awaiting_approval":
           S.agent = null; S.wait = null;
+          break;
+        case "deployed":
+          addAction("Argus", `Deployed the fix to ${p.app} (${p.commit})`, "good", t(e));
           break;
         case "approval":
           addAction(p.approver, p.approved ? "Approved the fix" : "Declined the fix", p.approved ? "good" : "bad", t(e));

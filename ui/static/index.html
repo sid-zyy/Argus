@@ -55,6 +55,21 @@
     <div class="tiles" id="tiles"></div>
   </section>
 
+  <section class="panel live-app" id="live-app" hidden>
+    <div class="la-main">
+      <div class="la-title"><h2>ShopFast</h2><span class="la-pill" id="la-pill"></span></div>
+      <p class="small faint" id="la-sub">The real app Argus watches. Its code is a git repo; every commit is deployed.</p>
+      <div class="la-stats" id="la-stats"></div>
+      <div class="la-commit" id="la-commit"></div>
+    </div>
+    <canvas class="la-chart" id="la-chart"></canvas>
+    <div class="la-actions">
+      <a class="btn" id="la-open" target="_blank" rel="noopener">Open the shop</a>
+      <button class="btn danger" id="la-break">Push a bad change</button>
+      <button class="btn ghost" id="la-reset">Reset</button>
+    </div>
+  </section>
+
   <div class="section-head"><h2>Incidents</h2></div>
   <div class="board" id="board"></div>
 
@@ -94,6 +109,7 @@
 </dialog>
 
 <script src="/static/common.js"></script>
+<script src="/static/vendor/reactbits.js"></script>
 <script src="/static/argus.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
@@ -161,7 +177,32 @@ function renderTiles(m) {
     ["Wrong guesses caught", m.claims_refuted, "Before anyone acted on them"],
     ["Made-up evidence blocked", m.fabrications_blocked, `AI used: ≈${m.wh_estimate} Wh`],
   ];
-  $("tiles").innerHTML = tiles.map(([k, v, s]) => `<div class="tile"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`).join("");
+  const counts = [moneyCount(m.saved_value), { to: m.engineer_hours_saved, decimals: 1, suffix: " h" }, { to: m.open }, null,
+    { to: m.claims_refuted }, { to: m.fabrications_blocked }];
+  const box = $("tiles");
+  if (box.children.length !== tiles.length) {
+    box.innerHTML = tiles.map(() => `<div class="tile"><div class="k"></div><div class="v"></div><div class="s"></div></div>`).join("");
+    tileCounters = [];
+  }
+  tiles.forEach(([k, v, sub], i) => {
+    const el = box.children[i];
+    el.querySelector(".k").textContent = k;
+    el.querySelector(".s").textContent = sub;
+    const c = counts[i], v_el = el.querySelector(".v");
+    if (!c || !window.ReactBits) { v_el.textContent = v; return; }
+    const key = JSON.stringify(c);
+    if (tileCounters[i] && tileCounters[i].key === key) return;
+    if (tileCounters[i] && tileCounters[i].shape !== `${c.prefix}|${c.suffix}|${c.decimals}`) { tileCounters[i].api.unmount(); tileCounters[i] = null; }
+    if (!tileCounters[i]) tileCounters[i] = { api: ReactBits.countUp(v_el, { ...c, duration: 1.4 }) };
+    else tileCounters[i].api.set({ to: c.to });
+    Object.assign(tileCounters[i], { key, shape: `${c.prefix}|${c.suffix}|${c.decimals}` });
+  });
+}
+let tileCounters = [];
+// React Bits CountUp settings that show money the same way money() does
+function moneyCount(v) {
+  if (v >= 1e5) return { to: +(v / 1e5).toFixed(1), decimals: 1, prefix: "₹", suffix: " L" };
+  return { to: Math.round(v || 0), prefix: "₹", separator: "," };
 }
 
 // ---- board ----
@@ -282,7 +323,63 @@ $("bug-form").addEventListener("submit", async (e) => {
   catch (err) { $("b-err").textContent = err.message; $("b-submit").disabled = false; }
 });
 
+// ---- the live app: ShopFast ----
+async function renderLiveApp() {
+  const s = await api("/live/status").catch(() => ({ online: false }));
+  const box = $("live-app");
+  box.hidden = false;
+  box.classList.toggle("down", s.online && !s.healthy);
+  $("la-open").href = s.url || "http://localhost:8100";
+  const canAct = Session.user && Session.user.role !== "tester";
+  if (!s.online) {
+    $("la-pill").className = "la-pill off"; $("la-pill").textContent = "Not running";
+    $("la-stats").innerHTML = `<p class="small">Start it in a terminal: <code>python -m shop.server</code></p>`;
+    $("la-commit").innerHTML = ""; $("la-break").disabled = $("la-reset").disabled = true;
+    return;
+  }
+  $("la-pill").className = `la-pill ${s.healthy ? "ok" : "bad"}`;
+  $("la-pill").textContent = s.healthy ? "Healthy" : "Checkout failing";
+  $("la-stats").innerHTML = [
+    ["Error rate", `${(s.error_rate * 100).toFixed(1)}%`, !s.healthy],
+    ["Orders per minute", s.orders_per_min],
+    ["DB connections", `${s.pool_in_use} of ${s.pool_size}`, s.pool_size && s.pool_in_use / s.pool_size > .8],
+  ].map(([k, v, bad]) => `<div><div class="k">${k}</div><div class="v ${bad ? "bad" : ""}">${esc(v)}</div></div>`).join("");
+  const c = s.commits[0];
+  const inc = s.alert.incident;
+  $("la-commit").innerHTML = `Live: <span class="mono">${esc(c.sha)}</span> ${esc(c.message)} <span class="faint">· ${esc(c.author)} · ${ago(c.date)}</span>`
+    + (s.alert.firing && inc ? ` · <a href="${esc(inc.url)}">${esc(inc.key)} open</a>` : "");
+  $("la-break").disabled = !canAct || s.broken_change_live;
+  $("la-reset").disabled = !canAct;
+  drawLiveChart(s.series);
+}
+function drawLiveChart(series) {
+  const cv = $("la-chart"), dpr = devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+  if (!w) return;
+  cv.width = w * dpr; cv.height = h * dpr;
+  const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
+  const pts = series.slice(-60), max = Math.max(.1, ...pts.map((p) => p.error_rate));
+  const css = getComputedStyle(document.documentElement);
+  ctx.strokeStyle = css.getPropertyValue("--border"); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, h - 1); ctx.lineTo(w, h - 1); ctx.stroke();
+  if (pts.length < 2) return;
+  const x = (i) => ((60 - pts.length + i) / 59) * w, y = (v) => h - 3 - (v / max) * (h - 8);
+  ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, x(i), y(p.error_rate)));
+  ctx.strokeStyle = css.getPropertyValue("--bad"); ctx.lineWidth = 2; ctx.stroke();
+}
+$("la-break").onclick = async () => {
+  try { const r = await api("/live/break", { method: "POST" }); toastMsg(`Pushed ${r.sha}: "${r.message}". Deploying…`); }
+  catch (e) { toastMsg(e.message, "bad"); }
+  renderLiveApp();
+};
+$("la-reset").onclick = async () => {
+  if (!confirm("Reset ShopFast to its healthy code and clear its logs?")) return;
+  try { await api("/live/reset", { method: "POST" }); toastMsg("ShopFast reset to the healthy version"); }
+  catch (e) { toastMsg(e.message, "bad"); }
+  renderLiveApp();
+};
+
 async function refresh() {
+  renderLiveApp();
   const [inc, m, ev] = await Promise.all([api("/incidents"), api("/metrics"), api("/events/recent?limit=25")]);
   incidents = inc;
   renderTiles(m); renderBoard(); renderFeed(ev); renderQueue(); renderMindStatus();
@@ -291,7 +388,7 @@ async function refresh() {
 mountThemeToggle($("theme-btn"));
 Session.onChange(() => { renderWelcome(); renderQueue(); });
 mountUserMenu($("user-menu"));
-Promise.all([Session.load(), api("/scenarios").then((s) => (scenarios = s))]).then(refresh).catch((e) => toastMsg(e.message, "bad"));
+Promise.all([Session.load(), api("/scenarios").then((s) => (scenarios = s.filter((x) => !x.live_app)))]).then(refresh).catch((e) => toastMsg(e.message, "bad"));
 setInterval(() => refresh().catch(() => {}), 3000);
 </script>
 </body>

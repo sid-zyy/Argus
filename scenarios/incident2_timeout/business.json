@@ -1,15 +1,15 @@
 {
   "service_label": "Checkout",
   "unit": "orders",
-  "units_per_minute": 320,
-  "value_per_unit": 1450,
+  "units_per_minute": 15,
+  "value_per_unit": 1200,
   "currency": "INR",
   "failure_share": "alert",
-  "manual_mttr_minutes": 70,
+  "manual_mttr_minutes": 60,
   "engineers_paged": 2,
   "assumptions": [
-    "320 checkout orders per minute at peak, average order value ₹1,450",
+    "A mid-sized store: 15 checkout orders per minute at peak, average order value ₹1,200",
     "Failed share of orders equals the alert's 5xx rate (9%)",
-    "A typical manual fix for a bad config change takes about 70 minutes with 2 engineers paged"
+    "A typical manual fix for a bad config change takes about 60 minutes with 2 engineers paged"
   ]
 }

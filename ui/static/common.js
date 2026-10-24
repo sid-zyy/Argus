@@ -19,8 +19,13 @@ const STATUS_LABEL = {
   awaiting_qa: "Needs testing", resolved: "Fixed", closed: "Fixed and confirmed", rejected: "Fix declined", escalated: "Needs a person",
 };
 const VERDICT_LABEL = { supported: "Confirmed", refuted: "Ruled out", insufficient: "Not enough proof" };
-const AGENT_NAME = { triage: "Investigator", code_history: "Change finder", verifier: "Fact checker", fix: "Fixer",
-  sandbox: "Test lab", reporter: "Writer", planner: "Commander", orchestrator: "Argus", human: "Person" };
+// each AI in Argus has a name and keeps its role
+const AGENT_ROLE = { triage: "Investigator", code_history: "Change finder", verifier: "Fact checker", fix: "Fixer",
+  sandbox: "Test lab", reporter: "Writer", planner: "Commander" };
+const AGENT_PERSONA = { triage: "Theia", code_history: "Chronos", verifier: "Themis", fix: "Hephaestus",
+  sandbox: "Talos", reporter: "Clio", planner: "Athena" };
+const AGENT_NAME = { ...Object.fromEntries(Object.keys(AGENT_ROLE).map((k) => [k, `${AGENT_PERSONA[k]} (${AGENT_ROLE[k]})`])),
+  orchestrator: "Argus", human: "Person" };
 const statusBadge = (s) => `<span class="badge s-${esc(s)}">${esc(STATUS_LABEL[s] || s)}</span>`;
 const incKey = (id) => `INC-${id}`;
 
@@ -204,6 +209,7 @@ function describeEvent(e) {
     case "phase": return p.label;
     case "plan": return p.version > 1 ? "Made a new plan" : "Made a plan";
     case "assigned": return `Assigned to ${p.to} (${p.reason.charAt(0).toLowerCase() + p.reason.slice(1)})`;
+    case "deployed": return `Deployed the approved fix to ${p.app} as commit ${p.commit}`;
     case "notified": return `Messaged ${p.to} on ${p.channel}: ${p.message}`;
     case "sla_breach": return `Approval waited over ${p.minutes} min. Escalated to ${p.escalated_to}`;
     default: return JSON.stringify(p).slice(0, 160);

@@ -9,3 +9,4 @@ scenarios/*/repo/
 eval/results.json
 *.db-shm
 *.db-wal
+scenarios/live_shop/logs/

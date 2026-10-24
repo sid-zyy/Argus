@@ -29,7 +29,8 @@ async function refresh() {
 
 function render() {
   document.title = `${incKey(inc.id)} · ${inc.title} · Argus`;
-  $("crumb").textContent = `${incKey(inc.id)} · ${SOURCE_LABEL[inc.source] || "Alert"}`;
+  $("crumb").innerHTML = `<span class="crumb-key">${incKey(inc.id)}</span><span class="crumb-src">${esc(SOURCE_LABEL[inc.source] || "Alert")}</span>`
+    + (inc.alert && inc.alert.source ? `<span class="crumb-from">from ${esc(inc.alert.source)}</span>` : "");
   $("summary-line").textContent = summaryLine();
   renderStepper();
   $("title").textContent = inc.title;

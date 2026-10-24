@@ -13,6 +13,9 @@ import hmac
 import json
 import os
 import re
+import urllib.error
+import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
@@ -180,7 +183,7 @@ def results_data():
     baseline = json.loads(BASELINE.read_text(encoding="utf-8")) if BASELINE.is_file() else {"rows": []}
     by_name = {r["scenario"]: r for r in baseline["rows"]}
     rows = []
-    for s in runner.scenarios():
+    for s in (s for s in runner.scenarios() if not s["live_app"]):
         rows.append({"scenario": s["name"], "service": s["service"], "title": s["title"],
                      "argus": argus_from_replay(s["name"]), "chatbot": by_name.get(s["name"])})
     return {"rows": rows, "baseline_recorded_at": baseline.get("recorded_at")}
@@ -214,7 +217,13 @@ def post_alert(body: dict):
         override = {"id": f"AM-{labels.get('alertname', 'alert')}-{a.get('fingerprint', '')[:6]}".rstrip("-"),
                     "title": notes.get("summary") or labels.get("alertname") or "Alert",
                     "severity": AM_SEVERITY.get(str(labels.get("severity", "")).lower(), "sev2"),
-                    "source": "Prometheus Alertmanager"}
+                    "source": "Prometheus Alertmanager",
+                    "fired_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+        if a.get("startsAt"):
+            override["started_at"] = a["startsAt"]
+        for key in ("metric", "value", "threshold", "window"):  # optional measurements in the annotations
+            if key in notes:
+                override[key] = notes[key]
         return {**_start(scenario, "live", override), "received_from": "alertmanager"}
     try:
         parsed = AlertIn.model_validate(body)
@@ -245,6 +254,39 @@ def _start(scenario: str, mode: str, override: dict | None, reporter: dict | Non
     except FileNotFoundError as e:
         raise HTTPException(409, str(e))
     return {"id": iid, "key": f"INC-{iid}", "url": f"/incidents/{iid}/view"}
+
+
+# ---- live demo app (ShopFast) ---------------------------------------------------
+SHOP_URL = os.getenv("SHOP_URL", "http://localhost:8100").rstrip("/")
+
+
+def _shop(path: str, method: str = "GET") -> dict:
+    req = urllib.request.Request(f"{SHOP_URL}{path}", method=method, data=b"" if method == "POST" else None)
+    try:
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        raise HTTPException(e.code, json.loads(e.read() or b"{}").get("detail", str(e)))
+    except OSError:
+        raise HTTPException(503, f"ShopFast is not running. Start it with: python -m shop.server")
+
+
+@app.get("/live/status")
+def live_status():
+    try:
+        return {**_shop("/api/status"), "url": SHOP_URL}
+    except HTTPException:
+        return {"online": False, "url": SHOP_URL}
+
+
+@app.post("/live/break")
+def live_break(user: dict = Depends(require("developer", "lead"))):
+    return _shop("/admin/break", "POST")
+
+
+@app.post("/live/reset")
+def live_reset(user: dict = Depends(require("developer", "lead"))):
+    return _shop("/admin/reset", "POST")
 
 
 @app.get("/scenarios")

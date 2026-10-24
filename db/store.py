@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import threading
 from datetime import datetime, timezone
@@ -315,8 +316,8 @@ class Store:
 
 
 def required_approvals(severity: str) -> dict:
-    """Sev 1/2: two distinct approvers, at least one lead. Sev 3/4: one developer or lead."""
-    if severity in ("sev1", "sev2"):
+    """One developer or lead. With TWO_PERSON_APPROVAL=1, sev 1/2 need two distinct approvers, at least one a lead."""
+    if severity in ("sev1", "sev2") and os.getenv("TWO_PERSON_APPROVAL", "0").lower() in ("1", "true", "yes"):
         return {"count": 2, "lead": True, "label": "Developer + Lead (two people)"}
     return {"count": 1, "lead": False, "label": "One developer or lead"}
 

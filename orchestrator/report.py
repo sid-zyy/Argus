@@ -131,7 +131,9 @@ def build_report(alert: dict, state: dict, trace: Trace, llm, scenario: str | No
             md.append(f"- {e['ts'][:16].replace('T', ' ')}: {p['tester']} tested it: {'fixed' if p['result'] == 'verified' else 'still broken'}. {p.get('note') or ''}")
         else:
             md.append(f"- {e['ts'][:16].replace('T', ' ')}: {p['by']} asked Argus to try again. {p.get('note') or ''}")
-    md += ["- This is a demo: applying the fix is simulated, no real system was changed.", ""]
+    deployed = next((e["payload"] for e in trace.events if e["type"] == "deployed"), None)
+    md += [f"- The approved fix was committed as `{deployed['commit']}` and deployed to {deployed['app']}." if deployed
+           else "- This is a demo: applying the fix is simulated, no real system was changed.", ""]
 
     if narrative and narrative.follow_ups:
         md += ["## Follow-ups"] + [f"- {x}" for x in narrative.follow_ups] + [""]

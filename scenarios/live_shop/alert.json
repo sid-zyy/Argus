@@ -1,0 +1,13 @@
+{
+  "id": "LIVE",
+  "service": "checkout-api",
+  "title": "ShopFast checkout-api errors",
+  "severity": "sev2",
+  "metric": "error_rate_5xx",
+  "value": null,
+  "threshold": 0.05,
+  "window": "30s",
+  "started_at": null,
+  "fired_at": null,
+  "source": "ShopFast monitor"
+}

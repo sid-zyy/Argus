@@ -1,4 +1,4 @@
-"""Provider-agnostic chat client: Gemini, Groq and Ollama through their OpenAI-compatible APIs.
+"""Provider-agnostic chat client: Groq, Gemini, OpenRouter and Ollama through their OpenAI-compatible APIs.
 
 chat(messages, tools=None, provider=None) -> dict(content, tool_calls, provider, model)
 Fails over to the next configured provider on rate limits, connection errors and 5xx responses.
@@ -28,6 +28,13 @@ PROVIDERS = {
         "model_env": "GROQ_MODEL",
         "default_model": "openai/gpt-oss-120b",
     },
+    # free models on OpenRouter (ids end in ':free'); they change often, so several are tried in turn
+    "openrouter": {
+        "base_url": "https://openrouter.ai/api/v1",
+        "key_env": "OPENROUTER_API_KEY",
+        "model_env": "OPENROUTER_MODEL",
+        "default_model": "qwen/qwen3-coder:free",
+    },
     "ollama": {
         "base_url": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
         "key_env": None,
@@ -35,6 +42,8 @@ PROVIDERS = {
         "default_model": "gemma4:e2b",
     },
 }
+
+OPENROUTER_BACKUPS = "meta-llama/llama-3.3-70b-instruct:free,openai/gpt-oss-20b:free"
 
 MAX_RATE_LIMIT_WAIT = 65.0  # seconds; per-minute token windows are worth waiting out, daily quotas are not
 COOLDOWN = 20.0  # seconds a failed provider is skipped (longer if it asks for longer)
@@ -49,7 +58,7 @@ class LLM:
     def __init__(self, provider: str | None = None, fallbacks: list[str] | None = None, temperature: float = 0.2):
         primary = provider or os.getenv("LLM_PROVIDER", "groq")
         if fallbacks is None:
-            fallbacks = [p.strip() for p in os.getenv("LLM_FALLBACKS", "gemini").split(",") if p.strip()]
+            fallbacks = [p.strip() for p in os.getenv("LLM_FALLBACKS", "gemini,openrouter").split(",") if p.strip()]
         self.order = [primary] + [p for p in fallbacks if p != primary]
         self.temperature = temperature
         self._clients: dict[str, openai.OpenAI] = {}
@@ -114,6 +123,10 @@ class LLM:
     def _call(self, provider: str, messages: list[dict], tools: list[dict] | None) -> dict:
         model = self.model_for(provider)
         kwargs = {"model": model, "messages": _for_provider(provider, messages), "temperature": self.temperature}
+        if provider == "openrouter":
+            # OpenRouter retries the next model in this list when one is rate-limited, down or retired
+            backups = [m.strip() for m in os.getenv("OPENROUTER_FALLBACK_MODELS", OPENROUTER_BACKUPS).split(",") if m.strip()]
+            kwargs["extra_body"] = {"models": [model] + [m for m in backups if m != model][:2]}
         if tools:
             kwargs["tools"] = tools
             kwargs["tool_choice"] = "auto"

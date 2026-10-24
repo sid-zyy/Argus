@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShopFast</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6b4a'/%3E%3Cpath d='M9 12h14l-1.5 11h-11z' fill='white'/%3E%3Cpath d='M12.5 12a3.5 3.5 0 0 1 7 0' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #faf8f5; --surface: #fff; --text: #1d1b22; --muted: #6b6775; --faint: #9a96a3; --border: #ebe7e1;
+    --accent: #ff6b4a; --good: #188c54; --good-bg: #e6f5ec; --bad: #cc3630; --bad-bg: #fdecea; --warn: #b07a10;
+    --shadow: 0 1px 2px rgba(30,20,10,.05), 0 6px 20px rgba(30,20,10,.05);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 Inter, system-ui, sans-serif; }
+  header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 2; }
+  .logo { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 18px; }
+  .logo svg { width: 28px; height: 28px; }
+  .tag { color: var(--muted); font-size: 13px; }
+  .spacer { flex: 1; }
+  .pill { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .pill.good { color: var(--good); background: var(--good-bg); }
+  .pill.bad { color: var(--bad); background: var(--bad-bg); }
+  .pill.bad::before { animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: .2; } }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 1fr 400px; gap: 24px; }
+  @media (max-width: 960px) { main { grid-template-columns: 1fr; padding: 16px; } }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.01em; }
+  h2 { font-size: 15px; margin: 0 0 12px; }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  .banner { padding: 12px 16px; border-radius: 12px; margin-bottom: 18px; font-weight: 500; display: none; }
+  .banner.bad { display: block; background: var(--bad-bg); color: var(--bad); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+  .swatch { height: 130px; display: grid; place-items: center; }
+  .swatch svg { width: 54px; height: 54px; opacity: .9; }
+  .card .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .name { font-weight: 600; }
+  .price { color: var(--muted); }
+  button { font: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 9px 14px; border-radius: 10px; font-weight: 600; }
+  button:hover { border-color: #d6d1c8; }
+  button.primary { background: var(--text); color: #fff; border-color: var(--text); margin-top: auto; }
+  button.primary:hover { background: #000; }
+  button.danger { color: var(--bad); }
+  button:disabled { opacity: .5; cursor: default; }
+  .check { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; margin: 16px 0 0; }
+  aside { display: flex; flex-direction: column; gap: 16px; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat .k { color: var(--muted); font-size: 12px; }
+  .stat .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stat .v.bad { color: var(--bad); }
+  .bar { height: 8px; border-radius: 99px; background: #f0ece6; overflow: hidden; margin-top: 6px; }
+  .bar > div { height: 100%; background: var(--good); transition: width .6s, background .6s; }
+  canvas { width: 100%; height: 110px; display: block; margin-top: 14px; }
+  .legend { color: var(--faint); font-size: 12px; display: flex; justify-content: space-between; }
+  .commit { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; padding: 9px 0; border-top: 1px solid var(--border); font-size: 13px; }
+  .commit:first-of-type { border-top: 0; }
+  .sha { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); }
+  .commit .meta { grid-column: 2; color: var(--faint); font-size: 12px; }
+  .commit.live .sha { color: var(--accent); font-weight: 600; }
+  .alert { padding: 12px 14px; border-radius: 12px; font-size: 14px; }
+  .alert.quiet { background: #f4f2ee; color: var(--muted); }
+  .alert.firing { background: var(--bad-bg); color: var(--bad); }
+  .alert a { color: inherit; font-weight: 700; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hint { color: var(--faint); font-size: 12px; margin: 10px 0 0; }
+  code { font-family: "JetBrains Mono", monospace; font-size: 12px; background: #f4f2ee; padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+  main > * { min-width: 0; }
+  @media (max-width: 600px) { .tag { display: none; } header { padding: 12px 16px; } }
+  .toast { position: fixed; left: 50%; bottom: 24px; translate: -50% 20px; opacity: 0; transition: .35s; background: var(--text); color: #fff; padding: 12px 18px; border-radius: 12px; font-weight: 500; box-shadow: var(--shadow); }
+  .toast.show { opacity: 1; translate: -50% 0; }
+  .toast.bad { background: var(--bad); }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#ff6b4a"/><path d="M9 12h14l-1.5 11h-11z" fill="#fff"/><path d="M12.5 12a3.5 3.5 0 0 1 7 0" stroke="#fff" stroke-width="2" fill="none"/></svg>ShopFast</div>
+  <span class="tag">Demo store, watched by Argus</span>
+  <span class="spacer"></span>
+  <span class="pill good" id="health">Connecting…</span>
+</header>
+<main>
+  <section>
+    <h1>Today's picks</h1>
+    <p class="sub">Every purchase runs the real checkout code from <code>scenarios/live_shop/repo</code>.</p>
+    <div class="banner" id="banner"></div>
+    <div class="grid" id="products"></div>
+    <label class="check"><input type="checkbox" id="decline"> Pay with a card that gets declined</label>
+  </section>
+  <aside>
+    <div class="panel">
+      <h2>Behind the scenes</h2>
+      <div class="stats">
+        <div class="stat"><div class="k">Error rate (30 s)</div><div class="v" id="err">–</div></div>
+        <div class="stat"><div class="k">Orders per minute</div><div class="v" id="opm">–</div></div>
+        <div class="stat" style="grid-column: span 2"><div class="k" id="pool-k">Database connections in use</div><div class="bar"><div id="pool"></div></div></div>
+      </div>
+      <canvas id="chart"></canvas>
+      <div class="legend"><span>Error rate, last 10 min</span><span id="chart-max"></span></div>
+    </div>
+    <div class="panel">
+      <h2>Argus</h2>
+      <div class="alert quiet" id="alert">Watching. Nothing wrong right now.</div>
+    </div>
+    <div class="panel">
+      <h2>Deployed changes</h2>
+      <div id="commits"></div>
+    </div>
+    <div class="panel">
+      <h2>Developer controls</h2>
+      <div class="row">
+        <button class="danger" id="break">Push a bad change</button>
+        <button id="reset">Reset shop</button>
+      </div>
+      <p class="hint">Or change the code yourself: edit <code>app/checkout.py</code> in <code>scenarios/live_shop/repo</code> and <code>git commit</code>. Each commit is deployed within seconds.</p>
+    </div>
+  </aside>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const rupees = (v) => `₹${v.toLocaleString("en-IN")}`;
+const ICONS = [
+  '<path d="M6 30h36l-4 8H10z M14 30l6-14h8l6 14" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+  '<path d="M10 28a14 14 0 0 1 28 0v8h-6v-10h4 M10 28v8h6V26h-4" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+  '<rect x="17" y="8" width="14" height="32" rx="5" fill="none" stroke="#fff" stroke-width="3"/><path d="M17 16h14" stroke="#fff" stroke-width="3"/>',
+  '<rect x="6" y="14" width="36" height="20" rx="4" fill="none" stroke="#fff" stroke-width="3"/><path d="M12 20h2m6 0h2m6 0h2m6 0h2M14 28h20" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',
+  '<path d="M14 12l10 6 10-6 6 8-6 4v16H14V24l-6-4z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+  '<path d="M12 40h24 M24 40V22 M14 22l10-14 10 14z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
+];
+let toastTimer;
+function toast(text, bad) {
+  const t = $("toast");
+  t.textContent = text; t.className = `toast show ${bad ? "bad" : ""}`;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.className = "toast"), 3500);
+}
+function ago(iso) {
+  const s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
+  return s < 60 ? "Just now" : s < 3600 ? `${Math.floor(s / 60)} min ago` : s < 86400 ? `${Math.floor(s / 3600)} h ago` : `${Math.floor(s / 86400)} d ago`;
+}
+
+async function loadProducts() {
+  const items = await fetch("/api/products").then((r) => r.json());
+  $("products").innerHTML = items.map((p, i) => `
+    <div class="card"><div class="swatch" style="background:${p.tint}"><svg viewBox="0 0 48 48">${ICONS[i % ICONS.length]}</svg></div>
+      <div class="body"><div class="name">${esc(p.name)}</div><div class="price">${rupees(p.price)}</div>
+      <button class="primary" data-id="${p.id}" style="margin-top:10px">Buy now</button></div></div>`).join("");
+  document.querySelectorAll("[data-id]").forEach((b) => b.onclick = async () => {
+    b.disabled = true; b.textContent = "Paying…";
+    try {
+      const r = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: b.dataset.id, decline: $("decline").checked }) }).then((x) => x.json());
+      if (r.status === 200) toast(`Order placed: ${r.product}`);
+      else if (r.status === 402) toast("Your card was declined. Try another card.", true);
+      else toast(`Sorry, checkout failed (error ${r.status}). Please try again later.`, true);
+    } finally { b.disabled = false; b.textContent = "Buy now"; }
+  });
+}
+
+function drawChart(series) {
+  const c = $("chart"), dpr = devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+  c.width = w * dpr; c.height = h * dpr;
+  const ctx = c.getContext("2d"); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
+  const pts = series.slice(-120);
+  const max = Math.max(.1, ...pts.map((p) => p.error_rate));
+  $("chart-max").textContent = `Top: ${Math.round(max * 100)}%`;
+  ctx.strokeStyle = "#ebe7e1"; ctx.lineWidth = 1;
+  [0, .5, 1].forEach((f) => { const y = h - 4 - f * (h - 8); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); });
+  const ty = h - 4 - (.05 / max) * (h - 8);  // alert threshold
+  ctx.setLineDash([4, 4]); ctx.strokeStyle = "#e0a96d"; ctx.beginPath(); ctx.moveTo(0, ty); ctx.lineTo(w, ty); ctx.stroke(); ctx.setLineDash([]);
+  if (pts.length < 2) return;
+  const x = (i) => (i / 119) * w, y = (v) => h - 4 - (v / max) * (h - 8);
+  const off = 120 - pts.length;
+  ctx.beginPath(); ctx.moveTo(x(off), h);
+  pts.forEach((p, i) => ctx.lineTo(x(off + i), y(p.error_rate)));
+  ctx.lineTo(x(off + pts.length - 1), h); ctx.closePath();
+  ctx.fillStyle = "rgba(204,54,48,.12)"; ctx.fill();
+  ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, x(off + i), y(p.error_rate)));
+  ctx.strokeStyle = "#cc3630"; ctx.lineWidth = 2; ctx.stroke();
+}
+
+async function refresh() {
+  let s;
+  try { s = await fetch("/api/status").then((r) => r.json()); } catch { return; }
+  const bad = !s.healthy;
+  $("health").className = `pill ${bad ? "bad" : "good"}`;
+  $("health").textContent = bad ? "Checkout failing" : "All systems normal";
+  $("banner").className = `banner ${bad ? "bad" : ""}`;
+  $("banner").textContent = s.start_error ? `The latest version failed to start: ${s.start_error}` :
+    `Checkout is failing for ${Math.round(s.error_rate * 100)}% of requests right now.`;
+  $("err").textContent = `${(s.error_rate * 100).toFixed(1)}%`;
+  $("err").className = `v ${bad ? "bad" : ""}`;
+  $("opm").textContent = s.orders_per_min;
+  $("pool-k").textContent = `Database connections in use: ${s.pool_in_use} of ${s.pool_size}`;
+  const share = s.pool_size ? s.pool_in_use / s.pool_size : 0;
+  $("pool").style.width = `${Math.max(2, share * 100)}%`;
+  $("pool").style.background = share > .8 ? "var(--bad)" : share > .5 ? "var(--warn)" : "var(--good)";
+  drawChart(s.series);
+  const a = s.alert, inc = a.incident;
+  $("alert").className = `alert ${a.firing ? "firing" : "quiet"}`;
+  $("alert").innerHTML = a.error ? `Alert firing, but ${esc(a.error)}`
+    : a.firing ? `Alert sent. Argus opened <a href="${esc(s.argus_url + (inc ? inc.url : "/"))}" target="_blank">${esc(inc ? inc.key : "an incident")}</a> and is investigating.`
+    : inc ? `Recovered. Argus handled <a href="${esc(s.argus_url + inc.url)}" target="_blank">${esc(inc.key)}</a>.`
+    : "Watching. Nothing wrong right now.";
+  $("commits").innerHTML = s.commits.map((c, i) => `<div class="commit ${i === 0 ? "live" : ""}"><span class="sha">${esc(c.sha)}</span>
+    <span>${esc(c.message)}</span><span class="meta">${esc(c.author)} · ${ago(c.date)}${i === 0 ? " · Live" : ""}</span></div>`).join("");
+  $("break").disabled = s.broken_change_live;
+}
+
+$("break").onclick = async () => {
+  const r = await fetch("/admin/break", { method: "POST" });
+  const j = await r.json();
+  toast(r.ok ? `Arjun pushed ${j.sha}: "${j.message}". Deploying…` : j.detail, !r.ok);
+  refresh();
+};
+$("reset").onclick = async () => {
+  if (!confirm("Reset the shop to its healthy code and clear its logs?")) return;
+  $("reset").disabled = true;
+  try { await fetch("/admin/reset", { method: "POST" }); toast("Shop reset to the healthy version."); }
+  finally { $("reset").disabled = false; refresh(); }
+};
+loadProducts();
+refresh();
+setInterval(refresh, 2000);
+</script>
+</body>
+</html>

@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import textwrap
 import threading
 import time
 from datetime import datetime, timezone
@@ -63,8 +64,14 @@ class IncidentRunner:
             d = p.parent
             alert = json.loads((d / "alert.json").read_text(encoding="utf-8")) if (d / "alert.json").exists() else {}
             out.append({"name": d.name, "service": alert.get("service", d.name), "title": alert.get("title", d.name),
-                        "replay_available": self.replay_file(d.name) is not None})
+                        "replay_available": self.replay_file(d.name) is not None, "live_app": self.live_app(d.name)})
         return out
+
+    @staticmethod
+    def live_app(scenario: str) -> dict | None:
+        """A scenario backed by a running app (scenarios/<name>/live.json): approved fixes are really deployed."""
+        p = ROOT / "scenarios" / scenario / "live.json"
+        return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else None
 
     def replay_file(self, scenario: str) -> Path | None:
         p = ROOT / "replay" / f"{scenario}.json"
@@ -249,12 +256,34 @@ class IncidentRunner:
         llm = self.llm_factory()
         trace = Trace([lambda e: self._record(iid, e)])
         state = run_incident(ws, llm, trace, lambda ctx: self._wait_for_human(iid), claim_offset=self.store.claim_count(iid))
+        live = self.live_app(scenario_dir.name)
+        if live and live.get("deploy_on_approve") and state["status"] == "applied":
+            self._deploy(iid, ws, state, trace, live)
         md = build_report(ws.alert, state, trace, llm, scenario_dir.name)
         out = ROOT / "runs" / f"{scenario_dir.name}-INC-{iid}-{datetime.now():%Y%m%d-%H%M%S}"
         out.mkdir(parents=True, exist_ok=True)
         (out / "incident_report.md").write_text(md, encoding="utf-8")
         trace.emit("reporter", "report", {"path": str(out / "incident_report.md"), "markdown": md})
         trace.save(out / "trace.json")
+
+    def _deploy(self, iid: int, ws: Workspace, state: dict, trace: Trace, live: dict) -> None:
+        """Commit the approved, sandbox-tested fix to the live app's repo; its deploy pipeline picks it up."""
+        fix, approval = state["fix"], state["approval"] or {}
+        try:
+            if fix.fix_type == "rollback":
+                ws.git("checkout", fix.rollback_to, "--", ".")
+            else:
+                for ed in fix.edits:
+                    p = ws.repo_dir / ed.file.removeprefix("repo/")
+                    p.write_text(p.read_text(encoding="utf-8").replace(ed.old, ed.new, 1), encoding="utf-8", newline="\n")
+            ws.git("add", "-A")
+            title = textwrap.shorten(fix.rationale.split(". ")[0] or "Fix", 72, placeholder="…")
+            ws.git("-c", "user.name=Argus", "-c", "user.email=argus@shopfast.example", "commit", "-q", "-m",
+                   f"{title}\n\nArgus {incKey(iid)}, tested in the sandbox, approved by {approval.get('approver', 'a person')}.")
+            sha = ws.git("rev-parse", "--short", "HEAD").strip()
+            trace.emit("orchestrator", "deployed", {"commit": sha, "app": live.get("app", "the app"), "message": title})
+        except ValueError as e:
+            trace.emit("orchestrator", "error", {"message": f"Could not deploy the approved fix: {e}"})
 
     def _replay(self, iid: int, scenario_dir: Path, note: str) -> None:
         path = self.replay_file(scenario_dir.name)

@@ -4,13 +4,13 @@
 // Drag to rotate; hover a region to see whose it is; click a region or a card to see that agent's steps.
 const Argus = (() => {
   const AGENTS = {
-    triage:       { name: "Investigator", role: "Reads the logs",          dark: [94, 206, 255],  light: [14, 132, 196],  icon: "eye",    x: .15, y: .24, dir: [-.7, -.5, .5] },
-    code_history: { name: "Change finder", role: "Checks recent changes",  dark: [255, 128, 210], light: [200, 50, 140],  icon: "branch", x: .11, y: .52, dir: [-.95, .05, -.3] },
-    verifier:     { name: "Fact checker", role: "Tries to prove it wrong", dark: [160, 132, 255], light: [104, 76, 214],  icon: "scale",  x: .15, y: .80, dir: [-.6, .65, .45] },
-    fix:          { name: "Fixer",        role: "Suggests a fix",          dark: [255, 186, 108], light: [204, 110, 8],   icon: "spark",  x: .85, y: .24, dir: [.7, -.5, .5] },
-    sandbox:      { name: "Test lab",     role: "Tests the fix safely",    dark: [120, 168, 255], light: [44, 100, 214],  icon: "cube",   x: .89, y: .52, dir: [.95, .05, -.3] },
-    reporter:     { name: "Writer",       role: "Writes the summary",      dark: [100, 232, 206], light: [10, 140, 124],  icon: "doc",    x: .85, y: .80, dir: [.6, .65, .45] },
-    human:        { name: "You",          role: "Approve the fix",         dark: [255, 214, 150], light: [190, 128, 16],  icon: "person", x: .50, y: .92, dir: [0, .95, -.3] },
+    triage:       { name: "Theia", title: "Investigator", role: "Reads the logs",          dark: [94, 206, 255],  light: [14, 132, 196],  icon: "eye",    x: .15, y: .24, dir: [-.7, -.5, .5] },
+    code_history: { name: "Chronos", title: "Change finder", role: "Checks recent changes",  dark: [255, 128, 210], light: [200, 50, 140],  icon: "branch", x: .11, y: .52, dir: [-.95, .05, -.3] },
+    verifier:     { name: "Themis", title: "Fact checker", role: "Tries to prove it wrong", dark: [160, 132, 255], light: [104, 76, 214],  icon: "scale",  x: .15, y: .80, dir: [-.6, .65, .45] },
+    fix:          { name: "Hephaestus", title: "Fixer",        role: "Suggests a fix",          dark: [255, 186, 108], light: [204, 110, 8],   icon: "spark",  x: .85, y: .24, dir: [.7, -.5, .5] },
+    sandbox:      { name: "Talos", title: "Test lab",     role: "Tests the fix safely",    dark: [120, 168, 255], light: [44, 100, 214],  icon: "cube",   x: .89, y: .52, dir: [.95, .05, -.3] },
+    reporter:     { name: "Clio", title: "Writer",       role: "Writes the summary",      dark: [100, 232, 206], light: [10, 140, 124],  icon: "doc",    x: .85, y: .80, dir: [.6, .65, .45] },
+    human:        { name: "You", title: "Approver",          role: "Approve the fix",         dark: [255, 214, 150], light: [190, 128, 16],  icon: "person", x: .50, y: .92, dir: [0, .95, -.3] },
   };
   const ACTOR = { triage: "triage", code_history: "code_history", verifier: "verifier", fix: "fix",
     sandbox: "sandbox", reporter: "reporter", human: "human" };
@@ -115,7 +115,8 @@ const Argus = (() => {
         el.style.setProperty("--y", `${a.y * 100}%`);
         el.style.setProperty("--c", col(key).join(","));
         el.innerHTML = `<div class="an-icon"><svg viewBox="0 0 24 24">${ICONS[a.icon]}</svg></div>
-          <div class="an-body"><div class="an-name">${a.name}<span class="an-result"></span></div>
+          <div class="an-body"><div class="an-name"><span class="an-label">${a.name}</span></div>
+          <div class="an-title"><span>${a.title}</span><span class="an-result"></span></div>
           <div class="an-status">${a.role}</div></div>`;
         el.addEventListener("click", () => select(key));
         el.addEventListener("mouseenter", () => { S.hoverAgent = key; });
@@ -152,6 +153,7 @@ const Argus = (() => {
     }
     new ResizeObserver(layout).observe(stage);
 
+    const MAX_TILT = .35;  // keep the sphere upright: only a gentle tilt, never a flip
     function rotate(p) {
       const cy = Math.cos(S.yaw), sy = Math.sin(S.yaw), cp = Math.cos(S.pitch), sp = Math.sin(S.pitch);
       const x = p[0] * cy + p[2] * sy, z1 = -p[0] * sy + p[2] * cy;
@@ -181,8 +183,8 @@ const Argus = (() => {
       if (S.dragging && last) {
         const dx = e.clientX - last[0], dy = e.clientY - last[1];
         moved += Math.abs(dx) + Math.abs(dy);
-        S.vyaw = dx * .006; S.vpitch = dy * .006;
-        S.yaw += S.vyaw; S.pitch = Math.max(-1.3, Math.min(1.3, S.pitch + S.vpitch));
+        S.vyaw = dx * .006; S.vpitch = 0;  // spin left/right only, so the sphere never turns upside down
+        S.yaw += S.vyaw;
         last = [e.clientX, e.clientY]; S.lastTouch = performance.now();
         tip.classList.remove("show");
         return;
@@ -193,7 +195,7 @@ const Argus = (() => {
       canvas.style.cursor = best >= 0 ? "pointer" : "grab";
       if (best >= 0) {
         const k = owner[best], a = AGENTS[k];
-        tip.innerHTML = `<b style="color:rgb(${col(k)})">${a.name}</b><span>${esc(history[k][0] || a.role)}</span>`;
+        tip.innerHTML = `<b style="color:rgb(${col(k)})">${a.name} · ${a.title}</b><span>${esc(history[k][0] || a.role)}</span>`;
         tip.style.left = `${mx}px`; tip.style.top = `${my}px`;
         tip.classList.add("show");
       } else tip.classList.remove("show");
@@ -218,7 +220,7 @@ const Argus = (() => {
       const key = S.selected, a = AGENTS[key];
       const items = history[key].slice(0, 8);
       detail.style.setProperty("--c", col(key).join(","));
-      detail.innerHTML = `<div class="ad-head"><span class="ad-dot"></span><b>${a.name}</b><span class="ad-role">${a.role}</span>
+      detail.innerHTML = `<div class="ad-head"><span class="ad-dot"></span><b>${a.name}</b><span class="ad-role">${a.title} · ${a.role}</span>
         <button type="button" class="ad-close" aria-label="Close">×</button></div>
         ${items.length ? `<ol>${items.map((t) => `<li>${esc(t)}</li>`).join("")}</ol>` : `<p>No steps from this agent yet.</p>`}`;
       detail.querySelector(".ad-close").onclick = () => select(key);
@@ -292,13 +294,13 @@ const Argus = (() => {
       // motion: drag inertia, then ease toward the agent in focus, otherwise a slow drift
       const idle = now - S.lastTouch > 3500;
       if (!S.dragging) {
-        S.yaw += S.vyaw; S.pitch = Math.max(-1.3, Math.min(1.3, S.pitch + S.vpitch));
-        S.vyaw *= .93; S.vpitch *= .93;
+        S.yaw += S.vyaw;
+        S.vyaw *= .93;
         const focusKey = S.hoverAgent || S.selected || S.active;
         if (idle && focusKey && !reduced) {
           const [ty, tp] = facing(focusKey);
           let dy = ty - S.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
-          S.yaw += dy * k * .8; S.pitch += (tp - S.pitch) * k * .8;
+          S.yaw += dy * k * .8; S.pitch += (Math.max(-MAX_TILT, Math.min(MAX_TILT, tp)) - S.pitch) * k * .8;
         } else if (idle && !reduced) {
           S.yaw += dt * .12;
           S.pitch += (-.25 - S.pitch) * k * .2;
@@ -478,7 +480,7 @@ const Argus = (() => {
 
     let typer = null;
     function say(key, text, fresh) {
-      who.textContent = key ? AGENTS[key].name : "Argus";
+      who.textContent = key ? `${AGENTS[key].name} · ${AGENTS[key].title}` : "Argus";
       who.style.setProperty("--c", (key ? col(key) : P("WHITE")).join(","));
       clearInterval(typer);
       if (!fresh || reduced) { line.textContent = text; return; }
@@ -554,7 +556,8 @@ const Argus = (() => {
         case "verdict": {
           setActive("verifier"); markDone("verifier");
           const kind = p.verdict === "supported" ? "good" : p.verdict === "refuted" ? "bad" : "warn";
-          result("verifier", VERDICT_TEXT[p.verdict], kind);
+          // once a cause is confirmed, a later ruled-out guess doesn't change the headline result
+          if (kind === "good" || nodes.verifier?.result.className.indexOf("good") === -1) result("verifier", VERDICT_TEXT[p.verdict], kind);
           status("verifier", p.reasoning.slice(0, 80));
           remember("verifier", `${p.claim_id} ${VERDICT_TEXT[p.verdict]}: ${p.reasoning}`);
           say("verifier", `${VERDICT_TEXT[p.verdict]}: ${p.reasoning}`, fresh);
@@ -616,6 +619,10 @@ const Argus = (() => {
           say("human", `${p.approved ? "Approved" : "Rejected"} by ${p.approver}.`, fresh);
           showToast(p.approved ? "Approved" : "Rejected", p.approved ? "good" : "bad", fresh);
           if (fresh) { ripple("human", p.approved ? P('GOOD') : P('BAD')); if (p.approved) relay("human", "reporter", "Approved"); }
+          break;
+        case "deployed":
+          say(null, `Fix deployed to ${p.app} as ${p.commit}. Watching it recover.`, fresh);
+          showToast(`Deployed to ${p.app}`, "good", fresh);
           break;
         case "qa":
           say(null, `QA by ${p.tester}: ${p.result === "verified" ? "verified fixed" : "still failing"}`, fresh);

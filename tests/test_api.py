@@ -16,6 +16,7 @@ from tools.workspace import Workspace
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("INCIDENT_DB", str(tmp_path / "t.db"))
     monkeypatch.setenv("REPLAY_SPEED", "0")
+    monkeypatch.setenv("TWO_PERSON_APPROVAL", "1")  # these tests cover the stricter rule
     import ui.app as appmod
     appmod = importlib.reload(appmod)
     ws = Workspace(tp.SCENARIO)
