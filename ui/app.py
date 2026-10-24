@@ -446,6 +446,17 @@ def comment(iid: int, body: CommentIn, user: dict = Depends(signed_in)):
     return c
 
 
+@app.get("/incidents/{iid}/impact-graph")
+def impact_graph(iid: int):
+    """What else the incident touches (observed vs inferred), how it would spread, and the cost of each way out."""
+    from orchestrator.impact_graph import analyse
+    inc = _incident_or_404(iid)
+    graph = analyse(inc, Workspace(ROOT / "scenarios" / inc["scenario"]))
+    if not graph:
+        raise HTTPException(404, f"no service map for {inc['service']}")
+    return graph
+
+
 class AskIn(BaseModel):
     question: str = Field(min_length=2, max_length=500)
 

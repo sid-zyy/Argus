@@ -37,17 +37,25 @@
     <details class="impact-note"><summary>How these estimates are worked out</summary><ul id="impact-assumptions"></ul></details>
   </section>
 
-  <section id="argus" style="margin-top: 16px"></section>
-  <section class="panel live" id="progress" aria-live="polite"></section>
+  <nav class="inc-tabs" id="inc-tabs" role="tablist">
+    <button role="tab" data-tab="live"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8M8.5 8.5a4.5 4.5 0 0 0 0 7M15.5 8.5a4.5 4.5 0 0 1 0 7"/></svg>Live<span class="tb-badge" id="tb-live"></span></button>
+    <button role="tab" data-tab="impact"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7.4 11 16.6 6M7.4 13l9.2 5"/></svg>Impact graph<span class="tb-badge" id="tb-impact"></span></button>
+    <button role="tab" data-tab="findings"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Findings<span class="tb-badge" id="tb-findings"></span></button>
+    <button role="tab" data-tab="timeline"><svg viewBox="0 0 24 24"><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>Timeline<span class="tb-badge" id="tb-timeline"></span></button>
+    <button role="tab" data-tab="report"><svg viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg>Report<span class="tb-badge" id="tb-report"></span></button>
+    <span class="tb-hint">Keys 1–5 switch tabs</span>
+  </nav>
 
-  <div class="grid" style="margin-top: 16px">
+  <section data-pane="live" id="argus" class="pane-live"></section>
+  <section data-pane="impact" class="ig" id="impact-graph" hidden></section>
+
+  <div class="grid" id="main-grid" style="margin-top: 16px">
     <div>
-      <nav class="tabs">
-        <button class="tab active" data-tab="investigation">Findings</button>
-        <button class="tab" data-tab="report">Report</button>
-      </nav>
+      <div data-pane="live">
+        <section class="panel live" id="progress" aria-live="polite"></section>
+      </div>
 
-      <div id="tab-investigation" class="stack">
+      <div data-pane="findings" class="stack" hidden>
         <section class="panel" id="alert-panel">
           <h2 id="alert-title">What happened</h2>
           <dl class="kv" id="alert" style="margin-top: 10px"></dl>
@@ -73,7 +81,18 @@
         </section>
       </div>
 
-      <div id="tab-report" hidden>
+      <div data-pane="timeline" hidden>
+        <section class="panel">
+          <div class="row" style="justify-content: space-between">
+            <h2 style="margin: 0">Timeline</h2>
+            <label class="small row" style="margin: 0; gap: 6px; width: auto; font-weight: 400; color: var(--muted)"><input type="checkbox" id="show-steps" style="width: auto"> All steps</label>
+          </div>
+          <p class="help" style="margin: 4px 0 0">Every step, by every agent and person, in order. This is the audit trail.</p>
+          <div class="activity tall" id="activity" style="margin-top: 8px"></div>
+        </section>
+      </div>
+
+      <div data-pane="report" hidden>
         <section class="panel">
           <div class="row" style="justify-content: space-between">
             <h2 style="margin: 0">Report</h2>
@@ -108,13 +127,6 @@
         <p class="small faint" id="details-hint" style="margin: 8px 0 0"></p>
       </section>
       <section class="panel">
-        <div class="row" style="justify-content: space-between">
-          <h2 style="margin: 0">Timeline</h2>
-          <label class="small row" style="margin: 0; gap: 6px; width: auto; font-weight: 400; color: var(--muted)"><input type="checkbox" id="show-steps" style="width: auto"> All steps</label>
-        </div>
-        <div class="activity" id="activity" style="margin-top: 8px"></div>
-      </section>
-      <section class="panel">
         <h2>Notes</h2>
         <div id="comments"></div>
         <label for="comment-text" id="comment-label">Add a note</label>
@@ -127,6 +139,7 @@
 <script src="/static/common.js"></script>
 <script src="/static/argus.js"></script>
 <script src="/static/live.js"></script>
+<script src="/static/impact_graph.js"></script>
 <script src="/static/ticket.js"></script>
 </body>
 </html>

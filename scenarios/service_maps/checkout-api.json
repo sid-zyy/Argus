@@ -1,0 +1,28 @@
+{
+  "about": "How ShopFast's checkout fits together. Edges point from a dependency to what depends on it, so a failure flows along them. cascade_min: minutes after its upstream fails before this part is affected, if nothing is done.",
+  "team": "Payments & Checkout team",
+  "nodes": [
+    {"id": "payments", "label": "Payment provider", "kind": "external", "col": 0, "code": ["app/payments.py"],
+     "signals": ["PaymentTimeout", "did not respond within", "payments\\.internal"], "note": "Charges customers' cards"},
+    {"id": "postgres", "label": "Orders database", "kind": "data", "col": 0, "code": [],
+     "signals": ["deadlock", "database is down"], "note": "Stores orders and order history"},
+    {"id": "pool", "label": "DB connection pool", "kind": "infra", "col": 1, "code": ["app/db.py"],
+     "signals": ["pool exhausted", "DBConnectionTimeout", "pool usage high", "pool\\.release\\(", "pool\\.acquire\\("], "note": "20 shared connections to the database"},
+    {"id": "checkout", "label": "checkout-api", "kind": "service", "col": 2, "code": ["app/checkout.py", "app/main.py", "app/config.py", "app/http.py"],
+     "signals": ["5xx", "status=50[234]", "error_rate"], "note": "Takes payment and creates the order"},
+    {"id": "history", "label": "Order history API", "kind": "service", "col": 2, "code": ["app/history.py"], "cascade_min": 3,
+     "signals": ["/orders/history"], "note": "Uses the same connection pool, so it starves too"},
+    {"id": "storefront", "label": "Checkout page", "kind": "frontend", "col": 3, "signals": [], "note": "Where customers pay"},
+    {"id": "account", "label": "My orders page", "kind": "frontend", "col": 3, "signals": [], "note": "Customers check their past orders"},
+    {"id": "orders", "label": "Order creation", "kind": "business", "col": 4, "signals": [], "metric": "affected", "note": "Orders that fail to be placed"},
+    {"id": "support", "label": "Customer support", "kind": "business", "col": 4, "cascade_min": 12, "signals": [],
+     "note": "Tickets and calls rise as customers retry and complain"},
+    {"id": "revenue", "label": "Revenue", "kind": "business", "col": 5, "signals": [], "metric": "at_risk", "note": "Money from failed orders"},
+    {"id": "emails", "label": "Order emails", "kind": "business", "col": 5, "signals": [], "note": "No order, no confirmation email"}
+  ],
+  "edges": [
+    ["payments", "checkout"], ["postgres", "pool"], ["pool", "checkout"], ["pool", "history"],
+    ["checkout", "storefront"], ["history", "account"], ["storefront", "orders"], ["storefront", "support"],
+    ["account", "support"], ["orders", "revenue"], ["orders", "emails"]
+  ]
+}

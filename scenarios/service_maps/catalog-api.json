@@ -1,0 +1,24 @@
+{
+  "about": "How the product catalog fits together. Edges point from a dependency to what depends on it, so a failure flows along them. cascade_min: minutes after its upstream fails before this part is affected, if nothing is done.",
+  "team": "Catalog team",
+  "nodes": [
+    {"id": "store", "label": "Product database", "kind": "data", "col": 0, "code": ["app/store.py"], "signals": ["database is down"], "note": "Products, prices and stock"},
+    {"id": "cache", "label": "Page cache", "kind": "infra", "col": 0, "code": ["app/catalog.py"],
+     "signals": ["cache"], "note": "Keeps rendered product pages in memory"},
+    {"id": "memory", "label": "Container memory", "kind": "infra", "col": 1, "code": ["deploy.yaml"],
+     "signals": ["out of memory", "OOMKilled", "memory high", "rss_mb"], "note": "512 MB limit per container"},
+    {"id": "catalog", "label": "catalog-api", "kind": "service", "col": 2, "code": ["app/main.py", "app/templates.py"],
+     "signals": ["restarting", "container_restarts", "killed"], "note": "Serves product pages"},
+    {"id": "lb", "label": "Load balancer", "kind": "infra", "col": 3, "signals": ["lb upstream", "unavailable"], "note": "Sends shoppers to healthy containers"},
+    {"id": "pages", "label": "Product pages", "kind": "frontend", "col": 3, "signals": [], "note": "Slow or failing while containers restart"},
+    {"id": "sessions", "label": "Shopping sessions", "kind": "business", "col": 4, "signals": [], "metric": "affected", "note": "Shoppers who give up"},
+    {"id": "campaigns", "label": "Email campaigns", "kind": "business", "col": 4, "signals": [], "note": "October Picks links land on product pages"},
+    {"id": "revenue", "label": "Revenue", "kind": "business", "col": 5, "signals": [], "metric": "at_risk", "note": "Sales lost from abandoned sessions"},
+    {"id": "seo", "label": "Search ranking", "kind": "business", "col": 5, "cascade_min": 45, "signals": [],
+     "note": "Search engines back off from a site that keeps failing"}
+  ],
+  "edges": [
+    ["cache", "memory"], ["memory", "catalog"], ["store", "catalog"], ["catalog", "lb"], ["lb", "pages"],
+    ["pages", "sessions"], ["pages", "campaigns"], ["sessions", "revenue"], ["campaigns", "revenue"], ["pages", "seo"]
+  ]
+}

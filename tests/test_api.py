@@ -143,3 +143,19 @@ def test_pause_ignores_alerts_and_notifications_are_sent(client):
     wait_for(c, iid, "awaiting_approval")
     kinds = [n["payload"]["kind"] for n in c.get("/notifications").json()]
     assert "opened" in kinds and "cause" in kinds and "approval" in kinds
+
+
+def test_impact_graph_maps_the_fault_and_prices_the_options(client):
+    c = client
+    sign_in(c, "Siddhartha")
+    iid = c.post("/demo/trigger/incident1_conn_leak").json()["id"]
+    wait_for(c, iid, "awaiting_approval")
+    g = c.get(f"/incidents/{iid}/impact-graph").json()
+    nodes = {n["id"]: n for n in g["nodes"]}
+    assert nodes["checkout"]["origin"] and nodes["checkout"]["status"] == "observed"  # the fix goes where the bug is
+    assert nodes["revenue"]["status"] == "inferred" and nodes["postgres"]["status"] == "healthy"
+    assert nodes["support"]["fails_at_min"] > 0  # spreads later if nothing is done
+    opts = {o["key"]: o for o in g["options"]}
+    assert set(opts) == {"fix", "rollback", "wait"} and opts["fix"].get("recommended")
+    assert opts["fix"]["blast"]["score"] < opts["rollback"]["blast"]["score"]  # the tested, smaller change is safer
+    assert opts["wait"]["loss"] > opts["fix"]["loss"]

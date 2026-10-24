@@ -11,6 +11,7 @@ let firstSuspectOpened = false;
 const $ = (id) => document.getElementById(id);
 const argus = Argus.mount($("argus"));
 const live = LiveProgress.mount($("progress"));
+const graph = ImpactGraph.mount($("impact-graph"), iid);
 // Events older than this are history (the stream replays the log on connect): set state, skip the animation.
 const FRESH_MS = 8000;
 
@@ -25,6 +26,8 @@ async function refresh() {
   inc = await api(`/incidents/${iid}`);
   impactLoaded = Date.now();
   render();
+  renderTabBadges();
+  graph.load();
 }
 
 function render() {
@@ -361,6 +364,7 @@ function addActivity(e) {
   el.dataset.minor = MINOR_TYPES.has(e.type) ? "1" : "";
   el.hidden = MINOR_TYPES.has(e.type) && !$("show-steps").checked;
   el.innerHTML = `<span class="t">${esc(clock(e.ts))}</span><div><span class="actor">${esc(actorName(e))}</span> <span class="detail">${esc(describeEvent(e))}</span></div>`;
+  $("tb-timeline").textContent = $("activity").querySelectorAll(".act:not(.minor)").length + (MINOR_TYPES.has(e.type) ? 0 : 1) || "";
   const box = $("activity");
   const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
   box.appendChild(el);
@@ -437,11 +441,42 @@ $("ask-chips").querySelectorAll("button").forEach((b) => b.onclick = () => ask(b
 $("ask-form").onsubmit = (e) => { e.preventDefault(); ask($("ask-input").value); };
 
 // ---- controls ----------------------------------------------------------------
-document.querySelectorAll(".tab").forEach((t) => t.onclick = () => {
-  document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("active", x === t));
-  $("tab-investigation").hidden = t.dataset.tab !== "investigation";
-  $("tab-report").hidden = t.dataset.tab !== "report";
+// ---- tabs: Live, Impact graph, Findings, Timeline, Report (the decision column stays beside all but the graph) ----
+const TABS = [...document.querySelectorAll("#inc-tabs [data-tab]")].map((b) => b.dataset.tab);
+function showTab(name, push = true) {
+  if (!TABS.includes(name)) name = "live";
+  document.querySelectorAll("#inc-tabs [data-tab]").forEach((b) => {
+    b.classList.toggle("on", b.dataset.tab === name);
+    b.setAttribute("aria-selected", b.dataset.tab === name);
+  });
+  document.querySelectorAll("[data-pane]").forEach((el) => (el.hidden = el.dataset.pane !== name));
+  $("main-grid").hidden = name === "impact";
+  document.querySelector("main.wrap").classList.toggle("wide", name === "impact");  // the graph gets the whole screen width
+  if (push) history.replaceState(null, "", `#${name}`);
+  store.set("ic.tab", name);
+  if (name === "impact") graph.show();
+  dispatchEvent(new Event("resize"));  // the sphere and the graph size themselves to what is visible
+}
+document.querySelectorAll("#inc-tabs [data-tab]").forEach((b) => b.onclick = () => showTab(b.dataset.tab));
+document.addEventListener("keydown", (e) => {
+  if ((e.target.closest && e.target.closest("input, textarea, select")) || e.metaKey || e.ctrlKey || e.altKey) return;
+  const i = Number(e.key) - 1;
+  if (i >= 0 && i < TABS.length) showTab(TABS[i]);
 });
+addEventListener("hashchange", () => showTab(location.hash.slice(1), false));
+showTab(location.hash.slice(1) || "live", false);
+window.showTab = showTab;  // the impact graph's buttons jump to the decision and the report
+
+function renderTabBadges() {
+  const live = ["open", "investigating"].includes(inc.status);
+  $("tb-live").className = `tb-badge ${live ? "pulse" : ""}`;
+  $("tb-live").textContent = live ? "" : "";
+  const failing = inc.claims.filter((c) => c.verdict === "supported").length;
+  $("tb-findings").textContent = inc.claims.length ? `${failing}/${inc.claims.length}` : "";
+  $("tb-findings").title = "Confirmed causes / possible causes";
+  $("tb-report").textContent = inc.report ? "Ready" : "";
+  $("tb-report").className = `tb-badge ${inc.report ? "ok" : ""}`;
+}
 $("show-steps").checked = store.get("ic.steps", "0") === "1";
 $("show-steps").onchange = () => {
   store.set("ic.steps", $("show-steps").checked ? "1" : "0");
