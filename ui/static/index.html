@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="icon" type="image/svg+xml" href="/static/logo.svg">
+<link rel="stylesheet" href="/static/vendor/reactbits.css">
 <link rel="stylesheet" href="/static/style.css">
 <link rel="stylesheet" href="/static/argus.css">
 </head>
@@ -22,6 +23,7 @@
 
 <main class="wrap">
   <div class="dash-head">
+    <div class="dash-particles" id="dash-particles" aria-hidden="true"></div>
     <div>
       <h1 id="greeting">Welcome to Argus</h1>
       <p id="subgreeting">Finds the cause, tests a fix, and asks a person before changing anything.</p>
@@ -276,14 +278,14 @@ function renderWelcome() {
   $("bug-btn").hidden = !Session.is("tester");
   $("trigger-btn").hidden = !u;
   if (!u) {
-    $("greeting").textContent = "Welcome to Argus";
+    setGreeting("Welcome to Argus");
     $("subgreeting").textContent = "Finds the cause, tests a fix, and asks a person before changing anything.";
     $("welcome-right").innerHTML = `<h2>Who are you?</h2><p class="help" style="margin:0">Pick a demo person. No password needed.</p>
       <div class="people">${Session.users.map((x) => `<button class="person" type="button" data-id="${x.id}">${avatar(x.name, x.role)}
         <span><b>${esc(x.name)}</b><small>${esc(ROLE_LABEL[x.role])}. ${esc(ROLE_HELP[x.role])}.</small></span></button>`).join("")}</div>`;
     $("welcome-right").querySelectorAll(".person").forEach((b) => b.onclick = () => Session.signIn(Number(b.dataset.id)));
   } else {
-    $("greeting").textContent = `${hour()}, ${u.name}`;
+    setGreeting(`${hour()}, ${u.name}`);
     $("subgreeting").textContent = `${ROLE_LABEL[u.role]}: ${ROLE_HELP[u.role]}.`;
   }
 }
@@ -322,6 +324,28 @@ $("bug-form").addEventListener("submit", async (e) => {
   try { location.href = (await api("/bugs", { method: "POST", body })).url; }
   catch (err) { $("b-err").textContent = err.message; $("b-submit").disabled = false; }
 });
+
+// ---- quiet motion (React Bits): drifting particles behind the header, the greeting blurs in ----
+const RB = window.ReactBits;
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isDark = () => document.documentElement.dataset.theme === "dark";
+const particleLook = () => ({ lightMode: !isDark(), particleColors: isDark() ? ["#8b7bff", "#6ee7ff"] : ["#5048d8", "#2b9fc4"] });
+if (RB && !calm) {
+  const field = RB.particles($("dash-particles"), {
+    particleCount: 70, particleSpread: 14, speed: .035, particleBaseSize: 55, sizeRandomness: .7, alphaParticles: true,
+    glow: .25, twinkle: .2, opacity: .55, connections: false, clickBurst: false, hoverEffect: "parallax", particleHoverFactor: .35,
+    ...particleLook(),
+  });
+  new MutationObserver(() => field.set(particleLook())).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+}
+let greetingFx = null, greetingText = "";
+function setGreeting(text) {
+  if (text === greetingText) return;
+  greetingText = text;
+  if (!RB || calm) { $("greeting").textContent = text; return; }
+  if (!greetingFx) { $("greeting").textContent = ""; greetingFx = RB.blurText($("greeting"), {}); }
+  greetingFx.set({ text, key: text, animateBy: "words", delay: 70, stepDuration: .32, blur: 6, distance: 10, direction: "top", trigger: "load", className: "greeting-text" });
+}
 
 // ---- the live app: ShopFast ----
 async function renderLiveApp() {

@@ -33,7 +33,7 @@ PROVIDERS = {
         "base_url": "https://openrouter.ai/api/v1",
         "key_env": "OPENROUTER_API_KEY",
         "model_env": "OPENROUTER_MODEL",
-        "default_model": "qwen/qwen3-coder:free",
+        "default_model": "nvidia/nemotron-3-super-120b-a12b:free",
     },
     "ollama": {
         "base_url": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
@@ -43,7 +43,7 @@ PROVIDERS = {
     },
 }
 
-OPENROUTER_BACKUPS = "meta-llama/llama-3.3-70b-instruct:free,openai/gpt-oss-20b:free"
+OPENROUTER_BACKUPS = "nvidia/nemotron-3-ultra-550b-a55b:free,poolside/laguna-s-2.1:free"
 
 MAX_RATE_LIMIT_WAIT = 65.0  # seconds; per-minute token windows are worth waiting out, daily quotas are not
 COOLDOWN = 20.0  # seconds a failed provider is skipped (longer if it asks for longer)

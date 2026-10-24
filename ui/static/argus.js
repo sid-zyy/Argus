@@ -153,7 +153,8 @@ const Argus = (() => {
     }
     new ResizeObserver(layout).observe(stage);
 
-    const MAX_TILT = .35;  // keep the sphere upright: only a gentle tilt, never a flip
+    const MAX_TILT = .35;       // how far it tilts on its own when turning toward an agent
+    const MAX_DRAG_TILT = 1.25; // how far a person can tilt it by dragging (about 70°)
     function rotate(p) {
       const cy = Math.cos(S.yaw), sy = Math.sin(S.yaw), cp = Math.cos(S.pitch), sp = Math.sin(S.pitch);
       const x = p[0] * cy + p[2] * sy, z1 = -p[0] * sy + p[2] * cy;
@@ -183,8 +184,9 @@ const Argus = (() => {
       if (S.dragging && last) {
         const dx = e.clientX - last[0], dy = e.clientY - last[1];
         moved += Math.abs(dx) + Math.abs(dy);
-        S.vyaw = dx * .006; S.vpitch = 0;  // spin left/right only, so the sphere never turns upside down
-        S.yaw += S.vyaw;
+        // the surface follows the pointer both ways; tilt stops short of upside down
+        S.vyaw = dx * .006; S.vpitch = -dy * .006;
+        S.yaw += S.vyaw; S.pitch = Math.max(-MAX_DRAG_TILT, Math.min(MAX_DRAG_TILT, S.pitch + S.vpitch));
         last = [e.clientX, e.clientY]; S.lastTouch = performance.now();
         tip.classList.remove("show");
         return;
@@ -294,8 +296,8 @@ const Argus = (() => {
       // motion: drag inertia, then ease toward the agent in focus, otherwise a slow drift
       const idle = now - S.lastTouch > 3500;
       if (!S.dragging) {
-        S.yaw += S.vyaw;
-        S.vyaw *= .93;
+        S.yaw += S.vyaw; S.pitch = Math.max(-MAX_DRAG_TILT, Math.min(MAX_DRAG_TILT, S.pitch + S.vpitch));
+        S.vyaw *= .93; S.vpitch *= .93;
         const focusKey = S.hoverAgent || S.selected || S.active;
         if (idle && focusKey && !reduced) {
           const [ty, tp] = facing(focusKey);
