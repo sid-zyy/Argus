@@ -44,6 +44,42 @@ uvicorn ui.app:app --port 8000 --reload     # Argus, http://localhost:8000
 
 `ARGUS_URL` (shop) and `SHOP_URL` (Argus) change the addresses; `SHOP_RPS` sets the simulated traffic.
 
+## Argus Connect: the same agents on any service
+Argus is not tied to ShopFast. Each service plugs in through **adapters** and one config file, `argus.yaml`, in its
+folder under `scenarios/`; the agents, prompts, evidence checker, sandbox and approval gate are the same for all of them.
+
+| Piece | What it does |
+|---|---|
+| Standard incident (`connect/schema.py`) | The one shape every alert becomes: service, title, severity, metric, value, threshold, window, times, labels |
+| Alert adapters | `alertmanager`, `grafana`, `standard`: webhooks to `POST /alerts` are normalised and routed to the service whose `alerts.match` labels they carry |
+| Repo adapter | `git`: a local checkout or a URL cloned on first use |
+| Log adapters | `text`, `jsonl` (pino, bunyan, CI records), `csv` (metrics exports), `command` (`docker logs`, `kubectl logs`): all rendered as the same numbered, timestamped lines the agents search and quote |
+| Service config (`argus.yaml`) | Log roles (service, metrics, dependency, deploy), dependencies, repro and test commands, sandbox image, severity rules, approval policy, on-call, deploy-on-approve |
+| Setup wizard (`connect/wizard.py`) | Writes a config from a few questions, then validates it; the same checks gate every incident in the web app and the terminal |
+
+Two different sample apps run through the unchanged pipeline:
+
+| | ShopFast (`live_shop`) | QuickBite (`quickbite_orders`) |
+|---|---|---|
+| Language | Python | Node.js |
+| Monitoring | Prometheus Alertmanager | Grafana Alerting |
+| Logs | Plain text | pino JSON lines, CSV metrics, CI deploy records in JSON |
+| Repro and tests | `python repro.py`, pytest | `node checks/repro.js`, `node --test` |
+| Policy | Global approval rule | Failure rate ≥ 25% is sev1, and sev1 fixes need a team lead |
+
+QuickBite's bug: commit `d9cece1` moves promo codes to `promos.json` with whole-number percentages but still multiplies by
+the value, so WEEKEND20 orders go negative and the payment gateway rejects them. The trap: every error says
+`GatewayError`, the gateway client changed the day before, and a marketing push started minutes earlier.
+```
+python -m connect.wizard list                          # every service and whether its config passes
+python -m connect.wizard check quickbite_orders --full # validate it, and run the repro and tests once in the sandbox
+python -m connect.wizard new my_service                # connect a new service: answer a few questions
+python -m connect.wizard route payload.json            # which service an alert would open an incident for
+python -m orchestrator.main scenarios/quickbite_orders --alert scenarios/quickbite_orders/alerts/grafana_alert.json
+```
+The dashboard's **Connect** page (`/connect`) shows each service's adapters and checks, compares the two apps, and
+sends a service's sample alert through its adapter. Config reference: [docs/CONNECT.md](docs/CONNECT.md).
+
 ## Setup
 ```
 python -m venv .venv
@@ -60,9 +96,10 @@ python -m eval.compare                                          # Argus vs a sin
 python -m eval.run_eval                                         # scorecard across all scenarios (real model calls)
 python -m pytest -q tests                                       # offline tests with a scripted fake model
 ```
-Send a real Alertmanager webhook:
+Send a real Alertmanager or Grafana webhook:
 ```
 curl -X POST http://localhost:8000/alerts -H "content-type: application/json" -d @examples/alertmanager_webhook.json
+curl -X POST http://localhost:8000/alerts -H "content-type: application/json" -d @scenarios/quickbite_orders/alerts/grafana_alert.json
 ```
 Pages stamp their assets with the file's modification time and send `Cache-Control: no-cache`, so a normal reload
 always shows the latest UI. Restart the server after Python changes (or use `--reload`).
@@ -73,6 +110,7 @@ always shows the latest UI. Restart the server after Python changes (or use `--r
 | `incident1_conn_leak` | checkout-api | early `return` skips `pool.release()` (code) | "database overloaded" |
 | `incident2_timeout` | checkout-api | `REQUEST_TIMEOUT` lowered 30 → 3 s (config) | "payment provider is slow" |
 | `incident3_cache_oom` | catalog-api | unbounded page cache keyed by full URL (resource) | "marketing traffic spike" |
+| `quickbite_orders` | orders-service (Node.js) | promo percentages stored as 20, still multiplied (code) | "the payment gateway is failing" |
 
 Each folder has `history.py` (commits), `generate_logs.py` (deterministic telemetry), `repro.py` (the sandbox check),
 `expected.json` and `business.json` (the business assumptions behind the impact figures); `repo/` and `logs/` are
@@ -103,7 +141,8 @@ The chosen user is kept in a signed cookie and the server checks the role on eve
 ## Layout
 - `llm.py`: Groq / Gemini / Ollama through OpenAI-compatible APIs, with failover, waits and cooldowns.
 - `agents/`: shared tool-calling loop (`base.py`), the agents including the Commander (`investigators.py`), prompts.
-- `tools/`: read-only log, metrics and git tools; `evidence_check.py`; `sandbox.py`.
+- `connect/`: Argus Connect: incident schema, alert/repo/log adapters, `argus.yaml` loader, severity and approval policy, checks, wizard.
+- `tools/`: read-only log, metrics and git tools over a service's adapters; `evidence_check.py`; `sandbox.py` (runs the service's own commands).
 - `orchestrator/`: state machine (`pipeline.py`), contracts, approval gate, terminal view, report, replay.
 - `db/`: schema, store, business impact. `ui/`: FastAPI app, background runner, static pages. `eval/`: scorecard and comparison.
 

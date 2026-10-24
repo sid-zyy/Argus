@@ -1,0 +1,85 @@
+# Argus Connect: QuickBite orders-service (Node.js, Grafana, pino JSON logs).
+# The same Argus agents run on this service as on ShopFast; only this file and the adapters it names differ.
+# Check it with:  python -m connect.wizard check quickbite_orders
+version: 1
+
+service:
+  name: orders-service
+  label: QuickBite ordering
+  team: Ordering team
+  language: javascript
+  on_call: Meera
+  description: Prices food orders, charges cards through PayRail, hands orders to restaurants.
+
+repo:
+  adapter: git
+  path: repo                      # built by: python -m scenarios.build quickbite_orders
+
+alerts:
+  adapter: grafana                # Grafana Alerting webhook contact point -> POST /alerts
+  match: {service: orders-service}
+  base: alert.json                # fields a webhook leaves out (metric, threshold, window)
+  sample: alerts/grafana_alert.json
+  severity_map: {warning: sev3, critical: sev1}
+
+logs:
+  - name: app.log                 # what the agents call it and cite as evidence
+    adapter: jsonl                # pino: numeric levels, epoch-ms times
+    path: logs/app.jsonl
+    role: service
+    fields: {time: time, level: level, message: msg}
+    time_format: epoch_ms
+    level_names: {"30": INFO, "40": WARN, "50": ERROR}
+    drop: [pid, hostname]
+  - name: payrail.log
+    adapter: text
+    path: logs/payrail.log
+    role: dependency
+    dependency: PayRail payment gateway
+  - name: metrics.log
+    adapter: csv
+    path: logs/metrics.csv
+    role: metrics
+    fields: {time: timestamp}
+  - name: deploy.log
+    adapter: jsonl
+    path: logs/deploys.jsonl
+    role: deploy
+    fields: {time: ts, message: event}
+
+metrics:
+  source: metrics.log
+  description: >-
+    orders-service metrics per 30s bucket: rps, orders_per_min, order_failure_rate (share of orders ending in a 5xx),
+    p95_ms, cpu_pct, event_loop_lag_ms, gateway_4xx and gateway_5xx (PayRail responses), heap_mb.
+    PayRail's own health is in payrail.log; use search_logs for it.
+
+dependencies:
+  - name: PayRail payment gateway
+    kind: external
+    logs: [payrail.log]
+    note: Charges customers' cards; rejects requests it considers invalid with HTTP 400.
+  - name: Promo codes
+    kind: data
+    note: src/promos.json, edited by marketing.
+
+commands:
+  files: [checks/repro.js]
+  repro: node checks/repro.js {repo}
+  test: node --test "{repo}/test/*.test.js"
+  image: node:22-alpine           # used when the sandbox runs in Docker
+  timeout: 60
+
+severity:
+  default: sev3
+  rules:                          # first match wins
+    - {metric: order_failure_rate, above: 0.25, severity: sev1}
+    - {metric: order_failure_rate, above: 0.10, severity: sev2}
+  approvals:
+    sev1: {count: 1, lead: true}  # a team lead signs off on fixes for the worst incidents
+    default: {count: 1}
+
+deploy:
+  on_approve: false               # recorded incident: applying the fix is simulated
+
+business: business.json

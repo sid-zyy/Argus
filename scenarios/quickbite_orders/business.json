@@ -1,0 +1,15 @@
+{
+  "service_label": "QuickBite ordering",
+  "unit": "orders",
+  "units_per_minute": 40,
+  "value_per_unit": 450,
+  "currency": "INR",
+  "failure_share": "alert",
+  "manual_mttr_minutes": 70,
+  "engineers_paged": 2,
+  "assumptions": [
+    "A food-delivery app at dinner peak: 40 orders per minute at an average basket of ₹450",
+    "Failed share of orders equals the alert's order failure rate",
+    "A typical manual fix for this kind of incident takes about 70 minutes with 2 engineers paged"
+  ]
+}

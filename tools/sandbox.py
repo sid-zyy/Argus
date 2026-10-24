@@ -1,5 +1,8 @@
 """Test a proposed fix on a throwaway clone of the repo: repro before, repro after, then the repo's tests.
 
+The commands come from the service's config (argus.yaml `commands`), so any language works: `{repo}` is replaced by
+the clone's path and the config's `files` (e.g. the repro script) are copied next to it.
+
 Mode SANDBOX_MODE=docker runs each step in a container with no network and CPU/memory limits.
 Mode 'subprocess' (fallback when Docker is missing) runs in a temp directory with a scrubbed
 environment and a timeout; it does NOT isolate the network.
@@ -9,6 +12,7 @@ from __future__ import annotations
 
 import difflib
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -95,42 +99,59 @@ def _mode() -> str:
     return mode
 
 
-def _run(mode: str, work: Path, argv: list[str]) -> SandboxRun:
+def _argv(command: str) -> list[str]:
+    return [a.replace("{repo}", "repo") for a in shlex.split(command)]
+
+
+def _run(mode: str, work: Path, argv: list[str], image: str | None = None, timeout: int = TIMEOUT) -> SandboxRun:
     t0 = time.time()
     if mode == "docker":
         cmd = ["docker", "run", "--rm", "--network", "none", "--memory", "256m", "--cpus", "1", "--pids-limit", "128",
-               "-e", "PYTHONPATH=/work/repo", "-v", f"{work}:/work", "-w", "/work", DOCKER_IMAGE, "python", *argv]
+               "-e", "PYTHONPATH=/work/repo", "-v", f"{work}:/work", "-w", "/work", image or DOCKER_IMAGE, *argv]
         env = None
     else:
-        cmd = [sys.executable, *argv]
         keep = ("PATH", "SYSTEMROOT", "TEMP", "TMP", "HOME", "USERPROFILE")
         env = {k: v for k, v in os.environ.items() if k.upper() in keep}
         env.update(PYTHONDONTWRITEBYTECODE="1", PYTHONPATH=str(work / "repo"))
+        exe = sys.executable if argv[0] == "python" else (shutil.which(argv[0], path=env.get("PATH")) or argv[0])
+        cmd = [exe, *argv[1:]]
     try:
-        r = subprocess.run(cmd, cwd=work, env=env, capture_output=True, text=True, timeout=TIMEOUT)
+        r = subprocess.run(cmd, cwd=work, env=env, capture_output=True, text=True, timeout=timeout)
         out = (r.stdout + r.stderr).strip()
         code = r.returncode
     except subprocess.TimeoutExpired:
-        out, code = f"timed out after {TIMEOUT}s", 124
+        out, code = f"timed out after {timeout}s", 124
+    except OSError as e:
+        out, code = f"could not run {argv[0]!r}: {e}", 127
     return SandboxRun(exit_code=code, output=out[-MAX_OUTPUT:], seconds=round(time.time() - t0, 2))
+
+
+def prepare(ws: Workspace, work: Path) -> None:
+    """Clone the repo to work/repo and copy the service's check files next to it."""
+    _git(work, "clone", "-q", "--no-hardlinks", str(ws.repo_dir), "repo")
+    for f in ws.config.commands.files:
+        dest = work / f
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(ws.config.resolve(f), dest)
 
 
 def run_sandbox(ws: Workspace, fix: FixOutput) -> SandboxResult:
     mode = _mode()
+    cmds = ws.config.commands
     diff, errors = preview_fix(ws, fix)
     work = Path(tempfile.mkdtemp(prefix="ic-sandbox-"))
+    run = lambda command: _run(mode, work, _argv(command), cmds.image, cmds.timeout)  # noqa: E731
     try:
-        _git(work, "clone", "-q", "--no-hardlinks", str(ws.repo_dir), "repo")
-        shutil.copy(ws.root / "repro.py", work / "repro.py")
-        before = _run(mode, work, ["repro.py", "repo"])
+        prepare(ws, work)
+        before = run(cmds.repro)
         reproduced = before.exit_code != 0
         if errors:
             return SandboxResult(mode=mode, before=before, reproduced=reproduced, passed=False, error="; ".join(errors))
         _apply(work / "repo", ws, fix)
-        after = _run(mode, work, ["repro.py", "repo"])
+        after = run(cmds.repro)
         tests = None
-        if (work / "repo" / "tests").is_dir():
-            tests = _run(mode, work, ["-m", "pytest", "-q", "-p", "no:cacheprovider", "repo/tests"])
+        if cmds.test and (not cmds.test_if_exists or (work / _argv(cmds.test_if_exists)[0]).exists()):
+            tests = run(cmds.test)
         passed = after.exit_code == 0 and (tests is None or tests.exit_code == 0)
         return SandboxResult(mode=mode, before=before, after=after, tests=tests, reproduced=reproduced, passed=passed, diff=diff)
     finally:

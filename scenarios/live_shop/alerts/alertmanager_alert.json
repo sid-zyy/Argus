@@ -1,0 +1,23 @@
+{
+  "receiver": "argus",
+  "status": "firing",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "CheckoutErrorRateHigh",
+        "service": "checkout-api",
+        "severity": "high",
+        "scenario": "live_shop"
+      },
+      "annotations": {
+        "summary": "ShopFast checkout-api 5xx rate 42%",
+        "metric": "error_rate_5xx",
+        "value": 0.42,
+        "threshold": 0.05,
+        "window": "30s"
+      },
+      "fingerprint": "5f1d2c9e8a7b"
+    }
+  ]
+}

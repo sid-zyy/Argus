@@ -1,0 +1,322 @@
+2026-10-23T18:29:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=230 open_incidents=0
+2026-10-23T18:30:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.9% p99_ms=236 open_incidents=0
+2026-10-23T18:30:05.199Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1001 amount=147000 currency=INR http=201
+2026-10-23T18:30:53.968Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1002 amount=81000 currency=INR http=201
+2026-10-23T18:31:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=237 open_incidents=0
+2026-10-23T18:31:13.409Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1003 amount=99000 currency=INR http=201
+2026-10-23T18:31:28.278Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1004 amount=51000 currency=INR http=201
+2026-10-23T18:31:52.310Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1005 amount=129000 currency=INR http=201
+2026-10-23T18:32:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.9% p99_ms=225 open_incidents=0
+2026-10-23T18:32:06.266Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1006 amount=115000 currency=INR http=201
+2026-10-23T18:32:09.929Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1007 amount=101000 currency=INR http=201
+2026-10-23T18:32:23.095Z gateway=payrail merchant=quickbite event=charge_declined reference=o-1008 amount=94000 currency=INR http=402 decline_code=card_declined
+2026-10-23T18:32:38.882Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1009 amount=121000 currency=INR http=201
+2026-10-23T18:32:43.484Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1010 amount=101400 currency=INR http=201
+2026-10-23T18:33:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=257 open_incidents=0
+2026-10-23T18:33:05.304Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1011 amount=12000 currency=INR http=201
+2026-10-23T18:33:27.007Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1012 amount=113000 currency=INR http=201
+2026-10-23T18:33:44.792Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1013 amount=120000 currency=INR http=201
+2026-10-23T18:33:49.416Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1014 amount=169000 currency=INR http=201
+2026-10-23T18:33:51.759Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1015 amount=47000 currency=INR http=201
+2026-10-23T18:34:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=217 open_incidents=0
+2026-10-23T18:34:00.391Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1016 amount=51000 currency=INR http=201
+2026-10-23T18:34:07.848Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1017 amount=179000 currency=INR http=201
+2026-10-23T18:34:08.329Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1018 amount=189000 currency=INR http=201
+2026-10-23T18:34:19.376Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1019 amount=41000 currency=INR http=201
+2026-10-23T18:34:27.939Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1020 amount=147000 currency=INR http=201
+2026-10-23T18:34:30.701Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1021 amount=111000 currency=INR http=201
+2026-10-23T18:34:34.414Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1022 amount=74000 currency=INR http=201
+2026-10-23T18:34:41.202Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1023 amount=24600 currency=INR http=201
+2026-10-23T18:34:42.497Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1024 amount=65000 currency=INR http=201
+2026-10-23T18:34:51.926Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1025 amount=87000 currency=INR http=201
+2026-10-23T18:35:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=239 open_incidents=0
+2026-10-23T18:35:30.937Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1026 amount=111000 currency=INR http=201
+2026-10-23T18:35:41.375Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1027 amount=131000 currency=INR http=201
+2026-10-23T18:35:51.991Z gateway=payrail merchant=quickbite event=charge_declined reference=o-1028 amount=98000 currency=INR http=402 decline_code=card_declined
+2026-10-23T18:35:55.183Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1029 amount=75000 currency=INR http=201
+2026-10-23T18:35:59.793Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1030 amount=119000 currency=INR http=201
+2026-10-23T18:36:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=231 open_incidents=0
+2026-10-23T18:36:24.292Z gateway=payrail merchant=quickbite event=charge_declined reference=o-1031 amount=75000 currency=INR http=402 decline_code=card_declined
+2026-10-23T18:36:32.718Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1032 amount=115000 currency=INR http=201
+2026-10-23T18:36:41.965Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1033 amount=21000 currency=INR http=201
+2026-10-23T18:36:42.864Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1034 amount=67000 currency=INR http=201
+2026-10-23T18:37:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=219 open_incidents=0
+2026-10-23T18:37:11.339Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1035 amount=15000 currency=INR http=201
+2026-10-23T18:37:20.645Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1036 amount=87000 currency=INR http=201
+2026-10-23T18:37:22.362Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1037 amount=109000 currency=INR http=201
+2026-10-23T18:37:41.673Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1038 amount=108000 currency=INR http=201
+2026-10-23T18:37:43.754Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1039 amount=137000 currency=INR http=201
+2026-10-23T18:37:45.419Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1040 amount=126000 currency=INR http=201
+2026-10-23T18:37:47.016Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1041 amount=165000 currency=INR http=201
+2026-10-23T18:38:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=215 open_incidents=0
+2026-10-23T18:38:24.511Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1042 amount=111000 currency=INR http=201
+2026-10-23T18:38:31.507Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1043 amount=99000 currency=INR http=201
+2026-10-23T18:39:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.6% p99_ms=210 open_incidents=0
+2026-10-23T18:39:11.988Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1044 amount=47000 currency=INR http=201
+2026-10-23T18:39:14.663Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1045 amount=99000 currency=INR http=201
+2026-10-23T18:39:22.303Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1046 amount=97000 currency=INR http=201
+2026-10-23T18:40:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.9% p99_ms=250 open_incidents=0
+2026-10-23T18:40:07.994Z gateway=payrail merchant=quickbite event=charge_declined reference=o-1047 amount=9000 currency=INR http=402 decline_code=card_declined
+2026-10-23T18:40:09.558Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1048 amount=79000 currency=INR http=201
+2026-10-23T18:40:15.758Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1049 amount=102000 currency=INR http=201
+2026-10-23T18:40:49.919Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1050 amount=63800 currency=INR http=201
+2026-10-23T18:41:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=238 open_incidents=0
+2026-10-23T18:41:01.214Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1051 amount=47000 currency=INR http=201
+2026-10-23T18:41:02.781Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1052 amount=119000 currency=INR http=201
+2026-10-23T18:41:39.964Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1053 amount=15000 currency=INR http=201
+2026-10-23T18:41:57.814Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1054 amount=53000 currency=INR http=201
+2026-10-23T18:42:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=212 open_incidents=0
+2026-10-23T18:42:00.637Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1055 amount=65000 currency=INR http=201
+2026-10-23T18:42:11.500Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1056 amount=29000 currency=INR http=201
+2026-10-23T18:42:46.327Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1057 amount=111000 currency=INR http=201
+2026-10-23T18:42:49.342Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1058 amount=65400 currency=INR http=201
+2026-10-23T18:42:58.942Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1059 amount=171000 currency=INR http=201
+2026-10-23T18:43:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=225 open_incidents=0
+2026-10-23T18:43:06.256Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1060 amount=111000 currency=INR http=201
+2026-10-23T18:43:36.799Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1061 amount=9000 currency=INR http=201
+2026-10-23T18:43:47.784Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1062 amount=123000 currency=INR http=201
+2026-10-23T18:44:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=245 open_incidents=0
+2026-10-23T18:44:06.411Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1063 amount=125400 currency=INR http=201
+2026-10-23T18:44:09.336Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1064 amount=81000 currency=INR http=201
+2026-10-23T18:44:10.208Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1065 amount=75000 currency=INR http=201
+2026-10-23T18:44:19.267Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1066 amount=57000 currency=INR http=201
+2026-10-23T18:44:25.831Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1067 amount=69000 currency=INR http=201
+2026-10-23T18:44:26.626Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1068 amount=171000 currency=INR http=201
+2026-10-23T18:44:29.690Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1069 amount=108000 currency=INR http=201
+2026-10-23T18:44:35.583Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1070 amount=9000 currency=INR http=201
+2026-10-23T18:44:51.884Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1071 amount=75000 currency=INR http=201
+2026-10-23T18:44:58.253Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1072 amount=15000 currency=INR http=201
+2026-10-23T18:45:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.6% p99_ms=255 open_incidents=0
+2026-10-23T18:45:01.755Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1073 amount=113000 currency=INR http=201
+2026-10-23T18:45:04.375Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1074 amount=151000 currency=INR http=201
+2026-10-23T18:45:19.687Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1075 amount=99000 currency=INR http=201
+2026-10-23T18:45:29.681Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1076 amount=55000 currency=INR http=201
+2026-10-23T18:45:38.569Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1077 amount=57000 currency=INR http=201
+2026-10-23T18:45:40.511Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1078 amount=21000 currency=INR http=201
+2026-10-23T18:45:48.713Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1079 amount=85000 currency=INR http=201
+2026-10-23T18:46:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=260 open_incidents=0
+2026-10-23T18:46:02.389Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1080 amount=135000 currency=INR http=201
+2026-10-23T18:46:08.392Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1081 amount=41000 currency=INR http=201
+2026-10-23T18:46:23.478Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1082 amount=25000 currency=INR http=201
+2026-10-23T18:46:26.969Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1083 amount=85000 currency=INR http=201
+2026-10-23T18:46:33.948Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1084 amount=30000 currency=INR http=201
+2026-10-23T18:46:55.511Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1085 amount=124000 currency=INR http=201
+2026-10-23T18:47:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.9% p99_ms=215 open_incidents=0
+2026-10-23T18:47:00.881Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1086 amount=69000 currency=INR http=201
+2026-10-23T18:47:20.706Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1087 amount=93000 currency=INR http=201
+2026-10-23T18:47:25.563Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1088 amount=62000 currency=INR http=201
+2026-10-23T18:47:28.430Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1089 amount=9000 currency=INR http=201
+2026-10-23T18:47:46.161Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1090 amount=3000 currency=INR http=201
+2026-10-23T18:47:49.927Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1091 amount=91000 currency=INR http=201
+2026-10-23T18:47:53.798Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1092 amount=99000 currency=INR http=201
+2026-10-23T18:47:54.997Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1093 amount=60600 currency=INR http=201
+2026-10-23T18:48:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=234 open_incidents=0
+2026-10-23T18:48:01.048Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1094 amount=119000 currency=INR http=201
+2026-10-23T18:48:10.881Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1095 amount=217000 currency=INR http=201
+2026-10-23T18:48:14.707Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1096 amount=85000 currency=INR http=201
+2026-10-23T18:48:34.698Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1097 amount=21000 currency=INR http=201
+2026-10-23T18:49:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=213 open_incidents=0
+2026-10-23T18:49:00.721Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1098 amount=73000 currency=INR http=201
+2026-10-23T18:49:08.644Z gateway=payrail merchant=quickbite event=charge_declined reference=o-1099 amount=25000 currency=INR http=402 decline_code=card_declined
+2026-10-23T18:49:11.746Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1100 amount=95000 currency=INR http=201
+2026-10-23T18:49:12.744Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1101 amount=24600 currency=INR http=201
+2026-10-23T18:49:19.827Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1102 amount=36000 currency=INR http=201
+2026-10-23T18:49:24.549Z gateway=payrail merchant=quickbite event=charge_declined reference=o-1103 amount=51000 currency=INR http=402 decline_code=card_declined
+2026-10-23T18:49:44.000Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1104 amount=25000 currency=INR http=201
+2026-10-23T18:49:44.694Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1105 amount=27000 currency=INR http=201
+2026-10-23T18:50:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=245 open_incidents=0
+2026-10-23T18:50:05.784Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1106 amount=49000 currency=INR http=201
+2026-10-23T18:50:18.544Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1107 amount=115000 currency=INR http=201
+2026-10-23T18:50:51.289Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1108 amount=157000 currency=INR http=201
+2026-10-23T18:50:53.630Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1109 amount=72600 currency=INR http=201
+2026-10-23T18:51:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=219 open_incidents=0
+2026-10-23T18:51:38.391Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1110 amount=96000 currency=INR http=201
+2026-10-23T18:52:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=230 open_incidents=0
+2026-10-23T18:52:05.336Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1111 amount=73000 currency=INR http=201
+2026-10-23T18:52:08.607Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1112 amount=21000 currency=INR http=201
+2026-10-23T18:52:40.450Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1113 amount=143000 currency=INR http=201
+2026-10-23T18:52:56.807Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1114 amount=80000 currency=INR http=201
+2026-10-23T18:53:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.6% p99_ms=248 open_incidents=0
+2026-10-23T18:53:14.608Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1115 amount=91000 currency=INR http=201
+2026-10-23T18:53:54.580Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1116 amount=29000 currency=INR http=201
+2026-10-23T18:53:56.826Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1117 amount=102000 currency=INR http=201
+2026-10-23T18:54:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=243 open_incidents=0
+2026-10-23T18:54:11.331Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1118 amount=25000 currency=INR http=201
+2026-10-23T18:54:15.372Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1119 amount=57400 currency=INR http=201
+2026-10-23T18:54:16.372Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1120 amount=30000 currency=INR http=201
+2026-10-23T18:54:22.440Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1121 amount=143000 currency=INR http=201
+2026-10-23T18:54:38.593Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1122 amount=12000 currency=INR http=201
+2026-10-23T18:55:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.9% p99_ms=211 open_incidents=0
+2026-10-23T18:55:22.166Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1123 amount=108000 currency=INR http=201
+2026-10-23T18:55:22.997Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1124 amount=138200 currency=INR http=201
+2026-10-23T18:55:27.951Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1125 amount=69000 currency=INR http=201
+2026-10-23T18:55:30.317Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1126 amount=105000 currency=INR http=201
+2026-10-23T18:55:38.733Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1127 amount=25000 currency=INR http=201
+2026-10-23T18:56:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=246 open_incidents=0
+2026-10-23T18:56:14.140Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1128 amount=33000 currency=INR http=201
+2026-10-23T18:56:26.584Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1129 amount=9000 currency=INR http=201
+2026-10-23T18:56:40.951Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1130 amount=45000 currency=INR http=201
+2026-10-23T18:56:45.605Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1131 amount=81000 currency=INR http=201
+2026-10-23T18:57:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=216 open_incidents=0
+2026-10-23T18:57:03.751Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1132 amount=107000 currency=INR http=201
+2026-10-23T18:57:34.764Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1133 amount=21000 currency=INR http=201
+2026-10-23T18:57:41.593Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1134 amount=133000 currency=INR http=201
+2026-10-23T18:57:54.198Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1135 amount=173000 currency=INR http=201
+2026-10-23T18:58:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=226 open_incidents=0
+2026-10-23T18:59:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=217 open_incidents=0
+2026-10-23T18:59:08.568Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1136 amount=36000 currency=INR http=201
+2026-10-23T18:59:14.289Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1137 amount=75000 currency=INR http=201
+2026-10-23T18:59:39.903Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1138 amount=121000 currency=INR http=201
+2026-10-23T18:59:51.344Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1139 amount=67000 currency=INR http=201
+2026-10-23T19:00:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=251 open_incidents=0
+2026-10-23T19:00:06.897Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1140 amount=128000 currency=INR http=201
+2026-10-23T19:00:14.371Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1141 amount=21000 currency=INR http=201
+2026-10-23T19:00:18.879Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1142 amount=75000 currency=INR http=201
+2026-10-23T19:00:35.813Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1143 amount=30000 currency=INR http=201
+2026-10-23T19:00:40.943Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1144 amount=118200 currency=INR http=201
+2026-10-23T19:00:47.291Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1145 amount=12600 currency=INR http=201
+2026-10-23T19:00:48.995Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1146 amount=60000 currency=INR http=201
+2026-10-23T19:00:55.305Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1147 amount=111000 currency=INR http=201
+2026-10-23T19:01:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=234 open_incidents=0
+2026-10-23T19:01:00.889Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1148 amount=80600 currency=INR http=201
+2026-10-23T19:01:07.692Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1149 amount=41400 currency=INR http=201
+2026-10-23T19:01:10.356Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1150 amount=46200 currency=INR http=201
+2026-10-23T19:01:13.769Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1151 amount=9000 currency=INR http=201
+2026-10-23T19:01:20.483Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1152 amount=167000 currency=INR http=201
+2026-10-23T19:01:25.416Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1153 amount=170000 currency=INR http=201
+2026-10-23T19:01:26.676Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1154 amount=7800 currency=INR http=201
+2026-10-23T19:01:30.498Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1155 amount=99000 currency=INR http=201
+2026-10-23T19:01:37.216Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1156 amount=97000 currency=INR http=201
+2026-10-23T19:01:48.610Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1157 amount=99000 currency=INR http=201
+2026-10-23T19:01:54.548Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1158 amount=103000 currency=INR http=201
+2026-10-23T19:01:55.916Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1159 amount=161000 currency=INR http=201
+2026-10-23T19:02:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=211 open_incidents=0
+2026-10-23T19:02:01.872Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1160 amount=21000 currency=INR http=201
+2026-10-23T19:02:04.877Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1161 amount=120000 currency=INR http=201
+2026-10-23T19:02:08.335Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1162 amount=67000 currency=INR http=201
+2026-10-23T19:02:11.628Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1163 amount=81400 currency=INR http=201
+2026-10-23T19:02:20.242Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1164 amount=61000 currency=INR http=201
+2026-10-23T19:02:26.068Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1165 amount=11000 currency=INR http=201
+2026-10-23T19:02:26.444Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1166 amount=81000 currency=INR http=201
+2026-10-23T19:02:40.380Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1167 amount=100600 currency=INR http=201
+2026-10-23T19:02:51.010Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1168 amount=55800 currency=INR http=201
+2026-10-23T19:03:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=216 open_incidents=0
+2026-10-23T19:03:15.099Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1169 amount=69000 currency=INR http=201
+2026-10-23T19:03:18.130Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1170 amount=21000 currency=INR http=201
+2026-10-23T19:03:19.115Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1171 amount=66000 currency=INR http=201
+2026-10-23T19:03:19.833Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1172 amount=45000 currency=INR http=201
+2026-10-23T19:03:21.598Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1173 amount=43000 currency=INR http=201
+2026-10-23T19:03:23.848Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1174 amount=-1403000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:03:26.704Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1175 amount=93000 currency=INR http=201
+2026-10-23T19:03:44.056Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1176 amount=37000 currency=INR http=201
+2026-10-23T19:03:48.912Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1177 amount=23000 currency=INR http=201
+2026-10-23T19:04:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.6% p99_ms=255 open_incidents=0
+2026-10-23T19:04:03.355Z gateway=payrail merchant=quickbite event=charge_declined reference=o-1178 amount=27000 currency=INR http=402 decline_code=card_declined
+2026-10-23T19:04:21.750Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1179 amount=-1289000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:04:23.091Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1180 amount=-719000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:04:28.521Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1181 amount=61000 currency=INR http=201
+2026-10-23T19:04:44.288Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1182 amount=-2353000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:05:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=222 open_incidents=0
+2026-10-23T19:05:05.244Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1183 amount=113000 currency=INR http=201
+2026-10-23T19:05:14.774Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1184 amount=-510000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:05:22.009Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1185 amount=131000 currency=INR http=201
+2026-10-23T19:05:33.234Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1186 amount=-1422000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:05:37.596Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1187 amount=111000 currency=INR http=201
+2026-10-23T19:05:41.477Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1188 amount=-111000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:05:47.294Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1189 amount=60000 currency=INR http=201
+2026-10-23T19:05:49.988Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1190 amount=195000 currency=INR http=201
+2026-10-23T19:05:50.638Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1191 amount=-1479000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:05:56.645Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1192 amount=93000 currency=INR http=201
+2026-10-23T19:06:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=216 open_incidents=0
+2026-10-23T19:06:03.097Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1193 amount=45000 currency=INR http=201
+2026-10-23T19:06:05.566Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1194 amount=45000 currency=INR http=201
+2026-10-23T19:06:06.597Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1195 amount=12000 currency=INR http=201
+2026-10-23T19:06:07.953Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1196 amount=126000 currency=INR http=201
+2026-10-23T19:06:09.557Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1197 amount=-339000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:06:12.318Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1198 amount=-2201000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:06:18.644Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1199 amount=69000 currency=INR http=201
+2026-10-23T19:06:21.223Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1200 amount=-225000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:06:24.957Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1201 amount=-2239000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:06:25.148Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1202 amount=119000 currency=INR http=201
+2026-10-23T19:06:37.589Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1203 amount=178000 currency=INR http=201
+2026-10-23T19:06:45.562Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1204 amount=67000 currency=INR http=201
+2026-10-23T19:06:53.419Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1205 amount=-985000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:06:57.279Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1206 amount=143000 currency=INR http=201
+2026-10-23T19:07:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=249 open_incidents=0
+2026-10-23T19:07:03.494Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1207 amount=69000 currency=INR http=201
+2026-10-23T19:07:08.870Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1208 amount=87000 currency=INR http=201
+2026-10-23T19:07:09.296Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1209 amount=183000 currency=INR http=201
+2026-10-23T19:07:11.479Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1210 amount=43000 currency=INR http=201
+2026-10-23T19:07:12.453Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1211 amount=-2467000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:07:14.054Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1212 amount=112000 currency=INR http=201
+2026-10-23T19:07:15.673Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1213 amount=198000 currency=INR http=201
+2026-10-23T19:07:18.625Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1214 amount=75000 currency=INR http=201
+2026-10-23T19:07:25.199Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1215 amount=86000 currency=INR http=201
+2026-10-23T19:07:27.292Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1216 amount=102000 currency=INR http=201
+2026-10-23T19:07:28.644Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1217 amount=25000 currency=INR http=201
+2026-10-23T19:07:32.777Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1218 amount=113000 currency=INR http=201
+2026-10-23T19:07:34.828Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1219 amount=89000 currency=INR http=201
+2026-10-23T19:07:35.362Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1220 amount=77000 currency=INR http=201
+2026-10-23T19:07:44.446Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1221 amount=73000 currency=INR http=201
+2026-10-23T19:07:47.814Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1222 amount=119000 currency=INR http=201
+2026-10-23T19:07:50.030Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1223 amount=30000 currency=INR http=201
+2026-10-23T19:07:58.294Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1224 amount=112000 currency=INR http=201
+2026-10-23T19:08:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=221 open_incidents=0
+2026-10-23T19:08:04.254Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1225 amount=-1251000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:08:06.390Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1226 amount=-947000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:08:09.774Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1227 amount=47000 currency=INR http=201
+2026-10-23T19:08:10.225Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1228 amount=63000 currency=INR http=201
+2026-10-23T19:08:14.005Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1229 amount=-415000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:08:19.760Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1230 amount=-225000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:08:20.403Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1231 amount=143000 currency=INR http=201
+2026-10-23T19:08:26.618Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1232 amount=9000 currency=INR http=201
+2026-10-23T19:08:28.695Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1233 amount=-1707000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:08:30.991Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1234 amount=204000 currency=INR http=201
+2026-10-23T19:08:39.150Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1235 amount=-510000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:08:41.594Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1236 amount=-529000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:08:47.310Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1237 amount=27000 currency=INR http=201
+2026-10-23T19:08:53.494Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1238 amount=143000 currency=INR http=201
+2026-10-23T19:08:55.973Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1239 amount=45000 currency=INR http=201
+2026-10-23T19:08:59.587Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1240 amount=-2847000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:09:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.7% p99_ms=241 open_incidents=0
+2026-10-23T19:09:01.099Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1241 amount=-2277000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:09:01.388Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1242 amount=51000 currency=INR http=201
+2026-10-23T19:09:10.981Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1243 amount=-2543000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:09:11.334Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1244 amount=-2315000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:09:22.241Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1245 amount=83000 currency=INR http=201
+2026-10-23T19:09:36.945Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1246 amount=-1555000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:09:37.933Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1247 amount=-415000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:09:44.848Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1248 amount=130000 currency=INR http=201
+2026-10-23T19:09:47.602Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1249 amount=-1878000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:09:48.516Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1250 amount=-168000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:09:50.596Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1251 amount=36000 currency=INR http=201
+2026-10-23T19:09:55.597Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1252 amount=65000 currency=INR http=201
+2026-10-23T19:09:59.418Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1253 amount=-2733000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:10:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.6% p99_ms=236 open_incidents=0
+2026-10-23T19:10:13.777Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1254 amount=-567000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:10:17.568Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1255 amount=-833000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:10:27.113Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1256 amount=98000 currency=INR http=201
+2026-10-23T19:10:33.816Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1257 amount=96000 currency=INR http=201
+2026-10-23T19:10:34.697Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1258 amount=-1479000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:10:36.570Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1259 amount=67000 currency=INR http=201
+2026-10-23T19:10:38.847Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1260 amount=33000 currency=INR http=201
+2026-10-23T19:10:41.693Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1261 amount=27000 currency=INR http=201
+2026-10-23T19:10:56.038Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1262 amount=-339000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:11:00.000Z gateway=payrail merchant=quickbite event=health status=operational success_rate=99.8% p99_ms=254 open_incidents=0
+2026-10-23T19:11:00.142Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1263 amount=47000 currency=INR http=201
+2026-10-23T19:11:02.655Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1264 amount=19000 currency=INR http=201
+2026-10-23T19:11:06.537Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1265 amount=-833000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:11:09.441Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1266 amount=27000 currency=INR http=201
+2026-10-23T19:11:11.182Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1267 amount=39000 currency=INR http=201
+2026-10-23T19:11:16.054Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1268 amount=54000 currency=INR http=201
+2026-10-23T19:11:17.540Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1269 amount=75000 currency=INR http=201
+2026-10-23T19:11:27.237Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1270 amount=-1612000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:11:29.489Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1271 amount=96000 currency=INR http=201
+2026-10-23T19:11:31.499Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1272 amount=85000 currency=INR http=201
+2026-10-23T19:11:32.888Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1273 amount=55000 currency=INR http=201
+2026-10-23T19:11:41.372Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1274 amount=18000 currency=INR http=201
+2026-10-23T19:11:45.155Z gateway=payrail merchant=quickbite event=charge_succeeded reference=o-1275 amount=171000 currency=INR http=201
+2026-10-23T19:11:45.485Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1276 amount=-2695000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:11:51.692Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1277 amount=-2220000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:11:55.113Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1278 amount=-1707000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"
+2026-10-23T19:11:56.037Z gateway=payrail merchant=quickbite event=charge_rejected reference=o-1279 amount=-453000 currency=INR http=400 error=invalid_request reason="amount must be a positive integer"

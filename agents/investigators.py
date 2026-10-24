@@ -84,7 +84,7 @@ def verifier(ws: Workspace, claims: list[Claim], llm, emit) -> tuple[VerifierOut
             if v.verdict in ("supported", "refuted") and not v.evidence:
                 errors.append(f"{v.claim_id}: a '{v.verdict}' verdict must cite evidence")
             errors += [f"{v.claim_id}: {e}" for e in check_all(ws, v.evidence)]
-            if v.verdict == "supported" and (why := cause_evidence_missing(category.get(v.claim_id, "code"), v.evidence)):
+            if v.verdict == "supported" and (why := cause_evidence_missing(category.get(v.claim_id, "code"), v.evidence, ws)):
                 errors.append(f"{v.claim_id}: cannot be 'supported' yet: {why}")
         return errors
 

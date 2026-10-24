@@ -1,0 +1,13 @@
+{
+  "id": "GF-OrderFailureRateHigh",
+  "service": "orders-service",
+  "title": "orders-service order failure rate 43%",
+  "severity": "sev3",
+  "metric": "order_failure_rate",
+  "value": 0.429,
+  "threshold": 0.1,
+  "window": "2m",
+  "started_at": "2026-10-23T19:03:00Z",
+  "fired_at": "2026-10-23T19:06:30Z",
+  "source": "Grafana Alerting"
+}

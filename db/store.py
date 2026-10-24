@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import json
-import os
 import sqlite3
 import threading
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 
+from connect import policy
+from connect.config import SERVICES_DIR, ConfigError, ServiceConfig, load
 from db.business import impact
 
 SCHEMA = Path(__file__).with_name("schema.sql")
@@ -70,6 +72,13 @@ class Store:
         with self._conn() as c:
             return [dict(r) for r in c.execute("SELECT id, name, role FROM users ORDER BY id")]
 
+    def user_by_name(self, name: str | None) -> dict | None:
+        if not name:
+            return None
+        with self._conn() as c:
+            r = c.execute("SELECT id, name, role FROM users WHERE name=?", (name,)).fetchone()
+        return dict(r) if r else None
+
     def get_user(self, user_id: int | None) -> dict | None:
         if not user_id:
             return None
@@ -102,11 +111,11 @@ class Store:
     def list_incidents(self) -> list[dict]:
         with self._conn() as c:
             rows = [dict(r) for r in c.execute(
-                "SELECT i.id, i.title, i.service, i.severity, i.status, i.assignee, i.mode, i.attempts, i.model, i.created_at, "
+                "SELECT i.id, i.title, i.service, i.severity, i.status, i.assignee, i.mode, i.scenario, i.attempts, i.model, i.created_at, "
                 "i.resolved_at, i.source, u.name AS reported_by_name FROM incidents i LEFT JOIN users u ON u.id = i.reported_by "
                 "WHERE i.archived_at IS NULL ORDER BY i.id DESC")]
             for r in rows:
-                r["required_approvals"] = required_approvals(r["severity"])
+                r["required_approvals"] = required_approvals(r["severity"], r["scenario"])
                 last = c.execute("SELECT actor, type, payload FROM events WHERE incident_id=? AND type NOT IN ('llm_step') "
                                  "ORDER BY id DESC LIMIT 1", (r["id"],)).fetchone()
                 r["last_event"] = {"actor": last["actor"], "type": last["type"], "payload": json.loads(last["payload"])} if last else None
@@ -155,7 +164,7 @@ class Store:
             inc["qa_checks"] = [dict(r) for r in c.execute(
                 "SELECT q.result, q.note, q.ts, u.name FROM qa_checks q JOIN users u ON u.id = q.tester_id WHERE q.incident_id=? ORDER BY q.id",
                 (incident_id,))]
-            inc["required_approvals"] = required_approvals(inc["severity"])
+            inc["required_approvals"] = required_approvals(inc["severity"], inc["scenario"])
             tokens = sum(json.loads(r[0]).get("tokens", 0) or 0 for r in
                          c.execute("SELECT payload FROM events WHERE incident_id=? AND type='llm_step'", (incident_id,)))
             inc["ai_usage"] = {"tokens": tokens, "wh_estimate": round(tokens / 1000 * WH_PER_1K_TOKENS, 1),
@@ -348,11 +357,23 @@ class Store:
                       [(claim_id, role, e["source"], e["line"], e["quote"]) for e in evidence])
 
 
-def required_approvals(severity: str) -> dict:
-    """One developer or lead. With TWO_PERSON_APPROVAL=1, sev 1/2 need two distinct approvers, at least one a lead."""
-    if severity in ("sev1", "sev2") and os.getenv("TWO_PERSON_APPROVAL", "0").lower() in ("1", "true", "yes"):
-        return {"count": 2, "lead": True, "label": "Developer + Lead (two people)"}
-    return {"count": 1, "lead": False, "label": "One developer or lead"}
+def required_approvals(severity: str, scenario: str | None = None) -> dict:
+    """Who must approve a fix: the service's own policy (argus.yaml `severity.approvals`), else one developer or lead,
+    or with TWO_PERSON_APPROVAL=1, two people including a lead for sev 1/2."""
+    return policy.required_approvals(severity, service_config(scenario))
+
+
+def service_config(scenario: str | None) -> ServiceConfig | None:
+    path = SERVICES_DIR / (scenario or "") / "argus.yaml"
+    return _config_at(scenario, path.stat().st_mtime) if scenario and path.is_file() else None
+
+
+@lru_cache(maxsize=32)
+def _config_at(scenario: str, _mtime: float) -> ServiceConfig | None:
+    try:
+        return load(SERVICES_DIR / scenario)
+    except (ConfigError, OSError):
+        return None
 
 
 def _ts(s: str) -> datetime:
