@@ -126,10 +126,11 @@ def test_alertmanager_grafana_and_standard_payloads_normalise_and_route():
 def test_approval_policy_comes_from_the_service(monkeypatch):
     monkeypatch.setenv("TWO_PERSON_APPROVAL", "0")
     qb_cfg = load(SCENARIOS / "quickbite_orders")
-    assert required_approvals("sev1", qb_cfg) == {"count": 1, "lead": True, "label": "A team lead", "policy": "quickbite_orders"}
+    rule = required_approvals("sev1", qb_cfg)
+    assert (rule["count"], rule["lead"], rule["label"], rule["policy_file"]) == (1, True, "A team lead", "quickbite_orders/argus.yaml")
     assert required_approvals("sev3", qb_cfg)["lead"] is False
     shop = load(SCENARIOS / "live_shop")
-    assert required_approvals("sev1", shop)["count"] == 1  # no policy: the global default
+    assert required_approvals("sev1", shop)["count"] == 1  # no rule of its own: policy.yaml decides
     monkeypatch.setenv("TWO_PERSON_APPROVAL", "1")
     assert required_approvals("sev1", shop)["count"] == 2
 

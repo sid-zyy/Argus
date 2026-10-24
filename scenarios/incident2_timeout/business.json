@@ -7,9 +7,11 @@
   "failure_share": "alert",
   "manual_mttr_minutes": 60,
   "engineers_paged": 2,
+  "engineer_cost_per_hour": 1500,
   "assumptions": [
     "A mid-sized store: 15 checkout orders per minute at peak, average order value ₹1,200",
     "Failed share of orders equals the alert's 5xx rate (9%)",
-    "A typical manual fix for a bad config change takes about 60 minutes with 2 engineers paged"
+    "A typical manual fix for a bad config change takes about 60 minutes with 2 engineers paged",
+    "An engineer's time costs about ₹1,500 an hour, fully loaded"
   ]
 }

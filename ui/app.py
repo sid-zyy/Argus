@@ -15,7 +15,7 @@ import os
 import re
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
@@ -28,6 +28,7 @@ from connect.adapters import alerts as alert_adapters
 from connect.config import ConfigError
 from connect.schema import IncidentInput
 from connect.validate import check as check_config
+from db import lock as db_lock
 from db.store import Store
 from tools.workspace import Workspace
 from ui.runner import ROOT, Denied, IncidentRunner
@@ -38,7 +39,12 @@ COOKIE = "argus_user"
 SECRET = os.getenv("ARGUS_SECRET", "argus-demo-secret").encode()
 SEVERITIES = ("sev1", "sev2", "sev3", "sev4")
 
-store = Store(os.getenv("INCIDENT_DB", ROOT / "incidents.db"))
+DB_PATH = Path(os.getenv("INCIDENT_DB", ROOT / "incidents.db"))
+try:
+    db_lock.hold(DB_PATH, note="ui.app")  # before mark_interrupted(), which would escalate another server's open incidents
+except db_lock.DatabaseInUse as e:
+    raise SystemExit(f"\nArgus did not start. {e}\n")
+store = Store(DB_PATH)
 store.mark_interrupted()
 runner = IncidentRunner(store, replay_speed=float(os.getenv("REPLAY_SPEED", "2")))
 
@@ -178,6 +184,41 @@ def index():
 @app.get("/results", include_in_schema=False)
 def results_page():
     return _page("results.html")
+
+
+@app.get("/check", include_in_schema=False)
+def check_page():
+    return _page("check.html")
+
+
+@app.get("/value", include_in_schema=False)
+def value_page():
+    return _page("value.html")
+
+
+# ---- readiness, governance, value ----------------------------------------------
+@app.get("/health")
+def health_check():
+    """Pre-demo self-check: database lock, audit chain, policy, AI keys, sandbox, service packs, ShopFast."""
+    from ui import health
+    return health.run(DB_PATH, store, in_server=True, shop_url=SHOP_URL)
+
+
+@app.get("/policy")
+def get_policy():
+    from orchestrator import policy
+    return policy.summary()
+
+
+@app.get("/audit/verify")
+def verify_audit(incident: int | None = None):
+    """Recompute the audit log's hash chain. Any edit, deletion or reordering of a past event shows up here."""
+    return store.verify_chain(incident)
+
+
+@app.get("/roi")
+def roi():
+    return store.roi_ledger()
 
 
 @app.get("/results/data")
@@ -433,6 +474,14 @@ def list_incidents():
     return store.list_incidents()
 
 
+@app.get("/incidents/history")
+def incident_history(days: int = Query(30, ge=1, le=90)):
+    """Each service's incidents over the last `days` days, archived ones included, for the dashboard's health strip."""
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    services = sorted({s["service"] for s in runner.scenarios()})
+    return {"days": days, "services": services, "incidents": store.incident_history(since)}
+
+
 @app.get("/incidents/{iid}")
 def get_incident(iid: int):
     return {**_incident_or_404(iid), "approval_sla_minutes": runner.sla_minutes}
@@ -527,6 +576,43 @@ def impact_graph(iid: int):
     if not graph:
         raise HTTPException(404, f"no service map for {inc['service']}")
     return graph
+
+
+def _compare(inc: dict) -> dict:
+    from eval.compare import BASELINE, expected_for, score_incident
+    ws = Workspace(ROOT / "scenarios" / inc["scenario"])
+    expected = expected_for(inc["scenario"], ws)
+    run = store.last_event(inc["id"], "chatbot_baseline")
+    if run:
+        chatbot = {**run["payload"], "source": "run", "ran_at": run["ts"]}
+    else:
+        rows = json.loads(BASELINE.read_text(encoding="utf-8"))["rows"] if BASELINE.is_file() else []
+        row = next((r for r in rows if r["scenario"] == inc["scenario"]), None)
+        chatbot = {**row, "source": "recorded"} if row else None
+    return {"argus": score_incident(inc, expected), "chatbot": chatbot, "trap": (expected or {}).get("trap"),
+            "answer_key": {k: expected[k] for k in ("category", "culprit_sha", "file") if k in expected} if expected else None}
+
+
+@app.get("/incidents/{iid}/compare")
+def compare(iid: int):
+    """Argus's result on this incident next to what a single chatbot prompt concludes from the same data, scored the same way."""
+    return _compare(_incident_or_404(iid))
+
+
+@app.post("/incidents/{iid}/compare")
+def compare_run(iid: int, user: dict = Depends(require("developer", "lead"))):
+    """Ask a plain chatbot now, with the paste an engineer would make (no tools, no fact checker). Kept in the audit log."""
+    from eval.compare import run_baseline
+    from llm import LLM, LLMError
+    inc = _incident_or_404(iid)
+    ws = Workspace(ROOT / "scenarios" / inc["scenario"])
+    ws.alert = inc["alert"]
+    try:
+        row = run_baseline(inc["scenario"], LLM(), ws=ws)
+    except LLMError as e:
+        raise HTTPException(503, f"No AI service could answer right now: {str(e)[:200]}")
+    store.record_event(iid, {"actor": "human", "type": "chatbot_baseline", "payload": {**row, "by": user["name"]}}, user)
+    return _compare(_incident_or_404(iid))
 
 
 class AskIn(BaseModel):

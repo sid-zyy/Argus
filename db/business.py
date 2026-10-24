@@ -42,6 +42,7 @@ def impact(inc: dict, now: datetime | None = None) -> dict | None:
     argus_minutes = detection + handling
     manual_minutes = detection + b["manual_mttr_minutes"]
     saved_minutes = max(0.0, manual_minutes - argus_minutes) if fixed else 0.0
+    hours_saved = round(b["manual_mttr_minutes"] * b["engineers_paged"] / 60, 1) if fixed else 0.0
     return {
         "service_label": b["service_label"],
         "unit": b["unit"],
@@ -55,6 +56,8 @@ def impact(inc: dict, now: datetime | None = None) -> dict | None:
         "manual_minutes": round(manual_minutes, 1),
         "saved_minutes": round(saved_minutes, 1),
         "saved_value": round(per_min * saved_minutes),
-        "engineer_hours_saved": round(b["manual_mttr_minutes"] * b["engineers_paged"] / 60, 1) if fixed else 0.0,
+        "engineer_hours_saved": hours_saved,
+        "engineer_cost_saved": round(hours_saved * b.get("engineer_cost_per_hour", 0)),
+        "detection_minutes": round(detection, 2),
         "assumptions": b["assumptions"],
     }

@@ -8,6 +8,7 @@ python -m eval.compare            # runs the baseline (real model calls) and wri
 """
 from __future__ import annotations
 
+import importlib
 import json
 import re
 import time
@@ -58,10 +59,25 @@ def _json(text: str) -> dict:
         return {}
 
 
-def run_baseline(name: str, llm) -> dict:
-    build(name)
-    ws = Workspace(SCENARIOS / name)
-    expected = json.loads((ws.root / "expected.json").read_text(encoding="utf-8"))
+def expected_for(name: str, ws: Workspace) -> dict | None:
+    """The answer key: expected.json, or for the live shop the pushed bad change (its sha is known only once pushed)."""
+    p = SCENARIOS / name / "expected.json"
+    if p.is_file():
+        return json.loads(p.read_text(encoding="utf-8"))
+    try:
+        bad = importlib.import_module(f"scenarios.{name}.history").BAD_CHANGE
+        sha = ws.git("log", "-1", "--format=%h", "--fixed-strings", f"--grep={bad['message']}").strip()
+    except (ImportError, AttributeError, KeyError, ValueError):
+        return None
+    return {**bad["expected"], "culprit_sha": sha} if sha else None
+
+
+def run_baseline(name: str, llm, ws: Workspace | None = None) -> dict:
+    """Pass `ws` to score an existing incident's workspace as it is (e.g. the live shop, whose repo must not be rebuilt)."""
+    if ws is None:
+        build(name)
+        ws = Workspace(SCENARIOS / name)
+    expected = expected_for(name, ws) or {}
     t0 = time.time()
     reply = llm.chat([{"role": "user", "content": PROMPT + _paste(ws)}])
     answer = _json(reply.get("content", ""))
@@ -88,8 +104,8 @@ def run_baseline(name: str, llm) -> dict:
     return {
         "scenario": name,
         "root_cause": answer.get("root_cause", "(no answer)"),
-        "right_category": answer.get("category") == expected["category"],
-        "named_culprit": expected["culprit_sha"][:7] in text,
+        "right_category": answer.get("category") == expected["category"] if expected else None,
+        "named_culprit": expected["culprit_sha"][:7] in text if expected else None,
         "evidence_total": len(evidence),
         "evidence_verified": len(evidence) - len(bad),
         "fix_passes": fix_ok,
@@ -97,6 +113,26 @@ def run_baseline(name: str, llm) -> dict:
         "wrong_guess_caught": False,
         "seconds": round(time.time() - t0, 1),
         "model": f"{reply.get('provider')}/{reply.get('model')}",
+    }
+
+
+def score_incident(inc: dict, expected: dict | None) -> dict:
+    """Score an Argus incident from its record (GET /incidents/{id}) the same way as the baseline."""
+    supported = next((c for c in inc["claims"] if c["verdict"] == "supported"), None)
+    evidence = [e for c in inc["claims"] for e in c["evidence"] + c["verdict_evidence"]]
+    latest = inc["patches"][-1] if inc["patches"] else None
+    culprit = (expected or {}).get("culprit_sha", "")[:7]
+    return {
+        "root_cause": supported["statement"] if supported else "(none confirmed yet)",
+        "right_category": (bool(supported) and supported["category"] == expected["category"]) if expected else None,
+        "named_culprit": (bool(culprit) and (culprit in json.dumps(supported or {}) or any(s.get("sha", "")[:7] == culprit for s in inc["suspects"])))
+        if expected else None,
+        "evidence_total": len(evidence),
+        "evidence_verified": len(evidence),  # stored evidence already passed the code check; failing quotes never get in
+        "fix_passes": bool(latest and latest["passed"]),
+        "wrong_guess_caught": bool(supported) and any(c["verdict"] in ("refuted", "insufficient") for c in inc["claims"]),
+        "guesses_ruled_out": [c["statement"] for c in inc["claims"] if c["verdict"] in ("refuted", "insufficient")],
+        "approved_by_person": bool(inc.get("approval") and inc["approval"].get("approved")),
     }
 
 

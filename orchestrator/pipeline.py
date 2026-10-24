@@ -8,6 +8,7 @@ from __future__ import annotations
 from agents import investigators as ag
 from agents.base import AgentError
 from llm import LLMError
+from orchestrator import policy
 from orchestrator.approval import Approver
 from orchestrator.state import Claim, SuspectChange, Verdict
 from orchestrator.trace import Trace
@@ -77,6 +78,8 @@ def run_incident(ws: Workspace, llm, trace: Trace, approve: Approver, claim_offs
         _plan(ws, llm, emit, trace, 1)
         for attempt in range(1, MAX_ATTEMPTS + 1):
             state["attempts"] = attempt
+            if over := _over_budget(trace):
+                return _escalate(trace, state, over)
             if attempt > 1:
                 _plan(ws, llm, emit, trace, attempt, feedback, suspects)
             trace.emit("orchestrator", "attempt", {"n": attempt, "max": MAX_ATTEMPTS, "stage": "investigate"})
@@ -111,6 +114,8 @@ def run_incident(ws: Workspace, llm, trace: Trace, approve: Approver, claim_offs
         claim, verdict = state["supported"]
         failure = ""
         for fix_attempt in range(1, MAX_ATTEMPTS + 1):
+            if over := _over_budget(trace):
+                return _escalate(trace, state, over)
             trace.emit("orchestrator", "attempt", {"n": fix_attempt, "max": MAX_ATTEMPTS, "stage": "fix"})
             _phase(trace, "fix", attempt=fix_attempt)
             f = ag.fix(ws, claim, verdict.reasoning, suspects or [], llm, emit, failure)
@@ -119,13 +124,20 @@ def run_incident(ws: Workspace, llm, trace: Trace, approve: Approver, claim_offs
             trace.emit("fix", "patch", {**f.model_dump(), "diff": result.diff})
             trace.emit("sandbox", "sandbox", result.model_dump())
             state["fix"], state["sandbox"] = f, result
+            blocked = policy.check_fix(f.fix_type, result.diff) if result.passed else []
+            if blocked:  # works, but not allowed: the fixer gets the rule and tries again
+                trace.emit("orchestrator", "policy_blocked", {"violations": blocked, **policy.ref(blocked[0]["rule"])})
+                failure = ("The fix passed testing but breaks the team's policy, so it can't be offered for approval: "
+                           + "; ".join(f"{b['reason']} (rule {b['rule']})" for b in blocked) + ". Write a fix that stays within it.")
+                continue
             if result.passed:
                 break
             failure = (f"error: {result.error}\n" if result.error else "") + \
                       f"after-fix replay: {result.after.output if result.after else 'not run'}\n" + \
                       f"tests: {result.tests.output if result.tests else 'not run'}"
         else:
-            return _escalate(trace, state, f"No fix passed the sandbox after {MAX_ATTEMPTS} attempts.")
+            why = "within the policy" if state["sandbox"] and state["sandbox"].passed else "the sandbox"
+            return _escalate(trace, state, f"No fix passed {why} after {MAX_ATTEMPTS} attempts.")
 
         state["status"] = "awaiting_approval"
         _phase(trace, "approval")
@@ -156,6 +168,19 @@ def _code_history(ws, llm, emit, trace) -> list[SuspectChange]:
         suspects = []
     trace.emit("code_history", "suspects", {"suspects": [s.model_dump() for s in suspects]})
     return suspects
+
+
+def _over_budget(trace: Trace) -> str | None:
+    """The policy's AI budget for one run, checked before each attempt so a run never starts work it can't pay for."""
+    budget = policy.ai_budget()
+    if not budget:
+        return None
+    spent = policy.ai_cost(sum(e["payload"].get("tokens", 0) or 0 for e in trace.of_type("llm_step")))
+    if spent < budget:
+        return None
+    trace.emit("orchestrator", "policy_blocked", {"violations": [{"rule": "ai.budget_per_incident",
+               "reason": f"AI spend reached {spent:g}; the budget is {budget:g}"}], **policy.ref("ai.budget_per_incident")})
+    return f"The AI budget for this run ({budget:g}) is used up (spent {spent:g}), so a person takes over."
 
 
 def _escalate(trace: Trace, state: dict, reason: str) -> dict:

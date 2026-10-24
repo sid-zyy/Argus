@@ -20,4 +20,6 @@ BAD_CHANGE = {
     "author": "Arjun Mehta <arjun@example.com>",
     "message": "Simplify checkout flow; return early on declined payments",
     "files": {"app/checkout.py": base.CHECKOUT_BAD},
+    # the answer key for scoring (eval.compare.expected_for); the culprit sha is whatever this commit got when pushed
+    "expected": {"category": "code", "file": "app/checkout.py", "trap": "database overloaded; scale up the database"},
 }

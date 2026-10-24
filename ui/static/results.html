@@ -14,7 +14,7 @@
 <body>
 <header class="topbar">
   <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
-  <nav class="nav"><a href="/">Dashboard</a><a href="/results" class="on">Results</a><a href="/connect">Connect</a></nav>
+  <nav class="nav"><a href="/">Dashboard</a><a href="/results" class="on">Results</a><a href="/value">Value</a><a href="/check">Health</a><a href="/connect">Connect</a></nav>
   <span class="spacer"></span>
   <button class="icon-btn" id="theme-btn" type="button"></button>
   <div class="user-menu" id="user-menu"></div>
@@ -24,111 +24,34 @@
     <div class="res-particles" id="particles" aria-hidden="true"></div>
     <div class="res-hero-text">
       <div class="res-eyebrow">Argus vs a chatbot · same incidents, same free AI models</div>
-      <div id="headline"><h1 class="res-h1">Every claim checked. Every fix tested.</h1></div>
+      <h1 class="res-h1" id="headline">Every claim checked. Every fix tested.</h1>
       <p class="res-lead">A chatbot answers in seconds, but you have to trust it. Argus gathers its own evidence, proves every
         quote against the real files, tests the fix, and lets a person decide.</p>
+      <div class="res-hero-actions"><a class="btn primary" href="#race">Watch them race</a><a class="btn" href="#score">See the scoreboard</a></div>
     </div>
   </section>
 
-  <section class="res-stats" id="stats"></section>
+  <section class="res-stats" id="stats">
+    <div class="res-skel"></div><div class="res-skel"></div><div class="res-skel"></div><div class="res-skel"></div>
+  </section>
+
+  <section class="panel res-score" id="score">
+    <div class="res-score-head"><h2>Head to head</h2><span class="res-key"><i class="k-argus"></i>Argus<i class="k-bot"></i>Chatbot</span></div>
+    <div id="score-rows"></div>
+  </section>
 
   <section class="panel res-caps">
     <h2>What each one actually does</h2>
     <table class="res-table" id="caps"></table>
   </section>
 
-  <div class="section-head"><h2>Incident by incident</h2></div>
+  <div class="section-head" id="race"><h2>Incident by incident</h2><p>Press play to see both answer the same alert, sped up.</p></div>
   <div class="res-rows" id="rows"></div>
   <p class="small faint res-note" id="note"></p>
 </main>
 <script src="/static/common.js"></script>
+<script src="/static/palette.js"></script>
 <script src="/static/vendor/reactbits.js"></script>
-<script>
-const $ = (id) => document.getElementById(id);
-const DEMO = { incident1_conn_leak: "Checkout is failing", incident2_timeout: "Payments are timing out", incident3_cache_oom: "Product pages keep crashing" };
-const CAPS = [
-  ["Reads the logs, metrics and git history itself", true, false, "The chatbot only sees what someone pastes in"],
-  ["Checks every quote against the real files", true, false, "Made-up evidence is blocked before anyone sees it"],
-  ["Tries to prove its own guesses wrong", true, false, "A separate Fact checker reviews every cause"],
-  ["Tests the fix on a safe copy first", true, false, "Replays the failure without and with the fix"],
-  ["Waits for a person to approve", true, false, "A developer or team lead signs off before anything changes"],
-  ["Starts by itself from a monitoring alert", true, false, "Prometheus Alertmanager webhook"],
-  ["Keeps a full audit trail", true, false, "Every step, quote and decision is recorded"],
-];
-const yes = '<span class="res-yes" aria-label="Yes">✓</span>', no = '<span class="res-no" aria-label="No">–</span>';
-const pill = (ok, text) => `<span class="res-pill ${ok ? "ok" : "miss"}">${ok ? "✓" : "✗"} ${esc(text)}</span>`;
-const RB = window.ReactBits;
-const dark = () => document.documentElement.dataset.theme === "dark";
-
-function mountEffects() {
-  if (!RB) return;
-  RB.particles($("particles"), {
-    particleCount: 140, particleSpread: 12, speed: .06, particleBaseSize: 90, sizeRandomness: .8,
-    particleColors: dark() ? ["#8b7bff", "#6ee7ff", "#ff7ad9"] : ["#5b4dd6", "#2b9fc4", "#c4479d"],
-    alphaParticles: true, moveParticlesOnHover: true, particleHoverFactor: .6, connections: true, connectionDistance: 90,
-    glow: .4, twinkle: .25, lightMode: !dark(), clickBurst: true,
-  });
-  $("headline").innerHTML = "";
-  RB.blurText($("headline"), { text: "Every claim checked. Every fix tested.", className: "res-h1", animateBy: "words", delay: 120, direction: "top", trigger: "load" });
-}
-
-function card(el, n, of, suffix, label, sub) {
-  el.innerHTML = "";
-  const html = `<div class="res-stat"><div class="res-num"><span class="cu"></span>${of ? `<span class="res-of"> of ${of}</span>` : ""}</div>
-    <div class="res-label">${esc(label)}</div><div class="res-sub">${sub}</div></div>`;
-  if (!RB) { el.innerHTML = html.replace('<span class="cu"></span>', `${n}${suffix}`); return; }
-  RB.spotlight(el, { html, className: "res-card", theme: dark() ? "dark" : "light", spotlightColor: dark() ? "rgba(139,123,255,.25)" : "rgba(91,77,214,.14)" });
-  requestAnimationFrame(() => {
-    const cu = el.querySelector(".cu");
-    if (cu) RB.countUp(cu, { to: n, duration: 1.6, suffix });
-  });
-}
-
-api("/results/data").then((d) => {
-  const rows = d.rows, n = rows.length;
-  const A = (k) => rows.filter((r) => r.argus && r.argus[k]).length;
-  const C = (k) => rows.filter((r) => r.chatbot && r.chatbot[k]).length;
-  const q = (who, k) => rows.reduce((s, r) => s + ((r[who] && r[who][k]) || 0), 0);
-  const aq = q("argus", "evidence_verified"), at = q("argus", "evidence_total");
-  const cq = q("chatbot", "evidence_verified"), ct = q("chatbot", "evidence_total");
-  const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
-  const blocked = q("argus", "fabrications_blocked"), caught = A("wrong_guess_caught");
-  const stats = $("stats");
-  stats.innerHTML = '<div></div><div></div><div></div><div></div>';
-  const slots = stats.children;
-  card(slots[0], pct(aq, at), 0, "%", "Of quoted evidence is real",
-    `${aq} of ${at} quotes match the real files. Chatbot: <b>${pct(cq, ct)}%</b> (${cq} of ${ct}).`);
-  card(slots[1], A("named_culprit"), n, "", "Culprit changes named",
-    `Found the exact commit or setting every time. Chatbot: <b>${C("named_culprit")} of ${n}</b>.`);
-  card(slots[2], A("fix_passes"), n, "", "Fixes proven before asking",
-    "Each fix replayed against the failure in a sandbox, then sent for approval.");
-  card(slots[3], blocked + caught, 0, "", "Mistakes caught by itself",
-    `${blocked} made-up quote blocked and ${caught} wrong guess ruled out before anyone acted on them.`);
-
-  $("caps").innerHTML = `<thead><tr><th></th><th>Chatbot</th><th class="res-argus-col">Argus</th></tr></thead><tbody>` +
-    CAPS.map(([what, a, c, why]) => `<tr><td><b>${esc(what)}</b><div class="small faint">${esc(why)}</div></td><td>${c ? yes : no}</td><td class="res-argus-col">${a ? yes : no}</td></tr>`).join("") + "</tbody>";
-
-  $("rows").innerHTML = rows.map((r) => {
-    const a = r.argus || {}, c = r.chatbot || {};
-    const ev = (x) => x.evidence_total ? `${x.evidence_verified} of ${x.evidence_total} quotes real` : "No quotes";
-    return `<section class="panel res-row">
-      <div class="res-row-head"><h3>${esc(DEMO[r.scenario] || r.title)}</h3><span class="small faint">${esc(r.title)}</span></div>
-      <div class="res-row-grid">
-        <div class="res-side argus"><div class="res-who">Argus</div><p class="res-cause">${esc(a.root_cause || "Not run yet")}</p>
-          <div class="res-pills">${pill(a.named_culprit, "Named the culprit")}${pill(a.evidence_total && a.evidence_verified === a.evidence_total, ev(a))}${pill(a.fix_passes, "Fix passed")}${a.wrong_guess_caught ? pill(true, "Caught a wrong guess") : ""}</div></div>
-        <div class="res-side"><div class="res-who">Chatbot</div><p class="res-cause">${esc(c.root_cause || "Not run yet")}</p>
-          <div class="res-pills">${pill(c.named_culprit, "Named the culprit")}${pill(c.evidence_total && c.evidence_verified === c.evidence_total, ev(c))}${pill(c.fix_passes, "Fix passed")}</div></div>
-      </div></section>`;
-  }).join("");
-
-  const models = (who) => [...new Set(rows.map((r) => r[who] && r[who].model).filter(Boolean).join(", ").split(", "))].join(", ") || "–";
-  $("note").textContent = `How this was measured: one recorded Argus run per incident (models: ${models("argus")}). The chatbot got one prompt per incident (model: ${models("chatbot")}) with what an engineer would usually paste: the alert, the end of each log, the deploy log and the latest code change, and no tools. Its fixes were tested by us in the same sandbox.${d.baseline_recorded_at ? ` Chatbot run on ${d.baseline_recorded_at}.` : ""}`;
-}).catch((e) => toastMsg(e.message, "bad"));
-
-mountEffects();
-mountThemeToggle($("theme-btn"));
-mountUserMenu($("user-menu"));
-Session.load();
-</script>
+<script src="/static/results.js"></script>
 </body>
 </html>

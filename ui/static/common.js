@@ -214,6 +214,8 @@ function describeEvent(e) {
     case "notified": return `Messaged ${p.to} on ${p.channel}: ${p.message}`;
     case "question": return `Asked Argus: “${p.question}”`;
     case "sla_breach": return `Approval waited over ${p.minutes} min. Escalated to ${p.escalated_to}`;
+    case "policy_blocked": return `Stopped by the policy (${p.rule}): ${(p.violations || []).map((v) => v.reason).join("; ")}`;
+    case "chatbot_baseline": return `Asked a single chatbot the same question, for comparison`;
     default: return JSON.stringify(p).slice(0, 160);
   }
 }

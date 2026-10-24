@@ -15,7 +15,7 @@
 <body>
 <header class="topbar">
   <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
-  <nav class="nav"><a href="/" class="on">Dashboard</a><a href="/results">Results</a><a href="/connect">Connect</a></nav>
+  <nav class="nav"><a href="/" class="on">Dashboard</a><a href="/results">Results</a><a href="/value">Value</a><a href="/check">Health</a><a href="/connect">Connect</a></nav>
   <span class="spacer"></span>
   <button class="icon-btn" id="theme-btn" type="button"></button>
   <div class="user-menu" id="user-menu"></div>
@@ -29,6 +29,7 @@
       <p id="subgreeting">Finds the cause, tests a fix, and asks a person before changing anything.</p>
     </div>
     <div class="dash-actions">
+      <button class="btn ghost tour-btn" id="tour-btn" type="button" title="A 30-second look around (T)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Take the tour</button>
       <button class="btn" id="bug-btn" hidden>Report a problem</button>
       <button class="btn primary" id="trigger-btn" hidden>Try a demo incident</button>
       <div class="menu-pop" id="trigger-menu" hidden></div>
@@ -72,6 +73,12 @@
     </div>
   </section>
 
+  <section class="panel svc-health" id="svc-health" hidden>
+    <div class="svc-head"><h2>Service health</h2><span class="small faint">Last 30 days · hover a day for details</span><span class="spacer"></span><span class="svc-legend"><i class="d-ok"></i>No incidents<i class="d-minor"></i>Minor<i class="d-major"></i>Major</span></div>
+    <div id="svc-rows"></div>
+  </section>
+  <div class="svc-tip" id="svc-tip" hidden></div>
+
   <div class="section-head"><h2>Incidents</h2></div>
   <div class="board" id="board"></div>
 
@@ -114,6 +121,8 @@
 <script src="/static/vendor/reactbits.js"></script>
 <script src="/static/argus.js"></script>
 <script src="/static/push.js"></script>
+<script src="/static/palette.js"></script>
+<script src="/static/tour.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const COLUMNS = [
@@ -176,20 +185,25 @@ function money(v) {
   if (v >= 1e5) return `₹${(v / 1e5).toFixed(1)} L`;
   return `₹${Math.round(v).toLocaleString("en-IN")}`;
 }
+// AI costs are small, so they keep their paise
+const aiMoney = (v) => `₹${(v || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 function renderTiles(m) {
   const tiles = [
-    ["Revenue protected", money(m.saved_value), "Estimated, compared with a manual fix"],
-    ["Engineer time saved", `${m.engineer_hours_saved} h`, `${m.resolved} incident${m.resolved === 1 ? "" : "s"} fixed`],
+    ["Revenue protected", money(m.saved_value), `Estimated, vs a manual fix. Plus ${m.engineer_hours_saved} h of engineer time`],
+    ["Return on AI spend", m.roi_multiple ? `${m.roi_multiple.toLocaleString("en-IN")}×` : "–",
+      m.ai_cost ? `${money(m.saved_value + m.engineer_cost_saved)} saved for ${aiMoney(m.ai_cost)} of AI` : "No AI spend yet"],
     ["Open right now", m.open, m.at_risk_per_minute_now ? `${money(m.at_risk_per_minute_now)}/min at risk` : "Nothing at risk"],
-    ["Average time to fix", fmtDuration(m.mttr_seconds), "Including human approval"],
+    ["Average time to fix", fmtDuration(m.mttr_seconds), `Including human approval. ${m.resolved} fixed`],
     ["Wrong guesses caught", m.claims_refuted, "Before anyone acted on them"],
     ["Made-up evidence blocked", m.fabrications_blocked, `AI used: ≈${m.wh_estimate} Wh`],
   ];
-  const counts = [moneyCount(m.saved_value), { to: m.engineer_hours_saved, decimals: 1, suffix: " h" }, { to: m.open }, null,
+  const counts = [moneyCount(m.saved_value), m.roi_multiple ? { to: m.roi_multiple, separator: ",", suffix: "×" } : null, { to: m.open }, null,
     { to: m.claims_refuted }, { to: m.fabrications_blocked }];
   const box = $("tiles");
   if (box.children.length !== tiles.length) {
-    box.innerHTML = tiles.map(() => `<div class="tile"><div class="k"></div><div class="v"></div><div class="s"></div></div>`).join("");
+    box.innerHTML = tiles.map((_, i) => i < 2
+      ? `<a class="tile tile-link" href="/value" title="See every incident's value and AI cost"><div class="k"></div><div class="v"></div><div class="s"></div></a>`
+      : `<div class="tile"><div class="k"></div><div class="v"></div><div class="s"></div></div>`).join("");
     tileCounters = [];
   }
   tiles.forEach(([k, v, sub], i) => {
@@ -229,27 +243,42 @@ function friendlyLine(i) {
     default: return esc(STATUS_LABEL[i.status] || i.status);
   }
 }
-function card(i) {
+// open incidents show a live "open for" clock, like incident.io; it ticks every second without re-rendering the board
+const ACTIVE = ["open", "investigating", "awaiting_approval", "awaiting_qa"];
+function since(iso) {
+  const s = Math.max(0, Math.floor((Date.now() - Date.parse(iso)) / 1000)), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60;
+  return h ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}m ${String(s % 60).padStart(2, "0")}s`;
+}
+setInterval(() => document.querySelectorAll("[data-since]").forEach((el) => (el.textContent = since(el.dataset.since))), 1000);
+function card(i, fresh) {
   const person = i.assignee ? `${avatar(i.assignee, "developer")}${esc(i.assignee)}` : i.reported_by_name ? `${avatar(i.reported_by_name, "tester")}${esc(i.reported_by_name)}` : "";
-  return `<a class="card" href="/incidents/${i.id}/view">
+  const when = ACTIVE.includes(i.status)
+    ? `<span class="card-clock" title="Open for"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span data-since="${esc(i.created_at)}">${since(i.created_at)}</span></span>`
+    : `<span>${esc(ago(i.created_at))}</span>`;
+  return `<a class="card sev-${esc(i.severity)} st-${esc(i.status)}${fresh ? " fresh" : ""}" href="/incidents/${i.id}/view">
     <div class="card-top"><span class="key">${incKey(i.id)}</span><span class="sev-pill ${esc(i.severity)}">${esc(SEV_LABEL[i.severity] || i.severity)}</span></div>
     <div class="card-title">${esc(i.title)}</div>
     <div class="card-ai">${friendlyLine(i)}</div>
-    <div class="card-foot">${person}<span class="spacer"></span><span>${esc(ago(i.created_at))}</span></div>
+    <div class="card-foot">${person}<span class="spacer"></span>${when}</div>
   </a>`;
 }
 const SEV_LABEL = { sev1: "Critical", sev2: "Major", sev3: "Minor", sev4: "Small" };
 // each column shows its newest few cards; the rest open on request so the board stays short
 const COLUMN_LIMIT = 3;
 const expanded = new Set();
+// what each card looked like last time, so a card that is new or has moved column can slide in, and a fix gets a cheer
+let lastStatus = null;
 function renderBoard() {
   const u = Session.user, canClear = u && u.role !== "tester";
+  const moved = new Set(incidents.filter((i) => lastStatus && lastStatus.get(i.id) !== i.status).map((i) => i.id));
+  const justFixed = lastStatus && incidents.some((i) => moved.has(i.id) && ["resolved", "closed"].includes(i.status) && lastStatus.has(i.id));
+  lastStatus = new Map(incidents.map((i) => [i.id, i.status]));
   $("board").innerHTML = COLUMNS.map((c, ci) => {
     const items = incidents.filter((i) => c.statuses.includes(i.status));
     const open = expanded.has(ci), shown = open ? items : items.slice(0, COLUMN_LIMIT), more = items.length - shown.length;
     const clear = c.clearable && canClear && items.length ? `<button class="col-clear" data-clear="${ci}" title="Hide these from the board. Nothing is deleted.">Clear</button>` : "";
     return `<div class="col"><div class="col-head"><span class="col-dot" style="background:${c.color}"></span>${esc(c.label)}${clear}<span class="n">${items.length}</span></div>
-      ${items.length ? shown.map(card).join("") : `<div class="col-empty">Nothing here</div>`}
+      ${items.length ? shown.map((i) => card(i, moved.has(i.id))).join("") : `<div class="col-empty">Nothing here</div>`}
       ${more > 0 ? `<button class="col-more" data-more="${ci}">Show ${more} more</button>` : open && items.length > COLUMN_LIMIT ? `<button class="col-more" data-more="${ci}">Show less</button>` : ""}</div>`;
   }).join("");
   $("board").querySelectorAll("[data-more]").forEach((b) => b.onclick = () => {
@@ -266,11 +295,18 @@ function renderBoard() {
       refresh();
     } catch (e) { toastMsg(e.message, "bad"); }
   });
+  if (justFixed) {
+    const r = $("board").querySelector(".card.fresh.st-resolved, .card.fresh.st-closed")?.getBoundingClientRect();
+    confetti(r && r.top > 0 && r.top < innerHeight ? { x: r.left + r.width / 2, y: r.top + 20 } : {});
+  }
 }
 
 // ---- feed and queue ----
+let feedNewest = null;
 function renderFeed(events) {
-  $("feed").innerHTML = events.length ? events.map((e) => `<div class="act"><span class="t">${esc(clock(e.ts))}</span>
+  const prev = feedNewest;
+  feedNewest = events.length ? events[0].id : feedNewest;
+  $("feed").innerHTML = events.length ? events.map((e) => `<div class="act${prev !== null && e.id > prev ? " new" : ""}"><span class="t">${esc(clock(e.ts))}</span>
     <div><a href="/incidents/${e.incident_id}/view">${incKey(e.incident_id)}</a> <span class="actor">${esc(actorName(e))}</span> <span class="detail">${esc(describeEvent(e))}</span></div></div>`).join("")
     : `<p class="empty">No activity yet.</p>`;
 }
@@ -455,9 +491,64 @@ $("la-reset").onclick = async () => {
   renderLiveApp();
 };
 
+// ---- service health: a status-page strip per service, one bar per day, coloured by that day's worst incident ----
+const DAY = 864e5;
+const dayStart = (t) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
+let svcData = null, svcDrawn = false;
+async function renderServiceHealth() {
+  try { svcData = await api("/incidents/history?days=30"); } catch { return; }
+  const { days, services, incidents: hist } = svcData;
+  const today = dayStart(Date.now()), now = Date.now();
+  const end = (i) => i.resolved_at ? Date.parse(i.resolved_at) : ACTIVE.includes(i.status) ? now : null;  // unknown when it was never fixed
+  $("svc-rows").innerHTML = services.map((svc) => {
+    const mine = hist.filter((i) => i.service === svc);
+    const live = mine.filter((i) => ACTIVE.includes(i.status));
+    const down = mine.reduce((sum, i) => { const e = end(i); return e ? sum + Math.max(0, e - Date.parse(i.created_at)) : sum; }, 0);
+    const uptime = Math.max(0, 100 - (down / (days * DAY)) * 100);
+    const bars = Array.from({ length: days }, (_, n) => {
+      const d0 = today - (days - 1 - n) * DAY, on = mine.filter((i) => Date.parse(i.created_at) >= d0 && Date.parse(i.created_at) < d0 + DAY);
+      const lvl = on.some((i) => ["sev1", "sev2"].includes(i.severity)) ? "major" : on.length ? "minor" : "ok";
+      return `<i class="d-${lvl}" data-svc="${esc(svc)}" data-day="${d0}" style="--n:${n}"></i>`;
+    }).join("");
+    return `<div class="svc"><div class="svc-name"><span class="svc-dot ${live.length ? "bad" : "ok"}"></span><b>${esc(svc)}</b>
+        <span class="svc-state ${live.length ? "bad" : "ok"}">${live.length ? `Degraded · <a href="/incidents/${live[0].id}/view">${incKey(live[0].id)}</a>` : "Operational"}</span>
+        <span class="spacer"></span><span class="svc-up">${uptime.toFixed(uptime === 100 ? 0 : 2)}% uptime</span></div>
+      <div class="svc-bars${svcDrawn ? "" : " grow"}">${bars}</div>
+      <div class="svc-axis"><span>${days} days ago</span><span>Today</span></div></div>`;
+  }).join("");
+  svcDrawn = true;
+  $("svc-health").hidden = !services.length;
+}
+$("svc-rows").addEventListener("pointerover", (e) => {
+  const b = e.target.closest("[data-day]");
+  if (!b || !svcData) return;
+  const d0 = +b.dataset.day, on = svcData.incidents.filter((i) => i.service === b.dataset.svc && Date.parse(i.created_at) >= d0 && Date.parse(i.created_at) < d0 + DAY);
+  const tip = $("svc-tip");
+  tip.innerHTML = `<b>${new Date(d0).toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" })}</b>` + (on.length
+    ? on.slice(-4).reverse().map((i) => `<div class="svc-tip-row"><span class="sev-pill ${esc(i.severity)}">${esc(SEV_LABEL[i.severity])}</span><span>${incKey(i.id)} ${esc(i.title)}</span>
+        <span class="faint">${i.resolved_at ? `fixed in ${fmtDuration((Date.parse(i.resolved_at) - Date.parse(i.created_at)) / 1000)}` : esc(STATUS_LABEL[i.status] || i.status)}</span></div>`).join("") + (on.length > 4 ? `<div class="faint">and ${on.length - 4} earlier</div>` : "")
+    : `<div class="faint">No incidents. All systems normal.</div>`);
+  tip.hidden = false;
+  const r = b.getBoundingClientRect(), w = tip.offsetWidth;
+  tip.style.left = `${Math.min(innerWidth - w - 12, Math.max(12, r.left + r.width / 2 - w / 2))}px`;
+  const above = r.top - tip.offsetHeight - 10;
+  tip.style.top = `${above > 64 ? above : r.bottom + 10}px`;  // below the bar when the top bar is in the way
+});
+$("svc-rows").addEventListener("pointerleave", () => ($("svc-tip").hidden = true));
+
+// ---- tour and keys: T for the tour, N to start a demo incident ----
+$("tour-btn").onclick = () => ArgusTour.start();
+document.addEventListener("keydown", (e) => {
+  if ((e.target.closest && e.target.closest("input, textarea, select")) || e.metaKey || e.ctrlKey || e.altKey || document.querySelector("dialog[open], .pal-overlay:not([hidden]), .tour:not([hidden])")) return;
+  if (e.key === "t") ArgusTour.start();
+  if (e.key === "n" && !$("trigger-btn").hidden) { e.preventDefault(); $("trigger-btn").click(); }
+});
+
 async function refresh() {
   renderLiveApp();
   const [inc, m, ev] = await Promise.all([api("/incidents"), api("/metrics"), api("/events/recent?limit=25")]);
+  const activeKey = (list) => list.filter((i) => ACTIVE.includes(i.status)).map((i) => i.id).join();
+  if (activeKey(inc) !== activeKey(incidents) && svcDrawn) renderServiceHealth();  // a service turns degraded or recovers right away
   incidents = inc;
   renderTiles(m); renderBoard(); renderFeed(ev); renderQueue(); renderMindStatus();
 }
@@ -467,6 +558,8 @@ Session.onChange(() => { renderWelcome(); renderQueue(); });
 mountUserMenu($("user-menu"));
 Promise.all([Session.load(), api("/scenarios").then((s) => (scenarios = s.filter((x) => !x.live_app)))]).then(refresh).catch((e) => toastMsg(e.message, "bad"));
 setInterval(() => refresh().catch(() => {}), 3000);
+renderServiceHealth();
+setInterval(renderServiceHealth, 15000);
 </script>
 </body>
 </html>
