@@ -46,7 +46,14 @@ def test_every_service_folder_has_a_passing_config():
     keys = [d.name for d in service_folders()]
     assert {"live_shop", "quickbite_orders", "incident1_conn_leak"} <= set(keys)
     for d in service_folders():
-        if not (load(d).repo_path() / ".git").exists():
+        cfg = load(d)
+        if cfg.deploy.on_approve:
+            # a live app (ShopFast) owns its repo and logs: a demo may be resetting or deploying them right now, so only
+            # its config is checked here, and the test never rebuilds them
+            errors = [c.message for c in check_folder(d).errors if c.area not in ("repo", "logs")]
+            assert not errors, (d.name, errors)
+            continue
+        if not (cfg.repo_path() / ".git").exists():
             build(d.name)
         r = check_folder(d)
         assert r.ok, (d.name, [c.message for c in r.errors])
