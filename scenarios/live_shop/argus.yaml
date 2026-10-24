@@ -1,0 +1,51 @@
+# Argus Connect: ShopFast checkout-api (Python, Prometheus Alertmanager, plain-text logs).
+# The live demo app: shop/server.py runs this repo's code, writes these logs and sends Alertmanager webhooks.
+# Check it with:  python -m connect.wizard check live_shop
+version: 1
+
+service:
+  name: checkout-api
+  label: ShopFast checkout
+  team: Payments & Checkout team
+  language: python
+  on_call: Siddhartha
+  description: Takes payment and creates the order for the ShopFast store.
+
+repo:
+  adapter: git
+  path: repo                      # the shop deploys every new commit here
+
+alerts:
+  adapter: alertmanager           # ShopFast's monitor posts Alertmanager webhooks to POST /alerts
+  match: {service: checkout-api}
+  base: alert.json
+  sample: alerts/alertmanager_alert.json
+
+logs:
+  - {name: app.log, adapter: text, path: logs/app.log, role: service}
+  - {name: metrics.log, adapter: text, path: logs/metrics.log, role: metrics}
+  - {name: db.log, adapter: text, path: logs/db.log, role: dependency, dependency: Orders database}
+  - {name: deploy.log, adapter: text, path: logs/deploy.log, role: deploy}
+
+metrics:
+  source: metrics.log
+  description: >-
+    checkout-api metrics every 15s (rps, error_rate_5xx, p95_ms, pool_in_use, pool_size, the live commit).
+    Database health is in db.log; use search_logs for it.
+
+dependencies:
+  - {name: Orders database, kind: data, logs: [db.log], note: Postgres behind a 20-connection pool}
+  - {name: Payment provider, kind: external, note: Charges customers' cards}
+
+commands:
+  files: [repro.py]
+  repro: python repro.py {repo}
+  test: python -m pytest -q -p no:cacheprovider {repo}/tests
+  test_if_exists: "{repo}/tests"
+
+deploy:
+  on_approve: true                # the approved fix is committed; ShopFast deploys it within seconds
+  app: ShopFast
+  url: http://localhost:8100
+
+business: business.json

@@ -1,0 +1,842 @@
+{"level": 30, "time": 1792667700000, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "server started", "version": "2.3.1", "commit": "39c3e51", "port": 8200}
+{"level": 30, "time": 1792780205027, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1001", "items": 2, "promo": null}
+{"level": 30, "time": 1792780205199, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1001", "status": 201, "latency_ms": 196}
+{"level": 30, "time": 1792780205202, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1001", "total": 147000}
+{"level": 30, "time": 1792780253681, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1002", "items": 1, "promo": null}
+{"level": 30, "time": 1792780253968, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1002", "status": 201, "latency_ms": 214}
+{"level": 30, "time": 1792780253971, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1002", "total": 81000}
+{"level": 30, "time": 1792780273212, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1003", "items": 1, "promo": null}
+{"level": 30, "time": 1792780273409, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1003", "status": 201, "latency_ms": 186}
+{"level": 30, "time": 1792780273412, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1003", "total": 99000}
+{"level": 30, "time": 1792780288026, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1004", "items": 1, "promo": null}
+{"level": 30, "time": 1792780288278, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1004", "status": 201, "latency_ms": 219}
+{"level": 30, "time": 1792780288281, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1004", "total": 51000}
+{"level": 30, "time": 1792780312134, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1005", "items": 3, "promo": null}
+{"level": 30, "time": 1792780312310, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1005", "status": 201, "latency_ms": 260}
+{"level": 30, "time": 1792780312313, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1005", "total": 129000}
+{"level": 30, "time": 1792780326094, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1006", "items": 2, "promo": "FLAT100"}
+{"level": 30, "time": 1792780326266, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1006", "status": 201, "latency_ms": 212}
+{"level": 30, "time": 1792780326269, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1006", "total": 115000}
+{"level": 30, "time": 1792780329653, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1007", "items": 3, "promo": null}
+{"level": 30, "time": 1792780329929, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1007", "status": 201, "latency_ms": 217}
+{"level": 30, "time": 1792780329932, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1007", "total": 101000}
+{"level": 30, "time": 1792780342841, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1008", "items": 2, "promo": null}
+{"level": 30, "time": 1792780343095, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1008", "status": 402, "latency_ms": 153}
+{"level": 30, "time": 1792780343097, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "payment declined", "orderId": "o-1008", "reason": "card_declined"}
+{"level": 30, "time": 1792780358701, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1009", "items": 3, "promo": "FLAT100"}
+{"level": 30, "time": 1792780358882, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1009", "status": 201, "latency_ms": 181}
+{"level": 30, "time": 1792780358885, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1009", "total": 121000}
+{"level": 30, "time": 1792780363225, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1010", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792780363484, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1010", "status": 201, "latency_ms": 293}
+{"level": 30, "time": 1792780363487, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1010", "total": 101400}
+{"level": 30, "time": 1792780385010, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1011", "items": 1, "promo": null}
+{"level": 30, "time": 1792780385304, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1011", "status": 201, "latency_ms": 239}
+{"level": 30, "time": 1792780385307, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1011", "total": 12000}
+{"level": 30, "time": 1792780406693, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1012", "items": 2, "promo": null}
+{"level": 30, "time": 1792780407007, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1012", "status": 201, "latency_ms": 317}
+{"level": 30, "time": 1792780407010, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1012", "total": 113000}
+{"level": 30, "time": 1792780424530, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1013", "items": 3, "promo": null}
+{"level": 30, "time": 1792780424792, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1013", "status": 201, "latency_ms": 286}
+{"level": 30, "time": 1792780424795, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1013", "total": 120000}
+{"level": 30, "time": 1792780429233, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1014", "items": 3, "promo": null}
+{"level": 30, "time": 1792780429416, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1014", "status": 201, "latency_ms": 258}
+{"level": 30, "time": 1792780429419, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1014", "total": 169000}
+{"level": 30, "time": 1792780431539, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1015", "items": 1, "promo": null}
+{"level": 30, "time": 1792780431759, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1015", "status": 201, "latency_ms": 170}
+{"level": 30, "time": 1792780431762, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1015", "total": 47000}
+{"level": 30, "time": 1792780440165, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1016", "items": 1, "promo": null}
+{"level": 30, "time": 1792780440391, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1016", "status": 201, "latency_ms": 175}
+{"level": 30, "time": 1792780440394, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1016", "total": 51000}
+{"level": 30, "time": 1792780447698, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1017", "items": 3, "promo": null}
+{"level": 30, "time": 1792780447848, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1017", "status": 201, "latency_ms": 255}
+{"level": 30, "time": 1792780447851, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1017", "total": 179000}
+{"level": 30, "time": 1792780448125, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1018", "items": 3, "promo": null}
+{"level": 30, "time": 1792780448329, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1018", "status": 201, "latency_ms": 222}
+{"level": 30, "time": 1792780448332, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1018", "total": 189000}
+{"level": 30, "time": 1792780459176, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1019", "items": 2, "promo": null}
+{"level": 30, "time": 1792780459376, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1019", "status": 201, "latency_ms": 176}
+{"level": 30, "time": 1792780459379, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1019", "total": 41000}
+{"level": 30, "time": 1792780467676, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1020", "items": 2, "promo": null}
+{"level": 30, "time": 1792780467939, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1020", "status": 201, "latency_ms": 283}
+{"level": 30, "time": 1792780467942, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1020", "total": 147000}
+{"level": 30, "time": 1792780470448, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1021", "items": 3, "promo": null}
+{"level": 30, "time": 1792780470701, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1021", "status": 201, "latency_ms": 163}
+{"level": 30, "time": 1792780470704, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1021", "total": 111000}
+{"level": 30, "time": 1792780474187, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1022", "items": 3, "promo": null}
+{"level": 30, "time": 1792780474414, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1022", "status": 201, "latency_ms": 268}
+{"level": 30, "time": 1792780474417, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1022", "total": 74000}
+{"level": 30, "time": 1792780481021, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1023", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792780481202, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1023", "status": 201, "latency_ms": 280}
+{"level": 30, "time": 1792780481205, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1023", "total": 24600}
+{"level": 30, "time": 1792780482334, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1024", "items": 3, "promo": null}
+{"level": 30, "time": 1792780482497, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1024", "status": 201, "latency_ms": 319}
+{"level": 30, "time": 1792780482500, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1024", "total": 65000}
+{"level": 30, "time": 1792780491719, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1025", "items": 2, "promo": null}
+{"level": 30, "time": 1792780491926, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1025", "status": 201, "latency_ms": 165}
+{"level": 30, "time": 1792780491929, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1025", "total": 87000}
+{"level": 30, "time": 1792780530676, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1026", "items": 2, "promo": null}
+{"level": 30, "time": 1792780530937, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1026", "status": 201, "latency_ms": 222}
+{"level": 30, "time": 1792780530940, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1026", "total": 111000}
+{"level": 30, "time": 1792780541152, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1027", "items": 2, "promo": "FLAT100"}
+{"level": 30, "time": 1792780541375, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1027", "status": 201, "latency_ms": 289}
+{"level": 30, "time": 1792780541378, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1027", "total": 131000}
+{"level": 30, "time": 1792780551766, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1028", "items": 3, "promo": null}
+{"level": 30, "time": 1792780551991, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1028", "status": 402, "latency_ms": 160}
+{"level": 30, "time": 1792780551993, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "payment declined", "orderId": "o-1028", "reason": "card_declined"}
+{"level": 30, "time": 1792780555025, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1029", "items": 1, "promo": null}
+{"level": 30, "time": 1792780555183, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1029", "status": 201, "latency_ms": 207}
+{"level": 30, "time": 1792780555186, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1029", "total": 75000}
+{"level": 30, "time": 1792780559620, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1030", "items": 2, "promo": null}
+{"level": 30, "time": 1792780559793, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1030", "status": 201, "latency_ms": 193}
+{"level": 30, "time": 1792780559796, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1030", "total": 119000}
+{"level": 30, "time": 1792780584137, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1031", "items": 1, "promo": null}
+{"level": 30, "time": 1792780584292, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1031", "status": 402, "latency_ms": 191}
+{"level": 30, "time": 1792780584294, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "payment declined", "orderId": "o-1031", "reason": "card_declined"}
+{"level": 30, "time": 1792780592520, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1032", "items": 2, "promo": null}
+{"level": 30, "time": 1792780592718, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1032", "status": 201, "latency_ms": 188}
+{"level": 30, "time": 1792780592721, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1032", "total": 115000}
+{"level": 30, "time": 1792780601731, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1033", "items": 1, "promo": null}
+{"level": 30, "time": 1792780601965, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1033", "status": 201, "latency_ms": 235}
+{"level": 30, "time": 1792780601968, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1033", "total": 21000}
+{"level": 30, "time": 1792780602661, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1034", "items": 2, "promo": null}
+{"level": 30, "time": 1792780602864, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1034", "status": 201, "latency_ms": 236}
+{"level": 30, "time": 1792780602867, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1034", "total": 67000}
+{"level": 30, "time": 1792780631032, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1035", "items": 1, "promo": null}
+{"level": 30, "time": 1792780631339, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1035", "status": 201, "latency_ms": 215}
+{"level": 30, "time": 1792780631342, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1035", "total": 15000}
+{"level": 30, "time": 1792780640343, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1036", "items": 2, "promo": null}
+{"level": 30, "time": 1792780640645, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1036", "status": 201, "latency_ms": 305}
+{"level": 30, "time": 1792780640648, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1036", "total": 87000}
+{"level": 30, "time": 1792780642197, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1037", "items": 3, "promo": null}
+{"level": 30, "time": 1792780642362, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1037", "status": 201, "latency_ms": 217}
+{"level": 30, "time": 1792780642365, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1037", "total": 109000}
+{"level": 30, "time": 1792780661412, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1038", "items": 3, "promo": null}
+{"level": 30, "time": 1792780661673, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1038", "status": 201, "latency_ms": 285}
+{"level": 30, "time": 1792780661676, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1038", "total": 108000}
+{"level": 30, "time": 1792780663493, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1039", "items": 3, "promo": null}
+{"level": 30, "time": 1792780663754, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1039", "status": 201, "latency_ms": 185}
+{"level": 30, "time": 1792780663757, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1039", "total": 137000}
+{"level": 30, "time": 1792780665248, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1040", "items": 3, "promo": null}
+{"level": 30, "time": 1792780665419, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1040", "status": 201, "latency_ms": 282}
+{"level": 30, "time": 1792780665422, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1040", "total": 126000}
+{"level": 30, "time": 1792780666874, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1041", "items": 3, "promo": null}
+{"level": 30, "time": 1792780667016, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1041", "status": 201, "latency_ms": 255}
+{"level": 30, "time": 1792780667019, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1041", "total": 165000}
+{"level": 30, "time": 1792780704267, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1042", "items": 3, "promo": null}
+{"level": 30, "time": 1792780704511, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1042", "status": 201, "latency_ms": 248}
+{"level": 30, "time": 1792780704514, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1042", "total": 111000}
+{"level": 30, "time": 1792780711318, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1043", "items": 1, "promo": null}
+{"level": 30, "time": 1792780711507, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1043", "status": 201, "latency_ms": 176}
+{"level": 30, "time": 1792780711510, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1043", "total": 99000}
+{"level": 30, "time": 1792780751707, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1044", "items": 1, "promo": null}
+{"level": 30, "time": 1792780751988, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1044", "status": 201, "latency_ms": 257}
+{"level": 30, "time": 1792780751991, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1044", "total": 47000}
+{"level": 30, "time": 1792780754481, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1045", "items": 1, "promo": null}
+{"level": 30, "time": 1792780754663, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1045", "status": 201, "latency_ms": 190}
+{"level": 30, "time": 1792780754666, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1045", "total": 99000}
+{"level": 30, "time": 1792780762062, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1046", "items": 2, "promo": null}
+{"level": 30, "time": 1792780762303, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1046", "status": 201, "latency_ms": 264}
+{"level": 30, "time": 1792780762306, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1046", "total": 97000}
+{"level": 30, "time": 1792780807765, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1047", "items": 1, "promo": null}
+{"level": 30, "time": 1792780807994, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1047", "status": 402, "latency_ms": 259}
+{"level": 30, "time": 1792780807996, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "payment declined", "orderId": "o-1047", "reason": "card_declined"}
+{"level": 30, "time": 1792780809310, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1048", "items": 3, "promo": null}
+{"level": 30, "time": 1792780809558, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1048", "status": 201, "latency_ms": 264}
+{"level": 30, "time": 1792780809561, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1048", "total": 79000}
+{"level": 30, "time": 1792780815524, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1049", "items": 3, "promo": null}
+{"level": 30, "time": 1792780815758, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1049", "status": 201, "latency_ms": 292}
+{"level": 30, "time": 1792780815761, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1049", "total": 102000}
+{"level": 30, "time": 1792780849701, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1050", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792780849919, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1050", "status": 201, "latency_ms": 186}
+{"level": 30, "time": 1792780849922, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1050", "total": 63800}
+{"level": 30, "time": 1792780861054, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1051", "items": 1, "promo": null}
+{"level": 30, "time": 1792780861214, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1051", "status": 201, "latency_ms": 245}
+{"level": 30, "time": 1792780861217, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1051", "total": 47000}
+{"level": 30, "time": 1792780862516, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1052", "items": 3, "promo": null}
+{"level": 30, "time": 1792780862781, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1052", "status": 201, "latency_ms": 244}
+{"level": 30, "time": 1792780862784, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1052", "total": 119000}
+{"level": 30, "time": 1792780899809, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1053", "items": 1, "promo": null}
+{"level": 30, "time": 1792780899964, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1053", "status": 201, "latency_ms": 227}
+{"level": 30, "time": 1792780899967, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1053", "total": 15000}
+{"level": 30, "time": 1792780917578, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1054", "items": 2, "promo": null}
+{"level": 30, "time": 1792780917814, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1054", "status": 201, "latency_ms": 235}
+{"level": 30, "time": 1792780917817, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1054", "total": 53000}
+{"level": 30, "time": 1792780920428, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1055", "items": 3, "promo": "FLAT100"}
+{"level": 30, "time": 1792780920637, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1055", "status": 201, "latency_ms": 232}
+{"level": 30, "time": 1792780920640, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1055", "total": 65000}
+{"level": 30, "time": 1792780931322, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1056", "items": 1, "promo": null}
+{"level": 30, "time": 1792780931500, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1056", "status": 201, "latency_ms": 279}
+{"level": 30, "time": 1792780931503, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1056", "total": 29000}
+{"level": 30, "time": 1792780966176, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1057", "items": 3, "promo": null}
+{"level": 30, "time": 1792780966327, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1057", "status": 201, "latency_ms": 263}
+{"level": 30, "time": 1792780966330, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1057", "total": 111000}
+{"level": 30, "time": 1792780969160, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1058", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792780969342, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1058", "status": 201, "latency_ms": 185}
+{"level": 30, "time": 1792780969345, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1058", "total": 65400}
+{"level": 30, "time": 1792780978784, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1059", "items": 2, "promo": null}
+{"level": 30, "time": 1792780978942, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1059", "status": 201, "latency_ms": 254}
+{"level": 30, "time": 1792780978945, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1059", "total": 171000}
+{"level": 30, "time": 1792780986051, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1060", "items": 2, "promo": null}
+{"level": 30, "time": 1792780986256, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1060", "status": 201, "latency_ms": 275}
+{"level": 30, "time": 1792780986259, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1060", "total": 111000}
+{"level": 30, "time": 1792781016553, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1061", "items": 1, "promo": null}
+{"level": 30, "time": 1792781016799, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1061", "status": 201, "latency_ms": 227}
+{"level": 30, "time": 1792781016802, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1061", "total": 9000}
+{"level": 30, "time": 1792781027611, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1062", "items": 3, "promo": null}
+{"level": 30, "time": 1792781027784, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1062", "status": 201, "latency_ms": 204}
+{"level": 30, "time": 1792781027787, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1062", "total": 123000}
+{"level": 30, "time": 1792781046210, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1063", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792781046411, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1063", "status": 201, "latency_ms": 266}
+{"level": 30, "time": 1792781046414, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1063", "total": 125400}
+{"level": 30, "time": 1792781049172, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1064", "items": 1, "promo": null}
+{"level": 30, "time": 1792781049336, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1064", "status": 201, "latency_ms": 228}
+{"level": 30, "time": 1792781049339, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1064", "total": 81000}
+{"level": 30, "time": 1792781050010, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1065", "items": 1, "promo": null}
+{"level": 30, "time": 1792781050208, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1065", "status": 201, "latency_ms": 255}
+{"level": 30, "time": 1792781050211, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1065", "total": 75000}
+{"level": 30, "time": 1792781059101, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1066", "items": 3, "promo": null}
+{"level": 30, "time": 1792781059267, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1066", "status": 201, "latency_ms": 275}
+{"level": 30, "time": 1792781059270, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1066", "total": 57000}
+{"level": 30, "time": 1792781065576, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1067", "items": 3, "promo": null}
+{"level": 30, "time": 1792781065831, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1067", "status": 201, "latency_ms": 151}
+{"level": 30, "time": 1792781065834, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1067", "total": 69000}
+{"level": 30, "time": 1792781066335, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1068", "items": 2, "promo": null}
+{"level": 30, "time": 1792781066626, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1068", "status": 201, "latency_ms": 167}
+{"level": 30, "time": 1792781066629, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1068", "total": 171000}
+{"level": 30, "time": 1792781069506, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1069", "items": 2, "promo": null}
+{"level": 30, "time": 1792781069690, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1069", "status": 201, "latency_ms": 199}
+{"level": 30, "time": 1792781069693, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1069", "total": 108000}
+{"level": 30, "time": 1792781075431, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1070", "items": 1, "promo": null}
+{"level": 30, "time": 1792781075583, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1070", "status": 201, "latency_ms": 287}
+{"level": 30, "time": 1792781075586, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1070", "total": 9000}
+{"level": 30, "time": 1792781091639, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1071", "items": 1, "promo": null}
+{"level": 30, "time": 1792781091884, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1071", "status": 201, "latency_ms": 270}
+{"level": 30, "time": 1792781091887, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1071", "total": 75000}
+{"level": 30, "time": 1792781098059, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1072", "items": 1, "promo": null}
+{"level": 30, "time": 1792781098253, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1072", "status": 201, "latency_ms": 316}
+{"level": 30, "time": 1792781098256, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1072", "total": 15000}
+{"level": 30, "time": 1792781101518, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1073", "items": 2, "promo": null}
+{"level": 30, "time": 1792781101755, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1073", "status": 201, "latency_ms": 273}
+{"level": 30, "time": 1792781101758, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1073", "total": 113000}
+{"level": 30, "time": 1792781104081, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1074", "items": 3, "promo": null}
+{"level": 30, "time": 1792781104375, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1074", "status": 201, "latency_ms": 156}
+{"level": 30, "time": 1792781104378, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1074", "total": 151000}
+{"level": 30, "time": 1792781119434, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1075", "items": 3, "promo": null}
+{"level": 30, "time": 1792781119687, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1075", "status": 201, "latency_ms": 216}
+{"level": 30, "time": 1792781119690, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1075", "total": 99000}
+{"level": 30, "time": 1792781129430, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1076", "items": 1, "promo": null}
+{"level": 30, "time": 1792781129681, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1076", "status": 201, "latency_ms": 190}
+{"level": 30, "time": 1792781129684, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1076", "total": 55000}
+{"level": 30, "time": 1792781138260, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1077", "items": 1, "promo": "FLAT100"}
+{"level": 30, "time": 1792781138569, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1077", "status": 201, "latency_ms": 199}
+{"level": 30, "time": 1792781138572, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1077", "total": 57000}
+{"level": 30, "time": 1792781140283, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1078", "items": 1, "promo": null}
+{"level": 30, "time": 1792781140511, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1078", "status": 201, "latency_ms": 190}
+{"level": 30, "time": 1792781140514, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1078", "total": 21000}
+{"level": 30, "time": 1792781148473, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1079", "items": 2, "promo": null}
+{"level": 30, "time": 1792781148713, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1079", "status": 201, "latency_ms": 256}
+{"level": 30, "time": 1792781148716, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1079", "total": 85000}
+{"level": 30, "time": 1792781162087, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1080", "items": 3, "promo": null}
+{"level": 30, "time": 1792781162389, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1080", "status": 201, "latency_ms": 206}
+{"level": 30, "time": 1792781162392, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1080", "total": 135000}
+{"level": 30, "time": 1792781168168, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1081", "items": 1, "promo": "FLAT100"}
+{"level": 30, "time": 1792781168392, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1081", "status": 201, "latency_ms": 213}
+{"level": 30, "time": 1792781168395, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1081", "total": 41000}
+{"level": 30, "time": 1792781183158, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1082", "items": 1, "promo": null}
+{"level": 30, "time": 1792781183478, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1082", "status": 201, "latency_ms": 267}
+{"level": 30, "time": 1792781183481, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1082", "total": 25000}
+{"level": 30, "time": 1792781186676, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1083", "items": 3, "promo": null}
+{"level": 30, "time": 1792781186969, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1083", "status": 201, "latency_ms": 202}
+{"level": 30, "time": 1792781186972, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1083", "total": 85000}
+{"level": 30, "time": 1792781193738, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1084", "items": 1, "promo": null}
+{"level": 30, "time": 1792781193948, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1084", "status": 201, "latency_ms": 314}
+{"level": 30, "time": 1792781193951, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1084", "total": 30000}
+{"level": 30, "time": 1792781215276, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1085", "items": 3, "promo": null}
+{"level": 30, "time": 1792781215511, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1085", "status": 201, "latency_ms": 256}
+{"level": 30, "time": 1792781215514, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1085", "total": 124000}
+{"level": 30, "time": 1792781220591, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1086", "items": 1, "promo": null}
+{"level": 30, "time": 1792781220881, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1086", "status": 201, "latency_ms": 316}
+{"level": 30, "time": 1792781220884, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1086", "total": 69000}
+{"level": 30, "time": 1792781240498, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1087", "items": 2, "promo": null}
+{"level": 30, "time": 1792781240706, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1087", "status": 201, "latency_ms": 203}
+{"level": 30, "time": 1792781240709, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1087", "total": 93000}
+{"level": 30, "time": 1792781245325, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1088", "items": 3, "promo": "FLAT100"}
+{"level": 30, "time": 1792781245563, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1088", "status": 201, "latency_ms": 206}
+{"level": 30, "time": 1792781245566, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1088", "total": 62000}
+{"level": 30, "time": 1792781248206, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1089", "items": 1, "promo": null}
+{"level": 30, "time": 1792781248430, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1089", "status": 201, "latency_ms": 258}
+{"level": 30, "time": 1792781248433, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1089", "total": 9000}
+{"level": 30, "time": 1792781265881, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1090", "items": 1, "promo": "FLAT100"}
+{"level": 30, "time": 1792781266161, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1090", "status": 201, "latency_ms": 176}
+{"level": 30, "time": 1792781266164, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1090", "total": 3000}
+{"level": 30, "time": 1792781269627, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1091", "items": 3, "promo": null}
+{"level": 30, "time": 1792781269927, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1091", "status": 201, "latency_ms": 234}
+{"level": 30, "time": 1792781269930, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1091", "total": 91000}
+{"level": 30, "time": 1792781273634, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1092", "items": 3, "promo": null}
+{"level": 30, "time": 1792781273798, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1092", "status": 201, "latency_ms": 220}
+{"level": 30, "time": 1792781273801, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1092", "total": 99000}
+{"level": 30, "time": 1792781274813, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1093", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792781274997, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1093", "status": 201, "latency_ms": 274}
+{"level": 30, "time": 1792781275000, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1093", "total": 60600}
+{"level": 30, "time": 1792781280823, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1094", "items": 3, "promo": null}
+{"level": 30, "time": 1792781281048, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1094", "status": 201, "latency_ms": 246}
+{"level": 30, "time": 1792781281051, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1094", "total": 119000}
+{"level": 30, "time": 1792781290689, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1095", "items": 3, "promo": null}
+{"level": 30, "time": 1792781290881, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1095", "status": 201, "latency_ms": 184}
+{"level": 30, "time": 1792781290884, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1095", "total": 217000}
+{"level": 30, "time": 1792781294443, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1096", "items": 2, "promo": null}
+{"level": 30, "time": 1792781294707, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1096", "status": 201, "latency_ms": 310}
+{"level": 30, "time": 1792781294710, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1096", "total": 85000}
+{"level": 30, "time": 1792781314526, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1097", "items": 1, "promo": null}
+{"level": 30, "time": 1792781314698, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1097", "status": 201, "latency_ms": 228}
+{"level": 30, "time": 1792781314701, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1097", "total": 21000}
+{"level": 30, "time": 1792781340466, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1098", "items": 2, "promo": null}
+{"level": 30, "time": 1792781340721, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1098", "status": 201, "latency_ms": 286}
+{"level": 30, "time": 1792781340724, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1098", "total": 73000}
+{"level": 30, "time": 1792781348349, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1099", "items": 1, "promo": null}
+{"level": 30, "time": 1792781348644, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1099", "status": 402, "latency_ms": 233}
+{"level": 30, "time": 1792781348646, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "payment declined", "orderId": "o-1099", "reason": "card_declined"}
+{"level": 30, "time": 1792781351605, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1100", "items": 3, "promo": null}
+{"level": 30, "time": 1792781351746, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1100", "status": 201, "latency_ms": 317}
+{"level": 30, "time": 1792781351749, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1100", "total": 95000}
+{"level": 30, "time": 1792781352508, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1101", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792781352744, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1101", "status": 201, "latency_ms": 156}
+{"level": 30, "time": 1792781352747, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1101", "total": 24600}
+{"level": 30, "time": 1792781359521, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1102", "items": 3, "promo": "FLAT100"}
+{"level": 30, "time": 1792781359827, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1102", "status": 201, "latency_ms": 166}
+{"level": 30, "time": 1792781359830, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1102", "total": 36000}
+{"level": 30, "time": 1792781364271, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1103", "items": 1, "promo": null}
+{"level": 30, "time": 1792781364549, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1103", "status": 402, "latency_ms": 219}
+{"level": 30, "time": 1792781364551, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "payment declined", "orderId": "o-1103", "reason": "card_declined"}
+{"level": 30, "time": 1792781383753, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1104", "items": 1, "promo": null}
+{"level": 30, "time": 1792781384000, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1104", "status": 201, "latency_ms": 297}
+{"level": 30, "time": 1792781384003, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1104", "total": 25000}
+{"level": 30, "time": 1792781384430, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1105", "items": 1, "promo": null}
+{"level": 30, "time": 1792781384694, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1105", "status": 201, "latency_ms": 260}
+{"level": 30, "time": 1792781384697, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1105", "total": 27000}
+{"level": 30, "time": 1792781405626, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1106", "items": 3, "promo": null}
+{"level": 30, "time": 1792781405784, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1106", "status": 201, "latency_ms": 170}
+{"level": 30, "time": 1792781405787, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1106", "total": 49000}
+{"level": 30, "time": 1792781418232, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1107", "items": 2, "promo": null}
+{"level": 30, "time": 1792781418544, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1107", "status": 201, "latency_ms": 274}
+{"level": 30, "time": 1792781418547, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1107", "total": 115000}
+{"level": 30, "time": 1792781451104, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1108", "items": 3, "promo": null}
+{"level": 30, "time": 1792781451289, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1108", "status": 201, "latency_ms": 217}
+{"level": 30, "time": 1792781451292, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1108", "total": 157000}
+{"level": 30, "time": 1792781453457, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1109", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792781453630, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1109", "status": 201, "latency_ms": 229}
+{"level": 30, "time": 1792781453633, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1109", "total": 72600}
+{"level": 30, "time": 1792781498152, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1110", "items": 2, "promo": null}
+{"level": 30, "time": 1792781498391, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1110", "status": 201, "latency_ms": 265}
+{"level": 30, "time": 1792781498394, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1110", "total": 96000}
+{"level": 30, "time": 1792781525058, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1111", "items": 2, "promo": null}
+{"level": 30, "time": 1792781525336, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1111", "status": 201, "latency_ms": 182}
+{"level": 30, "time": 1792781525339, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1111", "total": 73000}
+{"level": 30, "time": 1792781528332, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1112", "items": 1, "promo": null}
+{"level": 30, "time": 1792781528607, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1112", "status": 201, "latency_ms": 284}
+{"level": 30, "time": 1792781528610, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1112", "total": 21000}
+{"level": 30, "time": 1792781560280, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1113", "items": 3, "promo": null}
+{"level": 30, "time": 1792781560450, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1113", "status": 201, "latency_ms": 228}
+{"level": 30, "time": 1792781560453, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1113", "total": 143000}
+{"level": 30, "time": 1792781576541, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1114", "items": 3, "promo": null}
+{"level": 30, "time": 1792781576807, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1114", "status": 201, "latency_ms": 264}
+{"level": 30, "time": 1792781576810, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1114", "total": 80000}
+{"level": 30, "time": 1792781594452, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1115", "items": 3, "promo": null}
+{"level": 30, "time": 1792781594608, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1115", "status": 201, "latency_ms": 212}
+{"level": 30, "time": 1792781594611, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1115", "total": 91000}
+{"level": 30, "time": 1792781634378, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1116", "items": 1, "promo": null}
+{"level": 30, "time": 1792781634580, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1116", "status": 201, "latency_ms": 173}
+{"level": 30, "time": 1792781634583, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1116", "total": 29000}
+{"level": 30, "time": 1792781636510, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1117", "items": 3, "promo": null}
+{"level": 30, "time": 1792781636826, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1117", "status": 201, "latency_ms": 313}
+{"level": 30, "time": 1792781636829, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1117", "total": 102000}
+{"level": 30, "time": 1792781651160, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1118", "items": 1, "promo": null}
+{"level": 30, "time": 1792781651331, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1118", "status": 201, "latency_ms": 270}
+{"level": 30, "time": 1792781651334, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1118", "total": 25000}
+{"level": 30, "time": 1792781655215, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1119", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792781655372, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1119", "status": 201, "latency_ms": 209}
+{"level": 30, "time": 1792781655375, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1119", "total": 57400}
+{"level": 30, "time": 1792781656116, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1120", "items": 1, "promo": null}
+{"level": 30, "time": 1792781656372, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1120", "status": 201, "latency_ms": 179}
+{"level": 30, "time": 1792781656375, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1120", "total": 30000}
+{"level": 30, "time": 1792781662195, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1121", "items": 3, "promo": null}
+{"level": 30, "time": 1792781662440, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1121", "status": 201, "latency_ms": 257}
+{"level": 30, "time": 1792781662443, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1121", "total": 143000}
+{"level": 30, "time": 1792781678425, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1122", "items": 1, "promo": null}
+{"level": 30, "time": 1792781678593, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1122", "status": 201, "latency_ms": 232}
+{"level": 30, "time": 1792781678596, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1122", "total": 12000}
+{"level": 30, "time": 1792781721857, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1123", "items": 2, "promo": null}
+{"level": 30, "time": 1792781722166, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1123", "status": 201, "latency_ms": 291}
+{"level": 30, "time": 1792781722169, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1123", "total": 108000}
+{"level": 30, "time": 1792781722750, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1124", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792781722997, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1124", "status": 201, "latency_ms": 261}
+{"level": 30, "time": 1792781723000, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1124", "total": 138200}
+{"level": 30, "time": 1792781727706, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1125", "items": 1, "promo": null}
+{"level": 30, "time": 1792781727951, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1125", "status": 201, "latency_ms": 269}
+{"level": 30, "time": 1792781727954, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1125", "total": 69000}
+{"level": 30, "time": 1792781730105, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1126", "items": 3, "promo": null}
+{"level": 30, "time": 1792781730317, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1126", "status": 201, "latency_ms": 176}
+{"level": 30, "time": 1792781730320, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1126", "total": 105000}
+{"level": 30, "time": 1792781738484, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1127", "items": 1, "promo": null}
+{"level": 30, "time": 1792781738733, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1127", "status": 201, "latency_ms": 261}
+{"level": 30, "time": 1792781738736, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1127", "total": 25000}
+{"level": 30, "time": 1792781773885, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1128", "items": 2, "promo": null}
+{"level": 30, "time": 1792781774140, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1128", "status": 201, "latency_ms": 166}
+{"level": 30, "time": 1792781774143, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1128", "total": 33000}
+{"level": 30, "time": 1792781786286, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1129", "items": 1, "promo": null}
+{"level": 30, "time": 1792781786584, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1129", "status": 201, "latency_ms": 196}
+{"level": 30, "time": 1792781786587, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1129", "total": 9000}
+{"level": 30, "time": 1792781800674, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1130", "items": 2, "promo": null}
+{"level": 30, "time": 1792781800951, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1130", "status": 201, "latency_ms": 154}
+{"level": 30, "time": 1792781800954, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1130", "total": 45000}
+{"level": 30, "time": 1792781805381, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1131", "items": 2, "promo": null}
+{"level": 30, "time": 1792781805605, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1131", "status": 201, "latency_ms": 187}
+{"level": 30, "time": 1792781805608, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1131", "total": 81000}
+{"level": 30, "time": 1792781823572, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1132", "items": 3, "promo": null}
+{"level": 30, "time": 1792781823751, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1132", "status": 201, "latency_ms": 309}
+{"level": 30, "time": 1792781823754, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1132", "total": 107000}
+{"level": 30, "time": 1792781854624, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1133", "items": 1, "promo": null}
+{"level": 30, "time": 1792781854764, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1133", "status": 201, "latency_ms": 238}
+{"level": 30, "time": 1792781854767, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1133", "total": 21000}
+{"level": 30, "time": 1792781861280, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1134", "items": 2, "promo": null}
+{"level": 30, "time": 1792781861593, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1134", "status": 201, "latency_ms": 308}
+{"level": 30, "time": 1792781861596, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1134", "total": 133000}
+{"level": 30, "time": 1792781874045, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1135", "items": 3, "promo": null}
+{"level": 30, "time": 1792781874198, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1135", "status": 201, "latency_ms": 245}
+{"level": 30, "time": 1792781874201, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1135", "total": 173000}
+{"level": 30, "time": 1792781948391, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1136", "items": 2, "promo": null}
+{"level": 30, "time": 1792781948568, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1136", "status": 201, "latency_ms": 311}
+{"level": 30, "time": 1792781948571, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1136", "total": 36000}
+{"level": 30, "time": 1792781954060, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1137", "items": 1, "promo": null}
+{"level": 30, "time": 1792781954289, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1137", "status": 201, "latency_ms": 246}
+{"level": 30, "time": 1792781954292, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1137", "total": 75000}
+{"level": 30, "time": 1792781979714, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1138", "items": 3, "promo": null}
+{"level": 30, "time": 1792781979903, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1138", "status": 201, "latency_ms": 252}
+{"level": 30, "time": 1792781979906, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1138", "total": 121000}
+{"level": 30, "time": 1792781991037, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1139", "items": 1, "promo": null}
+{"level": 30, "time": 1792781991344, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1139", "status": 201, "latency_ms": 295}
+{"level": 30, "time": 1792781991347, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1139", "total": 67000}
+{"level": 30, "time": 1792782000000, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "campaign traffic tag seen", "campaign": "weekend20-push", "utm_source": "push"}
+{"level": 30, "time": 1792782006599, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1140", "items": 3, "promo": null}
+{"level": 30, "time": 1792782006897, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1140", "status": 201, "latency_ms": 295}
+{"level": 30, "time": 1792782006900, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1140", "total": 128000}
+{"level": 30, "time": 1792782014082, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1141", "items": 1, "promo": null}
+{"level": 30, "time": 1792782014371, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1141", "status": 201, "latency_ms": 160}
+{"level": 30, "time": 1792782014374, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1141", "total": 21000}
+{"level": 30, "time": 1792782018569, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1142", "items": 1, "promo": null}
+{"level": 30, "time": 1792782018879, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1142", "status": 201, "latency_ms": 235}
+{"level": 30, "time": 1792782018882, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1142", "total": 75000}
+{"level": 30, "time": 1792782035547, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1143", "items": 1, "promo": null}
+{"level": 30, "time": 1792782035813, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1143", "status": 201, "latency_ms": 240}
+{"level": 30, "time": 1792782035816, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1143", "total": 30000}
+{"level": 30, "time": 1792782040738, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1144", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782040943, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1144", "status": 201, "latency_ms": 259}
+{"level": 30, "time": 1792782040946, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1144", "total": 118200}
+{"level": 30, "time": 1792782047033, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1145", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782047291, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1145", "status": 201, "latency_ms": 228}
+{"level": 30, "time": 1792782047294, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1145", "total": 12600}
+{"level": 30, "time": 1792782048744, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1146", "items": 2, "promo": null}
+{"level": 30, "time": 1792782048995, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1146", "status": 201, "latency_ms": 176}
+{"level": 30, "time": 1792782048998, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1146", "total": 60000}
+{"level": 30, "time": 1792782055117, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1147", "items": 3, "promo": null}
+{"level": 30, "time": 1792782055305, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1147", "status": 201, "latency_ms": 288}
+{"level": 30, "time": 1792782055308, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1147", "total": 111000}
+{"level": 30, "time": 1792782060684, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1148", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782060889, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1148", "status": 201, "latency_ms": 245}
+{"level": 30, "time": 1792782060892, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1148", "total": 80600}
+{"level": 30, "time": 1792782067525, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1149", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782067692, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1149", "status": 201, "latency_ms": 264}
+{"level": 30, "time": 1792782067695, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1149", "total": 41400}
+{"level": 30, "time": 1792782070166, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1150", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782070356, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1150", "status": 201, "latency_ms": 186}
+{"level": 30, "time": 1792782070359, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1150", "total": 46200}
+{"level": 30, "time": 1792782073514, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1151", "items": 1, "promo": null}
+{"level": 30, "time": 1792782073769, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1151", "status": 201, "latency_ms": 227}
+{"level": 30, "time": 1792782073772, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1151", "total": 9000}
+{"level": 30, "time": 1792782080168, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1152", "items": 3, "promo": null}
+{"level": 30, "time": 1792782080483, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1152", "status": 201, "latency_ms": 316}
+{"level": 30, "time": 1792782080486, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1152", "total": 167000}
+{"level": 30, "time": 1792782085211, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1153", "items": 3, "promo": null}
+{"level": 30, "time": 1792782085416, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1153", "status": 201, "latency_ms": 216}
+{"level": 30, "time": 1792782085419, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1153", "total": 170000}
+{"level": 30, "time": 1792782086374, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1154", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782086676, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1154", "status": 201, "latency_ms": 205}
+{"level": 30, "time": 1792782086679, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1154", "total": 7800}
+{"level": 30, "time": 1792782090249, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1155", "items": 2, "promo": null}
+{"level": 30, "time": 1792782090498, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1155", "status": 201, "latency_ms": 207}
+{"level": 30, "time": 1792782090501, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1155", "total": 99000}
+{"level": 30, "time": 1792782097053, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1156", "items": 3, "promo": null}
+{"level": 30, "time": 1792782097216, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1156", "status": 201, "latency_ms": 205}
+{"level": 30, "time": 1792782097219, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1156", "total": 97000}
+{"level": 30, "time": 1792782108405, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1157", "items": 1, "promo": null}
+{"level": 30, "time": 1792782108610, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1157", "status": 201, "latency_ms": 301}
+{"level": 30, "time": 1792782108613, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1157", "total": 99000}
+{"level": 30, "time": 1792782114245, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1158", "items": 3, "promo": null}
+{"level": 30, "time": 1792782114548, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1158", "status": 201, "latency_ms": 189}
+{"level": 30, "time": 1792782114551, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1158", "total": 103000}
+{"level": 30, "time": 1792782115619, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1159", "items": 3, "promo": null}
+{"level": 30, "time": 1792782115916, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1159", "status": 201, "latency_ms": 270}
+{"level": 30, "time": 1792782115919, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1159", "total": 161000}
+{"level": 30, "time": 1792782121633, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1160", "items": 1, "promo": null}
+{"level": 30, "time": 1792782121872, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1160", "status": 201, "latency_ms": 180}
+{"level": 30, "time": 1792782121875, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1160", "total": 21000}
+{"level": 30, "time": 1792782124605, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1161", "items": 3, "promo": null}
+{"level": 30, "time": 1792782124877, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1161", "status": 201, "latency_ms": 231}
+{"level": 30, "time": 1792782124880, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1161", "total": 120000}
+{"level": 30, "time": 1792782128024, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1162", "items": 1, "promo": null}
+{"level": 30, "time": 1792782128335, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1162", "status": 201, "latency_ms": 258}
+{"level": 30, "time": 1792782128338, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1162", "total": 67000}
+{"level": 30, "time": 1792782131430, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1163", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782131628, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1163", "status": 201, "latency_ms": 260}
+{"level": 30, "time": 1792782131631, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1163", "total": 81400}
+{"level": 30, "time": 1792782140039, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1164", "items": 2, "promo": null}
+{"level": 30, "time": 1792782140242, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1164", "status": 201, "latency_ms": 189}
+{"level": 30, "time": 1792782140245, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1164", "total": 61000}
+{"level": 30, "time": 1792782145770, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1165", "items": 1, "promo": "FLAT100"}
+{"level": 30, "time": 1792782146068, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1165", "status": 201, "latency_ms": 236}
+{"level": 30, "time": 1792782146071, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1165", "total": 11000}
+{"level": 30, "time": 1792782146215, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1166", "items": 1, "promo": null}
+{"level": 30, "time": 1792782146444, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1166", "status": 201, "latency_ms": 317}
+{"level": 30, "time": 1792782146447, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1166", "total": 81000}
+{"level": 30, "time": 1792782160233, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1167", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782160380, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1167", "status": 201, "latency_ms": 151}
+{"level": 30, "time": 1792782160383, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1167", "total": 100600}
+{"level": 30, "time": 1792782170755, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1168", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782171010, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1168", "status": 201, "latency_ms": 315}
+{"level": 30, "time": 1792782171013, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1168", "total": 55800}
+{"level": 30, "time": 1792782183000, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "received SIGTERM, draining connections"}
+{"level": 30, "time": 1792782185000, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "server started", "version": "2.4.0", "commit": "d9cece1", "port": 8200}
+{"level": 30, "time": 1792782185040, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "promo codes loaded", "count": 2, "source": "src/promos.json"}
+{"level": 30, "time": 1792782194810, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1169", "items": 1, "promo": null}
+{"level": 30, "time": 1792782195099, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1169", "status": 201, "latency_ms": 186}
+{"level": 30, "time": 1792782195102, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1169", "total": 69000}
+{"level": 30, "time": 1792782197877, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1170", "items": 1, "promo": null}
+{"level": 30, "time": 1792782198130, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1170", "status": 201, "latency_ms": 198}
+{"level": 30, "time": 1792782198133, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1170", "total": 21000}
+{"level": 30, "time": 1792782198819, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1171", "items": 3, "promo": null}
+{"level": 30, "time": 1792782199115, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1171", "status": 201, "latency_ms": 259}
+{"level": 30, "time": 1792782199118, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1171", "total": 66000}
+{"level": 30, "time": 1792782199641, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1172", "items": 1, "promo": "FLAT100"}
+{"level": 30, "time": 1792782199833, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1172", "status": 201, "latency_ms": 230}
+{"level": 30, "time": 1792782199836, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1172", "total": 45000}
+{"level": 30, "time": 1792782201330, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1173", "items": 2, "promo": null}
+{"level": 30, "time": 1792782201598, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1173", "status": 201, "latency_ms": 152}
+{"level": 30, "time": 1792782201601, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1173", "total": 43000}
+{"level": 30, "time": 1792782203667, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1174", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782203848, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1174", "status": 400, "latency_ms": 47}
+{"level": 50, "time": 1792782203850, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1174", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782206498, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1175", "items": 2, "promo": null}
+{"level": 30, "time": 1792782206704, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1175", "status": 201, "latency_ms": 251}
+{"level": 30, "time": 1792782206707, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1175", "total": 93000}
+{"level": 30, "time": 1792782223878, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1176", "items": 1, "promo": "FLAT100"}
+{"level": 30, "time": 1792782224056, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1176", "status": 201, "latency_ms": 156}
+{"level": 30, "time": 1792782224059, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1176", "total": 37000}
+{"level": 30, "time": 1792782228718, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1177", "items": 2, "promo": "FLAT100"}
+{"level": 30, "time": 1792782228912, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1177", "status": 201, "latency_ms": 174}
+{"level": 30, "time": 1792782228915, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1177", "total": 23000}
+{"level": 30, "time": 1792782243151, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1178", "items": 1, "promo": null}
+{"level": 30, "time": 1792782243355, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1178", "status": 402, "latency_ms": 287}
+{"level": 30, "time": 1792782243357, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "payment declined", "orderId": "o-1178", "reason": "card_declined"}
+{"level": 30, "time": 1792782261513, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1179", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782261750, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1179", "status": 400, "latency_ms": 48}
+{"level": 50, "time": 1792782261752, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1179", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782262796, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1180", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782263091, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1180", "status": 400, "latency_ms": 45}
+{"level": 50, "time": 1792782263093, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1180", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782268239, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1181", "items": 3, "promo": "FLAT100"}
+{"level": 30, "time": 1792782268521, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1181", "status": 201, "latency_ms": 176}
+{"level": 30, "time": 1792782268524, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1181", "total": 61000}
+{"level": 30, "time": 1792782284007, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1182", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782284288, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1182", "status": 400, "latency_ms": 47}
+{"level": 50, "time": 1792782284290, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1182", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782305019, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1183", "items": 3, "promo": null}
+{"level": 30, "time": 1792782305244, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1183", "status": 201, "latency_ms": 159}
+{"level": 30, "time": 1792782305247, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1183", "total": 113000}
+{"level": 30, "time": 1792782314512, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1184", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782314774, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1184", "status": 400, "latency_ms": 51}
+{"level": 50, "time": 1792782314776, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1184", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782321792, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1185", "items": 3, "promo": null}
+{"level": 30, "time": 1792782322009, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1185", "status": 201, "latency_ms": 171}
+{"level": 30, "time": 1792782322012, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1185", "total": 131000}
+{"level": 30, "time": 1792782333033, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1186", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782333234, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1186", "status": 400, "latency_ms": 55}
+{"level": 50, "time": 1792782333236, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1186", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782337322, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1187", "items": 2, "promo": null}
+{"level": 30, "time": 1792782337596, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1187", "status": 201, "latency_ms": 189}
+{"level": 30, "time": 1792782337599, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1187", "total": 111000}
+{"level": 30, "time": 1792782341165, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1188", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782341477, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1188", "status": 400, "latency_ms": 85}
+{"level": 50, "time": 1792782341479, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1188", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782347102, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1189", "items": 3, "promo": "FLAT100"}
+{"level": 30, "time": 1792782347294, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1189", "status": 201, "latency_ms": 249}
+{"level": 30, "time": 1792782347297, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1189", "total": 60000}
+{"level": 30, "time": 1792782349732, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1190", "items": 3, "promo": null}
+{"level": 30, "time": 1792782349988, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1190", "status": 201, "latency_ms": 224}
+{"level": 30, "time": 1792782349991, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1190", "total": 195000}
+{"level": 30, "time": 1792782350340, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1191", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782350638, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1191", "status": 400, "latency_ms": 51}
+{"level": 50, "time": 1792782350640, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1191", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782356404, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1192", "items": 2, "promo": null}
+{"level": 30, "time": 1792782356645, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1192", "status": 201, "latency_ms": 198}
+{"level": 30, "time": 1792782356648, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1192", "total": 93000}
+{"level": 30, "time": 1792782362811, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1193", "items": 2, "promo": null}
+{"level": 30, "time": 1792782363097, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1193", "status": 201, "latency_ms": 275}
+{"level": 30, "time": 1792782363100, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1193", "total": 45000}
+{"level": 30, "time": 1792782365399, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1194", "items": 3, "promo": "FLAT100"}
+{"level": 30, "time": 1792782365566, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1194", "status": 201, "latency_ms": 249}
+{"level": 30, "time": 1792782365569, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1194", "total": 45000}
+{"level": 30, "time": 1792782366377, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1195", "items": 1, "promo": null}
+{"level": 30, "time": 1792782366597, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1195", "status": 201, "latency_ms": 277}
+{"level": 30, "time": 1792782366600, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1195", "total": 12000}
+{"level": 30, "time": 1792782367811, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1196", "items": 3, "promo": null}
+{"level": 30, "time": 1792782367953, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1196", "status": 201, "latency_ms": 254}
+{"level": 30, "time": 1792782367956, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1196", "total": 126000}
+{"level": 30, "time": 1792782369291, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1197", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782369557, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1197", "status": 400, "latency_ms": 75}
+{"level": 50, "time": 1792782369559, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1197", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782372166, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1198", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782372318, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1198", "status": 400, "latency_ms": 46}
+{"level": 50, "time": 1792782372320, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1198", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782378492, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1199", "items": 1, "promo": null}
+{"level": 30, "time": 1792782378644, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1199", "status": 201, "latency_ms": 301}
+{"level": 30, "time": 1792782378647, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1199", "total": 69000}
+{"level": 30, "time": 1792782381056, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1200", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782381223, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1200", "status": 400, "latency_ms": 49}
+{"level": 50, "time": 1792782381225, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1200", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782384787, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1201", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782384957, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1201", "status": 400, "latency_ms": 40}
+{"level": 50, "time": 1792782384959, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1201", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782385002, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1202", "items": 3, "promo": "FLAT100"}
+{"level": 30, "time": 1792782385148, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1202", "status": 201, "latency_ms": 159}
+{"level": 30, "time": 1792782385151, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1202", "total": 119000}
+{"level": 30, "time": 1792782397395, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1203", "items": 3, "promo": null}
+{"level": 30, "time": 1792782397589, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1203", "status": 201, "latency_ms": 298}
+{"level": 30, "time": 1792782397592, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1203", "total": 178000}
+{"level": 30, "time": 1792782405397, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1204", "items": 2, "promo": null}
+{"level": 30, "time": 1792782405562, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1204", "status": 201, "latency_ms": 211}
+{"level": 30, "time": 1792782405565, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1204", "total": 67000}
+{"level": 30, "time": 1792782413174, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1205", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782413419, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1205", "status": 400, "latency_ms": 48}
+{"level": 50, "time": 1792782413421, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1205", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782417093, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1206", "items": 2, "promo": "FLAT100"}
+{"level": 30, "time": 1792782417279, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1206", "status": 201, "latency_ms": 309}
+{"level": 30, "time": 1792782417282, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1206", "total": 143000}
+{"level": 30, "time": 1792782423176, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1207", "items": 1, "promo": null}
+{"level": 30, "time": 1792782423494, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1207", "status": 201, "latency_ms": 293}
+{"level": 30, "time": 1792782423497, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1207", "total": 69000}
+{"level": 30, "time": 1792782428674, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1208", "items": 2, "promo": null}
+{"level": 30, "time": 1792782428870, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1208", "status": 201, "latency_ms": 165}
+{"level": 30, "time": 1792782428873, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1208", "total": 87000}
+{"level": 30, "time": 1792782429020, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1209", "items": 3, "promo": null}
+{"level": 30, "time": 1792782429296, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1209", "status": 201, "latency_ms": 297}
+{"level": 30, "time": 1792782429299, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1209", "total": 183000}
+{"level": 30, "time": 1792782431207, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1210", "items": 2, "promo": null}
+{"level": 30, "time": 1792782431479, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1210", "status": 201, "latency_ms": 250}
+{"level": 30, "time": 1792782431482, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1210", "total": 43000}
+{"level": 30, "time": 1792782432139, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1211", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782432453, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1211", "status": 400, "latency_ms": 87}
+{"level": 50, "time": 1792782432455, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1211", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782433759, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1212", "items": 3, "promo": null}
+{"level": 30, "time": 1792782434054, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1212", "status": 201, "latency_ms": 270}
+{"level": 30, "time": 1792782434057, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1212", "total": 112000}
+{"level": 30, "time": 1792782435478, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1213", "items": 3, "promo": null}
+{"level": 30, "time": 1792782435673, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1213", "status": 201, "latency_ms": 226}
+{"level": 30, "time": 1792782435676, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1213", "total": 198000}
+{"level": 30, "time": 1792782438341, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1214", "items": 1, "promo": null}
+{"level": 30, "time": 1792782438625, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1214", "status": 201, "latency_ms": 155}
+{"level": 30, "time": 1792782438628, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1214", "total": 75000}
+{"level": 30, "time": 1792782445021, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1215", "items": 3, "promo": "FLAT100"}
+{"level": 30, "time": 1792782445199, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1215", "status": 201, "latency_ms": 248}
+{"level": 30, "time": 1792782445202, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1215", "total": 86000}
+{"level": 30, "time": 1792782447143, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1216", "items": 3, "promo": null}
+{"level": 30, "time": 1792782447292, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1216", "status": 201, "latency_ms": 278}
+{"level": 30, "time": 1792782447295, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1216", "total": 102000}
+{"level": 30, "time": 1792782448355, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1217", "items": 1, "promo": null}
+{"level": 30, "time": 1792782448644, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1217", "status": 201, "latency_ms": 185}
+{"level": 30, "time": 1792782448647, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1217", "total": 25000}
+{"level": 30, "time": 1792782452458, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1218", "items": 2, "promo": null}
+{"level": 30, "time": 1792782452777, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1218", "status": 201, "latency_ms": 288}
+{"level": 30, "time": 1792782452780, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1218", "total": 113000}
+{"level": 30, "time": 1792782454674, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1219", "items": 3, "promo": null}
+{"level": 30, "time": 1792782454828, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1219", "status": 201, "latency_ms": 220}
+{"level": 30, "time": 1792782454831, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1219", "total": 89000}
+{"level": 30, "time": 1792782455122, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1220", "items": 2, "promo": "FLAT100"}
+{"level": 30, "time": 1792782455362, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1220", "status": 201, "latency_ms": 226}
+{"level": 30, "time": 1792782455365, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1220", "total": 77000}
+{"level": 30, "time": 1792782464271, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1221", "items": 2, "promo": null}
+{"level": 30, "time": 1792782464446, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1221", "status": 201, "latency_ms": 211}
+{"level": 30, "time": 1792782464449, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1221", "total": 73000}
+{"level": 30, "time": 1792782467536, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1222", "items": 3, "promo": null}
+{"level": 30, "time": 1792782467814, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1222", "status": 201, "latency_ms": 228}
+{"level": 30, "time": 1792782467817, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1222", "total": 119000}
+{"level": 30, "time": 1792782469817, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1223", "items": 2, "promo": null}
+{"level": 30, "time": 1792782470030, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1223", "status": 201, "latency_ms": 211}
+{"level": 30, "time": 1792782470033, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1223", "total": 30000}
+{"level": 30, "time": 1792782478045, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1224", "items": 3, "promo": null}
+{"level": 30, "time": 1792782478294, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1224", "status": 201, "latency_ms": 277}
+{"level": 30, "time": 1792782478297, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1224", "total": 112000}
+{"level": 30, "time": 1792782484072, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1225", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782484254, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1225", "status": 400, "latency_ms": 46}
+{"level": 50, "time": 1792782484256, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1225", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782486212, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1226", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782486390, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1226", "status": 400, "latency_ms": 49}
+{"level": 50, "time": 1792782486392, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1226", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782489488, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1227", "items": 1, "promo": null}
+{"level": 30, "time": 1792782489774, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1227", "status": 201, "latency_ms": 239}
+{"level": 30, "time": 1792782489777, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1227", "total": 47000}
+{"level": 30, "time": 1792782490075, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1228", "items": 2, "promo": "FLAT100"}
+{"level": 30, "time": 1792782490225, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1228", "status": 201, "latency_ms": 195}
+{"level": 30, "time": 1792782490228, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1228", "total": 63000}
+{"level": 30, "time": 1792782493735, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1229", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782494005, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1229", "status": 400, "latency_ms": 40}
+{"level": 50, "time": 1792782494007, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1229", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782499619, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1230", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782499760, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1230", "status": 400, "latency_ms": 74}
+{"level": 50, "time": 1792782499762, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1230", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782500156, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1231", "items": 2, "promo": null}
+{"level": 30, "time": 1792782500403, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1231", "status": 201, "latency_ms": 216}
+{"level": 30, "time": 1792782500406, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1231", "total": 143000}
+{"level": 30, "time": 1792782506466, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1232", "items": 1, "promo": null}
+{"level": 30, "time": 1792782506618, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1232", "status": 201, "latency_ms": 245}
+{"level": 30, "time": 1792782506621, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1232", "total": 9000}
+{"level": 30, "time": 1792782508476, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1233", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782508695, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1233", "status": 400, "latency_ms": 68}
+{"level": 50, "time": 1792782508697, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1233", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782510840, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1234", "items": 3, "promo": null}
+{"level": 30, "time": 1792782510991, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1234", "status": 201, "latency_ms": 296}
+{"level": 30, "time": 1792782510994, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1234", "total": 204000}
+{"level": 30, "time": 1792782518862, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1235", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782519150, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1235", "status": 400, "latency_ms": 68}
+{"level": 50, "time": 1792782519152, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1235", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782521285, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1236", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782521594, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1236", "status": 400, "latency_ms": 73}
+{"level": 50, "time": 1792782521596, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1236", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782527077, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1237", "items": 1, "promo": null}
+{"level": 30, "time": 1792782527310, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1237", "status": 201, "latency_ms": 224}
+{"level": 30, "time": 1792782527313, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1237", "total": 27000}
+{"level": 30, "time": 1792782533320, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1238", "items": 2, "promo": null}
+{"level": 30, "time": 1792782533494, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1238", "status": 201, "latency_ms": 270}
+{"level": 30, "time": 1792782533497, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1238", "total": 143000}
+{"level": 30, "time": 1792782535763, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1239", "items": 2, "promo": null}
+{"level": 30, "time": 1792782535973, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1239", "status": 201, "latency_ms": 165}
+{"level": 30, "time": 1792782535976, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1239", "total": 45000}
+{"level": 30, "time": 1792782539281, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1240", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782539587, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1240", "status": 400, "latency_ms": 50}
+{"level": 50, "time": 1792782539589, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1240", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782540876, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1241", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782541099, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1241", "status": 400, "latency_ms": 42}
+{"level": 50, "time": 1792782541101, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1241", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782541174, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1242", "items": 1, "promo": null}
+{"level": 30, "time": 1792782541388, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1242", "status": 201, "latency_ms": 229}
+{"level": 30, "time": 1792782541391, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1242", "total": 51000}
+{"level": 30, "time": 1792782550801, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1243", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782550981, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1243", "status": 400, "latency_ms": 44}
+{"level": 50, "time": 1792782550983, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1243", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782551160, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1244", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782551334, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1244", "status": 400, "latency_ms": 84}
+{"level": 50, "time": 1792782551336, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1244", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782562017, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1245", "items": 3, "promo": null}
+{"level": 30, "time": 1792782562241, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1245", "status": 201, "latency_ms": 290}
+{"level": 30, "time": 1792782562244, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1245", "total": 83000}
+{"level": 30, "time": 1792782576766, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1246", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782576945, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1246", "status": 400, "latency_ms": 86}
+{"level": 50, "time": 1792782576947, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1246", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782577649, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1247", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782577933, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1247", "status": 400, "latency_ms": 75}
+{"level": 50, "time": 1792782577935, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1247", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782584562, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1248", "items": 3, "promo": null}
+{"level": 30, "time": 1792782584848, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1248", "status": 201, "latency_ms": 207}
+{"level": 30, "time": 1792782584851, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1248", "total": 130000}
+{"level": 30, "time": 1792782587374, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1249", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782587602, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1249", "status": 400, "latency_ms": 58}
+{"level": 50, "time": 1792782587604, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1249", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782588285, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1250", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782588516, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1250", "status": 400, "latency_ms": 78}
+{"level": 50, "time": 1792782588518, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1250", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782590359, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1251", "items": 2, "promo": null}
+{"level": 30, "time": 1792782590596, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1251", "status": 201, "latency_ms": 198}
+{"level": 30, "time": 1792782590599, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1251", "total": 36000}
+{"level": 30, "time": 1792782595430, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1252", "items": 3, "promo": null}
+{"level": 30, "time": 1792782595597, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1252", "status": 201, "latency_ms": 280}
+{"level": 30, "time": 1792782595600, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1252", "total": 65000}
+{"level": 30, "time": 1792782599143, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1253", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782599418, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1253", "status": 400, "latency_ms": 61}
+{"level": 50, "time": 1792782599420, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1253", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782613496, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1254", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782613777, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1254", "status": 400, "latency_ms": 58}
+{"level": 50, "time": 1792782613779, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1254", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782617386, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1255", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782617568, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1255", "status": 400, "latency_ms": 72}
+{"level": 50, "time": 1792782617570, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1255", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782626895, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1256", "items": 2, "promo": "FLAT100"}
+{"level": 30, "time": 1792782627113, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1256", "status": 201, "latency_ms": 267}
+{"level": 30, "time": 1792782627116, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1256", "total": 98000}
+{"level": 30, "time": 1792782633657, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1257", "items": 2, "promo": null}
+{"level": 30, "time": 1792782633816, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1257", "status": 201, "latency_ms": 288}
+{"level": 30, "time": 1792782633819, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1257", "total": 96000}
+{"level": 30, "time": 1792782634478, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1258", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782634697, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1258", "status": 400, "latency_ms": 44}
+{"level": 50, "time": 1792782634699, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1258", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782636400, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1259", "items": 1, "promo": null}
+{"level": 30, "time": 1792782636570, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1259", "status": 201, "latency_ms": 305}
+{"level": 30, "time": 1792782636573, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1259", "total": 67000}
+{"level": 30, "time": 1792782638627, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1260", "items": 2, "promo": null}
+{"level": 30, "time": 1792782638847, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1260", "status": 201, "latency_ms": 263}
+{"level": 30, "time": 1792782638850, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1260", "total": 33000}
+{"level": 30, "time": 1792782641523, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1261", "items": 1, "promo": null}
+{"level": 30, "time": 1792782641693, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1261", "status": 201, "latency_ms": 276}
+{"level": 30, "time": 1792782641696, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1261", "total": 27000}
+{"level": 30, "time": 1792782655884, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1262", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782656038, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1262", "status": 400, "latency_ms": 81}
+{"level": 50, "time": 1792782656040, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1262", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782659865, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1263", "items": 1, "promo": null}
+{"level": 30, "time": 1792782660142, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1263", "status": 201, "latency_ms": 248}
+{"level": 30, "time": 1792782660145, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1263", "total": 47000}
+{"level": 30, "time": 1792782662439, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1264", "items": 1, "promo": "FLAT100"}
+{"level": 30, "time": 1792782662655, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1264", "status": 201, "latency_ms": 235}
+{"level": 30, "time": 1792782662658, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1264", "total": 19000}
+{"level": 30, "time": 1792782666271, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1265", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782666537, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1265", "status": 400, "latency_ms": 72}
+{"level": 50, "time": 1792782666539, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1265", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782669134, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1266", "items": 1, "promo": null}
+{"level": 30, "time": 1792782669441, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1266", "status": 201, "latency_ms": 266}
+{"level": 30, "time": 1792782669444, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1266", "total": 27000}
+{"level": 30, "time": 1792782670896, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1267", "items": 2, "promo": null}
+{"level": 30, "time": 1792782671182, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1267", "status": 201, "latency_ms": 291}
+{"level": 30, "time": 1792782671185, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1267", "total": 39000}
+{"level": 30, "time": 1792782675745, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1268", "items": 2, "promo": null}
+{"level": 30, "time": 1792782676054, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1268", "status": 201, "latency_ms": 158}
+{"level": 30, "time": 1792782676057, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1268", "total": 54000}
+{"level": 30, "time": 1792782677295, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1269", "items": 1, "promo": null}
+{"level": 30, "time": 1792782677540, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1269", "status": 201, "latency_ms": 208}
+{"level": 30, "time": 1792782677543, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1269", "total": 75000}
+{"level": 30, "time": 1792782687008, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1270", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782687237, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1270", "status": 400, "latency_ms": 66}
+{"level": 50, "time": 1792782687239, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1270", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782689294, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1271", "items": 3, "promo": null}
+{"level": 30, "time": 1792782689489, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1271", "status": 201, "latency_ms": 317}
+{"level": 30, "time": 1792782689492, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1271", "total": 96000}
+{"level": 30, "time": 1792782691320, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1272", "items": 2, "promo": null}
+{"level": 30, "time": 1792782691499, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1272", "status": 201, "latency_ms": 154}
+{"level": 30, "time": 1792782691502, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1272", "total": 85000}
+{"level": 30, "time": 1792782692626, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1273", "items": 1, "promo": null}
+{"level": 30, "time": 1792782692888, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1273", "status": 201, "latency_ms": 303}
+{"level": 30, "time": 1792782692891, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1273", "total": 55000}
+{"level": 30, "time": 1792782701149, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1274", "items": 2, "promo": null}
+{"level": 30, "time": 1792782701372, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1274", "status": 201, "latency_ms": 304}
+{"level": 30, "time": 1792782701375, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1274", "total": 18000}
+{"level": 30, "time": 1792782704865, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1275", "items": 2, "promo": null}
+{"level": 30, "time": 1792782705155, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1275", "status": 201, "latency_ms": 185}
+{"level": 30, "time": 1792782705158, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order placed", "orderId": "o-1275", "total": 171000}
+{"level": 30, "time": 1792782705170, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1276", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782705485, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1276", "status": 400, "latency_ms": 52}
+{"level": 50, "time": 1792782705487, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1276", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782711530, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1277", "items": 3, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782711692, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1277", "status": 400, "latency_ms": 48}
+{"level": 50, "time": 1792782711694, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1277", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782714833, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1278", "items": 2, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782715113, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1278", "status": 400, "latency_ms": 75}
+{"level": 50, "time": 1792782715115, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1278", "err": "GatewayError: charge rejected (400): invalid_request"}
+{"level": 30, "time": 1792782715837, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order received", "orderId": "o-1279", "items": 1, "promo": "WEEKEND20"}
+{"level": 30, "time": 1792782716037, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "gateway charge", "orderId": "o-1279", "status": 400, "latency_ms": 71}
+{"level": 50, "time": 1792782716039, "pid": 4182, "hostname": "orders-7f9c4d", "msg": "order failed", "orderId": "o-1279", "err": "GatewayError: charge rejected (400): invalid_request"}

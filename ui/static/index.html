@@ -15,7 +15,7 @@
 <body>
 <header class="topbar">
   <a class="brand" href="/"><img class="brand-logo" src="/static/logo.svg" alt="">Argus<span class="brand-tag">Incident Commander</span></a>
-  <nav class="nav"><a href="/" class="on">Dashboard</a><a href="/results">Results</a><a href="/value">Value</a><a href="/check">Health</a></nav>
+  <nav class="nav"><a href="/" class="on">Dashboard</a><a href="/results">Results</a><a href="/check">Health</a><a href="/connect">Connect</a></nav>
   <span class="spacer"></span>
   <button class="icon-btn" id="theme-btn" type="button"></button>
   <div class="user-menu" id="user-menu"></div>
@@ -136,6 +136,7 @@ const DEMO_LABEL = {
   incident1_conn_leak: ["Checkout is failing", "A code bug after a deploy"],
   incident2_timeout: ["Payments are timing out", "A settings change after a deploy"],
   incident3_cache_oom: ["Product pages keep crashing", "Running out of memory"],
+  quickbite_orders: ["Food orders are failing", "A promo-code bug in a Node.js app"],
 };
 let scenarios = [], incidents = [];
 
@@ -201,7 +202,7 @@ function renderTiles(m) {
   const box = $("tiles");
   if (box.children.length !== tiles.length) {
     box.innerHTML = tiles.map((_, i) => i < 2
-      ? `<a class="tile tile-link" href="/value" title="See every incident's value and AI cost"><div class="k"></div><div class="v"></div><div class="s"></div></a>`
+      ? `<a class="tile tile-link" href="/results#value" title="See every incident's value and AI cost"><div class="k"></div><div class="v"></div><div class="s"></div></a>`
       : `<div class="tile"><div class="k"></div><div class="v"></div><div class="s"></div></div>`).join("");
     tileCounters = [];
   }

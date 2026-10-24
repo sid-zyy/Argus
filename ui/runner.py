@@ -13,6 +13,10 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+from connect.adapters.repos import repo_for
+from connect.config import ConfigError, ServiceConfig, load, service_folders
+from connect.intake import alert_for
+from connect.validate import check as check_config
 from db.store import Store, required_approvals
 from llm import LLM
 from orchestrator import policy
@@ -61,19 +65,35 @@ class IncidentRunner:
 
     # ---- public ------------------------------------------------------------
     def scenarios(self) -> list[dict]:
+        """Every service Argus can run: connected services (argus.yaml) and recorded scenarios."""
         out = []
-        for p in sorted((ROOT / "scenarios").glob("*/history.py")):
-            d = p.parent
-            alert = json.loads((d / "alert.json").read_text(encoding="utf-8")) if (d / "alert.json").exists() else {}
-            out.append({"name": d.name, "service": alert.get("service", d.name), "title": alert.get("title", d.name),
-                        "replay_available": self.replay_file(d.name) is not None, "live_app": self.live_app(d.name)})
+        for d in service_folders():
+            try:
+                cfg = load(d)
+                alert = cfg.base_alert()
+            except (ConfigError, OSError, ValueError) as e:
+                out.append({"name": d.name, "service": d.name, "title": d.name, "replay_available": False, "live_app": None,
+                            "connect": None, "config_error": str(e)})
+                continue
+            out.append({"name": d.name, "service": cfg.service.name, "title": alert.get("title", cfg.service.label or d.name),
+                        "replay_available": self.replay_file(d.name) is not None, "live_app": self.live_app(d.name),
+                        "connect": cfg.summary()})
         return out
 
     @staticmethod
+    def config(scenario: str) -> ServiceConfig:
+        return load(ROOT / "scenarios" / scenario)
+
+    @staticmethod
     def live_app(scenario: str) -> dict | None:
-        """A scenario backed by a running app (scenarios/<name>/live.json): approved fixes are really deployed."""
-        p = ROOT / "scenarios" / scenario / "live.json"
-        return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else None
+        """A service backed by a running app (argus.yaml `deploy.on_approve`, or live.json): approved fixes are really deployed."""
+        try:
+            deploy = load(ROOT / "scenarios" / scenario).deploy
+        except (ConfigError, OSError, ValueError):
+            return None
+        if deploy.on_approve:
+            return {"app": deploy.app or scenario, "url": deploy.url, "deploy_on_approve": True}
+        return None
 
     def replay_file(self, scenario: str) -> Path | None:
         p = ROOT / "replay" / f"{scenario}.json"
@@ -82,14 +102,20 @@ class IncidentRunner:
     def start(self, scenario: str, mode: str = "live", alert_override: dict | None = None,
               reporter: dict | None = None, report: dict | None = None) -> int:
         scenario_dir = self._scenario_dir(scenario)
-        alert = json.loads((scenario_dir / "alert.json").read_text(encoding="utf-8"))
+        cfg = load(scenario_dir)
+        checked = check_config(cfg)
+        if not checked.ok:  # the setup wizard's checks gate every incident
+            raise Denied(f"{scenario}'s configuration has {len(checked.errors)} error(s): "
+                         + "; ".join(c.message for c in checked.errors[:3]) + f". Run: python -m connect.wizard check {scenario}", 422)
         source = "alert"
         if report:  # a tester's bug report becomes a synthetic alert; the symptoms are what the agents start from
             source = "tester_report"
-            alert = {"id": "BUG", "service": alert["service"], "title": report["title"], "severity": report.get("severity", "sev3"),
+            alert = {"id": "BUG", "service": cfg.service.name, "title": report["title"], "severity": report.get("severity", "sev3"),
                      "metric": None, "value": None, "threshold": None, "window": None, "started_at": None,
                      "fired_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "source": f"bug report by {reporter['name']}"}
-        alert.update(alert_override or {})
+            alert.update(alert_override or {})
+        else:  # the base alert, overlaid with what the monitoring tool sent, with the service's severity policy applied
+            alert = alert_for(cfg, alert_override)
         if mode == "replay" and not self.replay_file(scenario):
             raise FileNotFoundError(f"no saved replay for {scenario}; record one with --save-replay")
         iid = self.store.create_incident(alert, scenario, mode, source=source,
@@ -97,13 +123,14 @@ class IncidentRunner:
         if report:
             alert["id"] = f"BUG-{iid}"
             self.store.update_incident(iid, alert=alert)
-        self._assign(iid, alert["service"])
+        self._assign(iid, alert["service"], cfg.service.on_call)
         self._launch(iid, scenario_dir, mode)
         return iid
 
     # ---- workflow automation: on-call assignment, notifications, approval SLA -------
-    def _assign(self, iid: int, service: str) -> None:
-        person = self.store.on_call_for(service)
+    def _assign(self, iid: int, service: str, configured: str | None = None) -> None:
+        """The on-call roster first, then the on_call named in the service's argus.yaml."""
+        person = self.store.on_call_for(service) or self.store.user_by_name(configured)
         if person:
             self.store.update_incident(iid, assignee=person["name"], assignee_id=person["id"])
             self.store.record_event(iid, {"actor": "orchestrator", "type": "assigned",
@@ -178,7 +205,7 @@ class IncidentRunner:
             raise Denied("this incident is not awaiting approval", 409)
         if user["role"] not in ("developer", "lead"):
             raise Denied("only a developer or lead can approve or reject a fix")
-        need = required_approvals(inc["severity"])
+        need = required_approvals(inc["severity"], inc["scenario"])
         if need["count"] > 1 and policy.separation_of_duties() and inc["reported_by"] == user["id"]:
             raise Denied("separation of duties: you reported this issue, so someone else must approve the fix")
         if any(v["user_id"] == user["id"] for v in inc["votes"]):
@@ -223,9 +250,14 @@ class IncidentRunner:
 
     # ---- internals ---------------------------------------------------------
     def _scenario_dir(self, scenario: str) -> Path:
+        """The service folder, with its repo ready: built from history.py for a sample, cloned for a remote repo."""
         d = ROOT / "scenarios" / scenario
-        if not (d / "repo" / ".git").exists():
-            build(scenario)
+        cfg = load(d)
+        if not (cfg.repo_path() / ".git").exists():
+            if (d / "history.py").is_file():
+                build(scenario)
+            else:
+                repo_for(cfg).ensure()
         return d
 
     def _launch(self, iid: int, scenario_dir: Path, mode: str, note: str = "") -> None:
@@ -293,7 +325,7 @@ class IncidentRunner:
                     p.write_text(p.read_text(encoding="utf-8").replace(ed.old, ed.new, 1), encoding="utf-8", newline="\n")
             ws.git("add", "-A")
             title = textwrap.shorten(fix.rationale.split(". ")[0] or "Fix", 72, placeholder="…")
-            ws.git("-c", "user.name=Argus", "-c", "user.email=argus@shopfast.example", "commit", "-q", "-m",
+            ws.git("-c", "user.name=Argus", "-c", "user.email=argus@argus.local", "commit", "-q", "-m",
                    f"{title}\n\nArgus {incKey(iid)}, tested in the sandbox, approved by {approval.get('approver', 'a person')}.")
             sha = ws.git("rev-parse", "--short", "HEAD").strip()
             trace.emit("orchestrator", "deployed", {"commit": sha, "app": live.get("app", "the app"), "message": title})

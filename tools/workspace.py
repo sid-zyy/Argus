@@ -1,33 +1,49 @@
-"""Read-only view of one scenario (logs + git repo) and the tool registry agents call."""
+"""Read-only view of one service (logs + git repo) and the tool registry agents call.
+
+What the view contains comes from the service's argus.yaml through Argus Connect's adapters (connect/), so the same
+agents and tools work on any connected service; a folder without argus.yaml uses the built-in scenario layout.
+"""
 from __future__ import annotations
 
-import json
-import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
+
+from connect.adapters.logs import logs_for
+from connect.adapters.repos import repo_for
+from connect.config import ServiceConfig, load
+from connect.schema import IncidentInput
 
 MAX_LINE = 300
 
 
 class Workspace:
-    def __init__(self, scenario_dir: str | Path):
+    def __init__(self, scenario_dir: str | Path, config: ServiceConfig | None = None):
         self.root = Path(scenario_dir).resolve()
-        self.logs_dir = self.root / "logs"
-        self.repo_dir = self.root / "repo"
-        self.alert = json.loads((self.root / "alert.json").read_text(encoding="utf-8"))
+        self.config = config or load(self.root)
+        self.repo = repo_for(self.config)
+        self.repo_dir = self.repo.path
+        self.logs = logs_for(self.config)
+        base = self.config.base_alert()
+        self.alert = IncidentInput.model_validate({"service": self.config.service.name, **base}).as_alert() if base else {
+            "id": "MANUAL", "service": self.config.service.name, "title": f"{self.config.service.name} incident"}
         self._cache: dict[str, list[str]] = {}
         self.extra_sources: dict[str, list[str]] = {}  # e.g. 'report' for tester bug reports
 
+    # what the evidence rules and the metrics tool need to know about this service's sources
+    @property
+    def symptom_sources(self) -> tuple[str, ...]:
+        return self.config.symptom_sources
+
+    @property
+    def change_sources(self) -> tuple[str, ...]:
+        return self.config.change_sources
+
     def log_sources(self) -> list[str]:
-        return sorted(p.name for p in self.logs_dir.glob("*.log"))
+        return sorted(name for name, src in self.logs.items() if src.exists())
 
     def git(self, *args: str) -> str:
-        r = subprocess.run(["git", "-c", "core.autocrlf=false", *args], cwd=self.repo_dir,
-                           capture_output=True, text=True, encoding="utf-8")
-        if r.returncode != 0:
-            raise ValueError(r.stderr.strip() or f"git {' '.join(args)} failed")
-        return r.stdout
+        return self.repo.git(*args)
 
     def lines(self, source: str) -> list[str]:
         """Lines of an evidence source: 'app.log', 'repo/app/x.py', 'git:<sha>' or 'report'."""
@@ -40,9 +56,10 @@ class Workspace:
         elif source.startswith("repo/"):
             path = self._safe(self.repo_dir, source[5:])
             out = path.read_text(encoding="utf-8").splitlines()
+        elif source in self.logs:
+            out = self.logs[source].lines()
         else:
-            path = self._safe(self.logs_dir, source)
-            out = path.read_text(encoding="utf-8").splitlines()
+            raise ValueError(f"no such file: {source}")
         self._cache[source] = out
         return out
 

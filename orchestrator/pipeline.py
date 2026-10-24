@@ -48,7 +48,7 @@ def _clean_verdicts(ws: Workspace, claims: list[Claim], verdicts: list[Verdict])
             v.evidence = [e for e in v.evidence if not check_all(ws, [e])]
             v.reasoning += f" [Downgraded from '{v.verdict}': evidence failed the code check: {'; '.join(bad) or 'no evidence'}]"
             v.verdict = "insufficient"
-        if v.verdict == "supported" and (why := cause_evidence_missing(category.get(v.claim_id, "code"), v.evidence)):
+        if v.verdict == "supported" and (why := cause_evidence_missing(category.get(v.claim_id, "code"), v.evidence, ws)):
             v.reasoning += f" [Downgraded from 'supported': {why}]"
             v.verdict = "insufficient"
         by_id.setdefault(v.claim_id, v)

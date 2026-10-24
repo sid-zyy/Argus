@@ -1,0 +1,49 @@
+{
+  "receiver": "argus",
+  "status": "firing",
+  "orgId": 1,
+  "state": "alerting",
+  "title": "[FIRING:1] OrderFailureRateHigh QuickBite",
+  "groupLabels": {
+    "alertname": "OrderFailureRateHigh"
+  },
+  "commonLabels": {
+    "alertname": "OrderFailureRateHigh",
+    "service": "orders-service",
+    "team": "ordering",
+    "severity": "warning"
+  },
+  "externalURL": "https://grafana.quickbite.example/",
+  "version": "1",
+  "truncatedAlerts": 0,
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "OrderFailureRateHigh",
+        "service": "orders-service",
+        "team": "ordering",
+        "severity": "warning",
+        "grafana_folder": "QuickBite"
+      },
+      "annotations": {
+        "summary": "orders-service order failure rate 43%",
+        "description": "Share of POST /orders ending in a 5xx, over 2 minutes, is above 10%",
+        "metric": "order_failure_rate",
+        "threshold": "0.1",
+        "window": "2m",
+        "fired_at": "2026-10-23T19:06:30Z"
+      },
+      "startsAt": "2026-10-23T19:03:00Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "https://grafana.quickbite.example/alerting/grafana/order-failure-rate/view",
+      "fingerprint": "9c1e4b7f02aa61d3",
+      "dashboardURL": "https://grafana.quickbite.example/d/orders/orders-service",
+      "values": {
+        "A": 0.429,
+        "C": 1
+      },
+      "valueString": "[ var='A' labels={service=orders-service} value=0.429 ]"
+    }
+  ]
+}

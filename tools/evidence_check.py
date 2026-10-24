@@ -41,20 +41,24 @@ def check_all(ws: Workspace, evidence: list[Evidence]) -> list[str]:
 
 
 SYMPTOM_SOURCES = ("app.log", "metrics.log")
+CHANGE_SOURCES = ("deploy.log",)
 
 
-def cause_evidence_missing(category: str, evidence: list[Evidence]) -> str | None:
+def cause_evidence_missing(category: str, evidence: list[Evidence], ws: Workspace | None = None) -> str | None:
     """A supported root cause must cite the cause itself, not only logs that show the symptom.
 
     code/config/resource causes need a code line ('repo/...'), a commit ('git:...') or a deploy record;
-    dependency causes need the dependency's own signal (any log other than the service's app log and metrics).
+    dependency causes need the dependency's own signal (any log other than the service's own logs and metrics).
+    Which logs are the service's own and which are deploy records comes from the service's config (log roles).
     """
+    symptom = ws.symptom_sources if ws else SYMPTOM_SOURCES
+    changes = ws.change_sources if ws else CHANGE_SOURCES
     sources = [e.source for e in evidence]
     if category == "dependency":
-        if not any(s not in SYMPTOM_SOURCES for s in sources):
+        if not any(s not in symptom for s in sources):
             return "a dependency cause needs evidence from the dependency's own logs, not just this service's errors"
         return None
-    if not any(s.startswith(("repo/", "git:")) or s == "deploy.log" for s in sources):
+    if not any(s.startswith(("repo/", "git:")) or s in changes for s in sources):
         return (f"a {category} cause needs evidence of the cause itself (a code line 'repo/...', a commit 'git:...' "
                 "or a deploy record), not only logs showing the symptom; otherwise use 'insufficient'")
     return None

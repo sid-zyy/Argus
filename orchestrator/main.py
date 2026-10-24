@@ -1,14 +1,24 @@
-"""Run one incident end to end in the terminal.
+"""Run one incident end to end in the terminal, on any connected service.
 
 python -m orchestrator.main scenarios/incident1_conn_leak [--provider gemini] [--approve ask|yes|no] [--save-replay] [-v]
+python -m orchestrator.main scenarios/quickbite_orders --alert scenarios/quickbite_orders/alerts/grafana_alert.json
+
+The service's argus.yaml is checked first (as `python -m connect.wizard check` does); a config with errors is refused.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
+import sys
 from datetime import datetime
 from pathlib import Path
 
+from connect.adapters.alerts import RouteError, route
+from connect.adapters.repos import repo_for
+from connect.config import ConfigError, load
+from connect.intake import alert_for
+from connect.validate import check
 from llm import LLM
 from orchestrator import console
 from orchestrator.approval import make_approver
@@ -27,13 +37,30 @@ def main(argv=None) -> dict:
     ap.add_argument("--provider", help="gemini | groq | ollama (default: LLM_PROVIDER)")
     ap.add_argument("--approve", default="ask", choices=["ask", "yes", "no"], help="'yes'/'no' only for unattended eval runs")
     ap.add_argument("--save-replay", action="store_true", help="copy the trace to replay/<scenario>.json for the UI's Replay button")
+    ap.add_argument("--alert", help="a monitoring payload (Alertmanager, Grafana or standard) to start from instead of the base alert")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args(argv)
 
     scenario = Path(args.scenario)
-    if not (scenario / "repo" / ".git").exists():
-        build(scenario.name)
-    ws = Workspace(scenario)
+    try:
+        cfg = load(scenario)
+    except ConfigError as e:
+        sys.exit(f"Invalid service config: {e}")
+    if not (cfg.repo_path() / ".git").exists():
+        build(scenario.name) if (scenario / "history.py").is_file() else repo_for(cfg).ensure()
+    checked = check(cfg)
+    if not checked.ok:
+        sys.exit("Not running: the service config has errors:\n" + "\n".join(f"  - [{c.area}] {c.message}" for c in checked.errors)
+                 + f"\nSee: python -m connect.wizard check {scenario}")
+    ws = Workspace(scenario, cfg)
+    incoming = None
+    if args.alert:
+        try:
+            _, incoming, fmt = route(json.loads(Path(args.alert).read_text(encoding="utf-8")), [cfg])
+        except RouteError as e:
+            sys.exit(f"That alert is not for {cfg.service.name}: {e}")
+        console.console.print(f"[dim]Alert received through the {fmt} adapter.[/dim]")
+    ws.alert = alert_for(cfg, incoming)
     llm = LLM(provider=args.provider)
     trace = Trace([lambda e: console.render(e, args.verbose)])
     state = run_incident(ws, llm, trace, make_approver(args.approve))

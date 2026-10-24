@@ -1,0 +1,20 @@
+# Argus Connect: recorded incident 3 on the catalog-api (unbounded page cache).
+version: 1
+service: {name: catalog-api, label: "Product catalog (recorded: out of memory)", team: Catalog team, language: python, on_call: Meera}
+repo: {adapter: git, path: repo}
+alerts: {adapter: standard, base: alert.json}
+logs:
+  - {name: app.log, path: logs/app.log, role: service}
+  - {name: metrics.log, path: logs/metrics.log, role: metrics}
+  - {name: events.log, path: logs/events.log, role: other}
+  - {name: deploy.log, path: logs/deploy.log, role: deploy}
+metrics:
+  source: metrics.log
+  description: >-
+    catalog-api metrics per 30s bucket (rps, error_rate_5xx, rss_mb, limit_mb, page_cache_entries, restarts).
+    Kubernetes and marketing events are in events.log; use search_logs for it.
+commands:
+  files: [repro.py]
+  repro: python repro.py {repo}
+  test: python -m pytest -q -p no:cacheprovider {repo}/tests
+  test_if_exists: "{repo}/tests"

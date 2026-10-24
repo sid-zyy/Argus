@@ -1,0 +1,27 @@
+{
+  "about": "How QuickBite's ordering fits together. Edges point from a dependency to what depends on it, so a failure flows along them. cascade_min: minutes after its upstream fails before this part is affected, if nothing is done.",
+  "team": "Ordering team",
+  "nodes": [
+    {"id": "payrail", "label": "PayRail gateway", "kind": "external", "col": 0, "code": ["src/gateway.js"],
+     "signals": ["status=(degraded|down|major_outage)", "http=5\\d\\d", "PayRail.*tim(ed|es) out"], "note": "Charges customers' cards"},
+    {"id": "promos", "label": "Promo codes", "kind": "data", "col": 0, "code": ["src/promos.js", "src/promos.json"],
+     "signals": ["WEEKEND20", "promos\\.json", "promo\\.percent"], "note": "Edited by marketing"},
+    {"id": "pricing", "label": "Pricing", "kind": "infra", "col": 1, "code": ["src/pricing.js", "src/menu.js", "src/config.js"],
+     "signals": ["discount", "subtotal", "amount=-"], "note": "Subtotal, discounts and delivery fee"},
+    {"id": "orders", "label": "orders-service", "kind": "service", "col": 2, "code": ["src/orders.js", "src/server.js", "src/logger.js"],
+     "signals": ["order failed", "order_failure_rate", "GatewayError"], "note": "Prices, charges and places orders"},
+    {"id": "app", "label": "QuickBite app checkout", "kind": "frontend", "col": 3, "signals": [], "note": "Where customers pay"},
+    {"id": "kitchens", "label": "Restaurant tablets", "kind": "frontend", "col": 3, "cascade_min": 2, "signals": [],
+     "note": "Restaurants only see orders that were paid"},
+    {"id": "placed", "label": "Orders placed", "kind": "business", "col": 4, "signals": [], "metric": "affected", "note": "Orders that fail to be placed"},
+    {"id": "support", "label": "Customer support", "kind": "business", "col": 4, "cascade_min": 10, "signals": [],
+     "note": "Chats rise as promo customers retry and complain"},
+    {"id": "revenue", "label": "Revenue", "kind": "business", "col": 5, "signals": [], "metric": "at_risk", "note": "Money from failed orders"},
+    {"id": "partners", "label": "Restaurant partners", "kind": "business", "col": 5, "cascade_min": 15, "signals": [],
+     "note": "Partners lose dinner-rush orders"}
+  ],
+  "edges": [
+    ["payrail", "orders"], ["promos", "pricing"], ["pricing", "orders"], ["orders", "app"], ["orders", "kitchens"],
+    ["app", "placed"], ["app", "support"], ["kitchens", "partners"], ["placed", "revenue"]
+  ]
+}

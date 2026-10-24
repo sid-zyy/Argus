@@ -1,0 +1,25 @@
+# Argus Connect: recorded incident 1 on ShopFast's checkout-api (connection leak).
+version: 1
+service: {name: checkout-api, label: "ShopFast checkout (recorded: connection leak)", team: Payments & Checkout team, language: python, on_call: Siddhartha}
+repo: {adapter: git, path: repo}
+alerts:
+  adapter: alertmanager
+  base: alert.json
+  sample: ../../examples/alertmanager_webhook.json
+logs:
+  - {name: app.log, path: logs/app.log, role: service}
+  - {name: metrics.log, path: logs/metrics.log, role: metrics}
+  - {name: db.log, path: logs/db.log, role: dependency, dependency: Orders database}
+  - {name: deploy.log, path: logs/deploy.log, role: deploy}
+metrics:
+  source: metrics.log
+  description: >-
+    checkout-api metrics per 30s bucket (rps, error_rate_5xx, p95_ms, pool_in_use, pool_size, mem_mb, restarts).
+    Database health is in db.log; use search_logs for it.
+dependencies:
+  - {name: Orders database, kind: data, logs: [db.log]}
+commands:
+  files: [repro.py]
+  repro: python repro.py {repo}
+  test: python -m pytest -q -p no:cacheprovider {repo}/tests
+  test_if_exists: "{repo}/tests"

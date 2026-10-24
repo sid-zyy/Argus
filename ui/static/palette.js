@@ -66,7 +66,7 @@ const Palette = {
     if (window.openAsk) add("This incident", "Ask Argus a question", PAL_ICON.ask, () => window.openAsk(), "", "/");
     add("Go to", "Dashboard", PAL_ICON.go, () => (location.href = "/"), "", "G D");
     add("Go to", "Results: Argus vs a chatbot", PAL_ICON.go, () => (location.href = "/results"), "", "G R");
-    add("Go to", "Value: what each incident was worth", PAL_ICON.go, () => (location.href = "/value"));
+    add("Go to", "Results, Value tab: what each incident was worth", PAL_ICON.go, () => (location.href = "/results#value"));
     add("Go to", "Health: self-check and audit trail", PAL_ICON.go, () => (location.href = "/check"));
     add("Go to", "Open ShopFast", PAL_ICON.shop, () => window.open("http://localhost:8100", "_blank", "noopener"));
     if (Session.user) {
