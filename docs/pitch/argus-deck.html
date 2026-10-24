@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Argus Pitch Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07070f; --bg-2: #0d0c1c; --card: rgba(255,255,255,.045); --card-2: rgba(255,255,255,.07);
+  --line: rgba(255,255,255,.09); --line-2: rgba(255,255,255,.16);
+  --text: #f4f3ff; --muted: #a3a1c2; --dim: #6d6b8f;
+  --violet: #7b6cff; --cyan: #46d3f5; --ok: #3ee59a; --bad: #ff5d73; --warn: #ffb547;
+  --grad: linear-gradient(100deg, #9a8cff 0%, #7b6cff 35%, #46d3f5 100%);
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--text); overflow: hidden; }
+body { font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+
+/* 1920x1080 stage, scaled to fit the window */
+#viewport { position: fixed; inset: 0; overflow: hidden; }
+#stage { width: 1920px; height: 1080px; position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%); }
+
+/* backdrop */
+.bg { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.bg .orb { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .5; animation: drift 22s ease-in-out infinite alternate; }
+.bg .o1 { width: 820px; height: 820px; background: #4a3cff; left: -220px; top: -260px; }
+.bg .o2 { width: 700px; height: 700px; background: #128bb0; right: -200px; bottom: -260px; animation-delay: -8s; }
+.bg .o3 { width: 460px; height: 460px; background: #8a2be2; right: 22%; top: 30%; opacity: .22; animation-delay: -14s; }
+.bg .grid { position: absolute; inset: 0;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 72px 72px; opacity: .35;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 20%, transparent 80%); }
+@keyframes drift { to { transform: translate(140px, 90px) scale(1.12); } }
+
+/* slides */
+.slide { position: absolute; inset: 0; padding: 96px 120px 110px; display: flex; flex-direction: column;
+  opacity: 0; visibility: hidden; overflow: hidden; transition: opacity .6s ease, visibility .6s; }
+.slide.active { opacity: 1; visibility: visible; }
+.slide.center { align-items: center; justify-content: center; text-align: center; }
+
+/* reveal on enter */
+.r { opacity: 0; transform: translateY(26px); filter: blur(8px);
+  transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1), filter .8s; transition-delay: calc(var(--d, 0) * 110ms + 120ms); }
+.slide.active .r { opacity: 1; transform: none; filter: none; }
+
+/* type */
+.kicker { font: 600 22px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--cyan); display: inline-flex; align-items: center; gap: 14px; }
+.kicker::before { content: ""; width: 34px; height: 2px; background: var(--grad); }
+.center .kicker::before { display: none; }
+h1 { font-size: 132px; line-height: .98; font-weight: 900; letter-spacing: -.045em; }
+h2 { font-size: 76px; line-height: 1.04; font-weight: 800; letter-spacing: -.035em; margin-top: 22px; max-width: 1500px; }
+h3 { font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+.lead { font-size: 32px; line-height: 1.45; color: var(--muted); max-width: 1380px; margin-top: 26px; font-weight: 450; }
+.g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bad { color: var(--bad); } .ok { color: var(--ok); } .warn { color: var(--warn); }
+.mono { font-family: var(--mono); }
+p, li { font-size: 24px; line-height: 1.5; color: var(--muted); }
+b, strong { color: var(--text); font-weight: 650; }
+
+/* layout helpers */
+.body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.mt { margin-top: 56px; } .mt-s { margin-top: 30px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 26px; padding: 34px 36px; position: relative; overflow: hidden;
+  backdrop-filter: blur(14px); }
+.card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(160deg, rgba(255,255,255,.07), transparent 40%); }
+.card h3 { margin-bottom: 12px; }
+.card p { font-size: 22px; }
+.ic { width: 58px; height: 58px; border-radius: 16px; display: grid; place-items: center; margin-bottom: 22px;
+  background: rgba(var(--c, 123,108,255), .14); color: rgb(var(--c, 123,108,255)); border: 1px solid rgba(var(--c, 123,108,255), .3); }
+.ic svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.pill { display: inline-flex; align-items: center; gap: 10px; padding: 10px 20px; border-radius: 999px; font-size: 20px; font-weight: 600;
+  background: var(--card-2); border: 1px solid var(--line-2); color: var(--text); }
+.pill .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 12px var(--ok); }
+.tag { display: inline-block; font: 600 15px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; padding: 8px 12px; border-radius: 8px;
+  background: rgba(70,211,245,.1); color: var(--cyan); border: 1px solid rgba(70,211,245,.25); }
+.criteria { position: absolute; top: 96px; right: 120px; }
+.criteria .tag { background: rgba(123,108,255,.14); color: #b9b0ff; border-color: rgba(123,108,255,.35); }
+
+/* big numbers */
+.stat { font-size: 104px; font-weight: 900; letter-spacing: -.05em; line-height: 1; }
+.stat small { font-size: .42em; letter-spacing: -.02em; font-weight: 800; }
+.statlabel { font-size: 23px; color: var(--muted); margin-top: 14px; line-height: 1.4; }
+
+/* lists */
+.ticks { list-style: none; display: grid; gap: 16px; }
+.ticks li { padding-left: 42px; position: relative; font-size: 24px; }
+.ticks li::before { content: ""; position: absolute; left: 0; top: 7px; width: 24px; height: 24px; border-radius: 7px;
+  background: rgba(62,229,154,.14) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233ee59a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/16px no-repeat; }
+.ticks.x li::before { background: rgba(255,93,115,.14) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff5d73' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E") center/16px no-repeat; }
+
+/* code / log */
+.term { background: #05050b; border: 1px solid var(--line-2); border-radius: 22px; overflow: hidden; font: 20px/1.7 var(--mono); }
+.term .bar { display: flex; gap: 9px; padding: 16px 20px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.03); }
+.term .bar i { width: 13px; height: 13px; border-radius: 50%; background: #333; } .term .bar i:nth-child(1){background:#ff5f57}.term .bar i:nth-child(2){background:#febc2e}.term .bar i:nth-child(3){background:#28c840}
+.term .bar span { margin-left: 14px; color: var(--dim); font-size: 16px; }
+.term pre { padding: 22px 26px; color: #cfcde8; white-space: pre-wrap; font: inherit; }
+.term .del { color: #ff8a99; background: rgba(255,93,115,.1); display: block; margin: 0 -26px; padding: 0 26px; }
+.term .add { color: #7ff0bb; background: rgba(62,229,154,.1); display: block; margin: 0 -26px; padding: 0 26px; }
+.term .c { color: var(--dim); }
+
+/* "Meet" title slides */
+.meet h1 { font-size: 220px; letter-spacing: -.06em; }
+.meet .sub { font-size: 38px; color: var(--muted); margin-top: 34px; font-weight: 500; }
+.ring { position: absolute; left: 50%; top: 50%; border-radius: 50%; border: 1px solid rgba(123,108,255,.22); translate: -50% -50%; animation: spin 40s linear infinite; }
+.ring::before { content: ""; position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 22px var(--cyan); }
+@keyframes spin { to { rotate: 360deg; } }
+
+/* logo */
+.logo { width: 150px; height: 150px; filter: drop-shadow(0 30px 60px rgba(123,108,255,.45)); }
+.brand { position: absolute; left: 120px; bottom: 44px; display: flex; align-items: center; gap: 14px; color: var(--dim); font: 600 17px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+.brand svg { width: 30px; height: 30px; }
+
+/* agents */
+.agents { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+.agent { --c: 123,108,255; border-radius: 24px; padding: 28px 28px 30px; background: linear-gradient(170deg, rgba(var(--c), .16), rgba(var(--c), .03) 60%);
+  border: 1px solid rgba(var(--c), .3); position: relative; overflow: hidden; }
+.agent .av { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; background: rgb(var(--c)); color: #0a0a13; margin-bottom: 18px;
+  box-shadow: 0 14px 34px -10px rgba(var(--c), .9); }
+.agent .av svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.agent .name { font-size: 34px; font-weight: 800; letter-spacing: -.02em; }
+.agent .role { font: 600 15px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: rgb(var(--c)); margin: 8px 0 14px; }
+.agent p { font-size: 20px; line-height: 1.45; }
+.agent.human { --c: 62,229,154; border-style: dashed; }
+
+/* pipeline */
+.flow { display: flex; align-items: stretch; gap: 0; }
+.step { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+.step .node { width: 92px; height: 92px; border-radius: 28px; margin: 0 auto 18px; display: grid; place-items: center;
+  background: var(--card-2); border: 1px solid var(--line-2); color: rgb(var(--c, 200,200,230)); position: relative; z-index: 1; }
+.step .node svg { width: 40px; height: 40px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.step:not(:last-child)::after { content: ""; position: absolute; top: 46px; left: calc(50% + 46px); right: calc(-50% + 46px); height: 2px;
+  background: linear-gradient(90deg, rgba(123,108,255,.7), rgba(70,211,245,.7)); }
+.step .t { font-size: 22px; font-weight: 700; color: var(--text); }
+.step .s { font-size: 17px; color: var(--muted); margin-top: 6px; line-height: 1.35; }
+.step.human .node { background: rgba(62,229,154,.12); border-color: rgba(62,229,154,.5); color: var(--ok); box-shadow: 0 0 40px -6px rgba(62,229,154,.5); }
+.pulse { position: absolute; top: 41px; width: 12px; height: 12px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 18px var(--cyan); z-index: 2;
+  left: 5%; animation: travel 6s linear infinite; }
+@keyframes travel { from { left: 5%; } to { left: 95%; } }
+
+/* comparison table */
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 25px; }
+th, td { padding: 22px 26px; text-align: left; border-bottom: 1px solid var(--line); }
+th { font: 600 17px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+td:first-child { color: var(--muted); }
+td.a { color: var(--text); font-weight: 750; } td.b { color: var(--muted); }
+tr.hl td { background: rgba(123,108,255,.07); }
+.bar-h { height: 12px; border-radius: 6px; background: rgba(255,255,255,.08); overflow: hidden; margin-top: 10px; width: 260px; }
+.bar-h i { display: block; height: 100%; border-radius: inherit; background: var(--grad); width: 0; transition: width 1.4s cubic-bezier(.2,.7,.2,1) .6s; }
+.bar-h.grey i { background: #5b5a74; }
+.slide.active .bar-h i { width: var(--w); }
+
+/* ROI equation */
+.eq { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; font-size: 30px; font-weight: 700; }
+.eq .term2 { background: var(--card-2); border: 1px solid var(--line-2); border-radius: 18px; padding: 18px 26px; text-align: center; }
+.eq .term2 small { display: block; font: 500 16px/1.3 var(--mono); color: var(--dim); letter-spacing: .06em; text-transform: uppercase; margin-top: 6px; }
+.eq .op { color: var(--dim); font-size: 40px; }
+
+/* chrome */
+#progress { position: fixed; left: 0; top: 0; height: 4px; background: var(--grad); width: 0; transition: width .5s ease; z-index: 10; box-shadow: 0 0 16px rgba(70,211,245,.6); }
+#count { position: fixed; right: 28px; bottom: 22px; font: 600 15px/1 var(--mono); color: var(--dim); letter-spacing: .1em; z-index: 10; }
+#hint { position: fixed; left: 50%; bottom: 20px; translate: -50% 0; font: 500 14px/1 var(--mono); color: var(--dim); z-index: 10; transition: opacity 1s; }
+.navbtn { position: fixed; top: 50%; translate: 0 -50%; width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(255,255,255,.04);
+  color: var(--muted); font-size: 24px; cursor: pointer; z-index: 10; opacity: 0; transition: opacity .3s; }
+body:hover .navbtn { opacity: .7; } .navbtn:hover { opacity: 1 !important; color: var(--text); }
+#prev { left: 18px; } #next { right: 18px; }
+
+@media print {
+  html, body { overflow: visible; height: auto; }
+  #progress, #count, #hint, .navbtn, .bg { display: none; }
+  #viewport { position: static; display: block; }
+  #stage { transform: none !important; position: static; width: auto; height: auto; }
+  .slide { position: relative; opacity: 1; visibility: visible; width: 1920px; height: 1080px; page-break-after: always; background: var(--bg); }
+  .r { opacity: 1; transform: none; filter: none; }
+  .bar-h i { width: var(--w); }
+  @page { size: 1920px 1080px; margin: 0; }
+}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="grid"></div></div>
+<div id="progress"></div>
+<button class="navbtn" id="prev" aria-label="Previous slide">‹</button>
+<button class="navbtn" id="next" aria-label="Next slide">›</button>
+<div id="count"></div>
+<div id="hint">← → or click to navigate · F for full screen</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="lt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e1b3f"/><stop offset="1" stop-color="#0a0a13"/></linearGradient>
+    <linearGradient id="le" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".5" stop-color="#fff" stop-opacity=".03"/></linearGradient>
+    <linearGradient id="li" x1="13" y1="50" x2="51" y2="14" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#7b6cff"/><stop offset="1" stop-color="#46d3f5"/></linearGradient>
+    <radialGradient id="lg" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#8f84ff" stop-opacity=".45"/><stop offset="1" stop-color="#8f84ff" stop-opacity="0"/></radialGradient>
+    <symbol id="logo" viewBox="0 0 64 64">
+      <rect width="64" height="64" rx="15" fill="url(#lt)"/>
+      <rect x=".5" y=".5" width="63" height="63" rx="14.5" fill="none" stroke="url(#le)"/>
+      <circle cx="32" cy="32" r="14" fill="url(#lg)"/>
+      <path d="M13 29 Q32 9 51 29" fill="none" stroke="url(#li)" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M51 35 Q32 55 13 35" fill="none" stroke="url(#li)" stroke-width="4.5" stroke-linecap="round"/>
+      <circle cx="32" cy="32" r="8.5" fill="none" stroke="url(#li)" stroke-width="3.5"/>
+      <circle cx="32" cy="32" r="3.6" fill="#fff"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div id="viewport"><div id="stage">
+
+<!-- 1 · Title -->
+<section class="slide center">
+  <svg class="logo r" style="--d:0"><use href="#logo"/></svg>
+  <h1 class="r" style="--d:1; margin-top:46px; font-size:180px">Argus</h1>
+  <p class="lead r" style="--d:2; font-size:40px; margin-top:20px; color:var(--text)">The <span class="g" style="font-weight:800">AI incident commander</span> for production software.</p>
+  <p class="lead r" style="--d:3; margin-top:18px">From a firing alert to a root cause proven with evidence, a tested fix, and a human sign-off. In minutes.</p>
+  <div class="r" style="--d:5; margin-top:56px; display:flex; gap:16px; flex-wrap:wrap; justify-content:center">
+    <span class="pill"><span class="dot"></span>B2B SaaS</span>
+    <span class="pill">IT Infrastructure</span>
+    <span class="pill">Multi-agent systems</span>
+  </div>
+</section>
+
+<!-- 2 · Problem hook -->
+<section class="slide center">
+  <span class="kicker r" style="--d:0">The problem</span>
+  <h1 class="r" style="--d:1; margin-top:34px; font-size:150px">Every minute of downtime<br><span class="bad">costs money.</span></h1>
+  <p class="lead r" style="--d:3; font-size:36px">And at 2 a.m., three engineers are still grepping logs to find out why.</p>
+</section>
+
+<!-- 3 · Problem, in numbers -->
+<section class="slide">
+  <span class="kicker r" style="--d:0">The problem, in numbers</span>
+  <h2 class="r" style="--d:1">One bad commit to a mid-sized store's checkout.</h2>
+  <div class="body">
+    <div class="grid4">
+      <div class="card r" style="--d:2"><div class="stat bad">38<small>%</small></div><div class="statlabel">of checkouts failing once the database pool runs dry</div></div>
+      <div class="card r" style="--d:3"><div class="stat"><small>₹</small>6,840</div><div class="statlabel">revenue at risk <b>every minute</b> (15 orders/min × ₹1,200 × 38%)</div></div>
+      <div class="card r" style="--d:4"><div class="stat warn">80<small> min</small></div><div class="statlabel">a typical manual fix, with <b>3 engineers</b> paged</div></div>
+      <div class="card r" style="--d:5"><div class="stat bad"><small>₹</small>5.5<small>L</small></div><div class="statlabel">lost on one incident before anyone ships a fix</div></div>
+    </div>
+    <p class="r mt-s" style="--d:6; font-size:19px; color:var(--dim)">Figures from Argus's own business model for the checkout scenario (<span class="mono">business.json</span>). Every assumption is shown and editable in the product.</p>
+  </div>
+</section>
+
+<!-- 4 · Why it's hard -->
+<section class="slide">
+  <span class="kicker r" style="--d:0">Why it is hard</span>
+  <h2 class="r" style="--d:1">The loudest signal is usually <span class="bad">the wrong one.</span></h2>
+  <div class="body">
+    <div class="grid2" style="grid-template-columns: 1.05fr 1fr; align-items:center; gap:56px">
+      <div class="term r" style="--d:2">
+        <div class="bar"><i></i><i></i><i></i><span>app.log</span></div>
+        <pre><span class="del">14:07:41 ERROR DBConnectionTimeout: pool exhausted (20/20)</span><span class="del">14:07:42 ERROR DBConnectionTimeout: pool exhausted (20/20)</span><span class="c">14:07:42 WARN  payment declined card=****4242</span>
+<span class="c">  → everyone's first guess: "the database is overloaded, scale it up"</span>
+
+<span class="c"># the real cause, 2 minutes earlier, in git:</span>
+    if declined:
+<span class="del">-    try: ... finally: pool.release(conn)</span><span class="add">+    return error_response()   # never releases conn</span></pre>
+      </div>
+      <ul class="ticks x">
+        <li class="r" style="--d:3"><b>Context is scattered</b> across alerts, logs, metrics, deploys and git history.</li>
+        <li class="r" style="--d:4"><b>Symptoms shout, causes whisper.</b> The database looks guilty; one early <span class="mono">return</span> is.</li>
+        <li class="r" style="--d:5"><b>Chatbots guess with confidence.</b> In our test only <b>25%</b> of a chatbot's quoted evidence actually existed.</li>
+        <li class="r" style="--d:6"><b>Nobody wants an AI pushing to prod</b> without rules, tests and a person in charge.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · The gap -->
+<section class="slide">
+  <span class="kicker r" style="--d:0">The gap in the market</span>
+  <h2 class="r" style="--d:1">Tools tell you <i>something</i> broke. Nobody <span class="g">proves why</span> and fixes it safely.</h2>
+  <div class="body">
+    <div class="grid4">
+      <div class="card r" style="--d:2; --c:163,161,194"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div><h3>Monitoring</h3><p>Prometheus, Grafana: <b>detects</b> the symptom. Stops there.</p></div>
+      <div class="card r" style="--d:3; --c:163,161,194"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div><h3>Ticketing</h3><p>Jira, PagerDuty: <b>tracks</b> who is working on it. Doesn't investigate.</p></div>
+      <div class="card r" style="--d:4; --c:163,161,194"><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></div><h3>AI chatbots</h3><p><b>Guesses</b> from a pasted log tail. No tools, no proof, no tests.</p></div>
+      <div class="card r" style="--d:5; --c:123,108,255; border-color:rgba(123,108,255,.55); background:linear-gradient(170deg, rgba(123,108,255,.2), rgba(70,211,245,.05))"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="3"/></svg></div><h3 class="g">Argus</h3><p><b>Investigates, proves, tests, asks a person, deploys, reports.</b> End to end.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · MEET ARGUS -->
+<section class="slide center meet">
+  <div class="ring" style="width:1000px;height:1000px"></div>
+  <div class="ring" style="width:720px;height:720px;animation-duration:28s;animation-direction:reverse"></div>
+  <svg class="logo r" style="--d:0; width:170px; height:170px"><use href="#logo"/></svg>
+  <h1 class="r" style="--d:1; margin-top:40px">Meet <span class="g">Argus.</span></h1>
+  <p class="sub r" style="--d:3">The hundred-eyed watchman of Greek myth, now watching your production systems.</p>
+</section>
+
+<!-- 7 · Solution overview -->
+<section class="slide">
+  <span class="kicker r" style="--d:0">The solution</span>
+  <h2 class="r" style="--d:1">An alert goes in. A <span class="g">proven, approved fix</span> comes out.</h2>
+  <div class="body">
+    <div class="flow r" style="--d:2; position:relative">
+      <div class="pulse"></div>
+      <div class="step" style="--c:255,181,71"><div class="node"><svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg></div><div class="t">Alert</div><div class="s">Alertmanager or Grafana webhook opens a ticket</div></div>
+      <div class="step" style="--c:155,140,255"><div class="node"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg></div><div class="t">Plan</div><div class="s">Commander maps the investigation</div></div>
+      <div class="step" style="--c:70,211,245"><div class="node"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></div><div class="t">Investigate</div><div class="s">Logs, metrics, git, deploys</div></div>
+      <div class="step" style="--c:255,93,115"><div class="node"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><div class="t">Disprove</div><div class="s">Every cause attacked; quotes checked</div></div>
+      <div class="step" style="--c:255,145,77"><div class="node"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z"/></svg></div><div class="t">Fix + test</div><div class="s">Smallest fix, replayed in a sandbox</div></div>
+      <div class="step human"><div class="node"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-6 8-6s7 1.5 8 6"/></svg></div><div class="t">Human approves</div><div class="s">Nothing changes without a person</div></div>
+      <div class="step" style="--c:62,229,154"><div class="node"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="t">Deploy + report</div><div class="s">Commit, recover, cost and savings</div></div>
+    </div>
+    <div class="grid3 mt">
+      <div class="card r" style="--d:4"><h3>Autonomous where it's safe</h3><p>Opens the incident, assigns on-call, pings Slack, investigates and tests <b>without being asked</b>.</p></div>
+      <div class="card r" style="--d:5"><h3>Human where it matters</h3><p>The AI <b>never approves</b>. Policy decides who must sign off, by severity.</p></div>
+      <div class="card r" style="--d:6"><h3>Business-aware</h3><p>Every ticket shows <b>revenue at risk per minute</b>, time to fix and money protected.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · MEET THE TEAM -->
+<section class="slide center meet">
+  <div class="ring" style="width:1080px;height:1080px;animation-duration:50s"></div>
+  <span class="kicker r" style="--d:0">Seven specialist agents · one commander</span>
+  <h1 class="r" style="--d:1; margin-top:30px">Meet the <span class="g">team.</span></h1>
+  <p class="sub r" style="--d:3">Each one does a single job well, and one of them exists only to prove the others wrong.</p>
+</section>
+
+<!-- 9 · The agents -->
+<section class="slide">
+  <span class="kicker r" style="--d:0">The agents</span>
+  <h2 class="r" style="--d:1">A war room that never sleeps.</h2>
+  <div class="body">
+    <div class="agents">
+      <div class="agent r" style="--d:2; --c:155,140,255"><div class="av"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4.5 4 1 6.5L12 16l-5.5 3.5 1-6.5L3 9l6-1z"/></svg></div><div class="name">Athena</div><div class="role">Commander</div><p>Plans the investigation and <b>re-plans</b> when a guess is ruled out.</p></div>
+      <div class="agent r" style="--d:3; --c:70,211,245"><div class="av"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></div><div class="name">Theia</div><div class="role">Investigator</div><p>Reads logs and metrics, proposes causes with <b>quoted evidence</b>.</p></div>
+      <div class="agent r" style="--d:4; --c:255,196,87"><div class="av"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="name">Chronos</div><div class="role">Change finder</div><p>Finds the <b>commit or deploy</b> that lines up with the problem.</p></div>
+      <div class="agent r" style="--d:5; --c:255,93,115"><div class="av"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/></svg></div><div class="name">Themis</div><div class="role">Fact checker</div><p>Tries to <b>prove every cause wrong</b>. Only checked evidence counts.</p></div>
+      <div class="agent r" style="--d:6; --c:255,145,77"><div class="av"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z"/></svg></div><div class="name">Hephaestus</div><div class="role">Fixer</div><p>Writes the <b>smallest fix</b>: a patch, a settings change or a rollback.</p></div>
+      <div class="agent r" style="--d:7; --c:62,229,154"><div class="av"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4 19a1.5 1.5 0 0 0 1.3 2h13.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7 15h10"/></svg></div><div class="name">Talos</div><div class="role">Test lab</div><p>Reproduces the failure on a safe copy, then shows the fix <b>makes it go away</b>.</p></div>
+      <div class="agent r" style="--d:8; --c:110,160,255"><div class="av"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg></div><div class="name">Clio</div><div class="role">Writer</div><p>Writes the report for <b>engineers and managers</b>: what, why, cost, saved.</p></div>
+      <div class="agent human r" style="--d:9"><div class="av"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-6 8-6s7 1.5 8 6"/></svg></div><div class="name">You</div><div class="role">Approver</div><p>The only one who can <b>ship a change</b>. Argus waits for you.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · How they reason -->
+<section class="slide">
+  <span class="kicker r" style="--d:0">Feature · Adversarial verification</span>
+  <h2 class="r" style="--d:1">Guesses are cheap. Argus <span class="g">tries to kill them.</span></h2>
+  <div class="body">
+    <div class="grid2" style="gap:56px; align-items:center">
+      <div class="term r" style="--d:2">
+        <div class="bar"><i></i><i></i><i></i><span>reasoning trace (illustrative)</span></div>
+        <pre><span class="c">Theia</span>   claim #1  "database is overloaded"
+<span class="del">Themis  REFUTED   db.log:212 cpu=31% p95=18ms, normal</span><span class="c">Athena</span>  re-plan → look at changes before 14:07
+<span class="c">Chronos</span> suspect 6c95fcb "return early on declined"
+<span class="c">Theia</span>   claim #2  "early return skips pool.release()"
+<span class="add">Themis  SUPPORTED checkout.py:48 + deploy.log:9</span><span class="c">Hephaestus</span> patch: release in finally (4 lines)
+<span class="c">Talos</span>   before: <span class="bad">pool exhausted</span>  after: <span class="ok">healthy</span></pre>
+      </div>
+      <ul class="ticks">
+        <li class="r" style="--d:3"><b>A separate fact-checker</b> with its own context attacks each claim, and must cite evidence to rule.</li>
+        <li class="r" style="--d:4"><b>Every quote is checked by code</b> against the real file and line. Made-up evidence never gets in.</li>
+        <li class="r" style="--d:5"><b>Symptoms aren't enough.</b> A cause must be backed by the code or the change itself.</li>
+        <li class="r" style="--d:6"><b>The plan adapts.</b> When a guess dies, the Commander re-plans. After 3 failed attempts, a person takes over.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · Sandbox + live loop -->
+<section class="slide">
+  <span class="kicker r" style="--d:0">Feature · Proven fixes, real deploys</span>
+  <h2 class="r" style="--d:1">Not a suggestion. A fix that <span class="ok">already passed the test.</span></h2>
+  <div class="body">
+    <div class="grid3">
+      <div class="card r" style="--d:2; --c:62,229,154"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg></div><h3>Sandboxed replay</h3><p>Talos runs <b>the service's own repro and tests</b> in Docker, with no network and CPU/memory limits: failing before, passing after.</p></div>
+      <div class="card r" style="--d:3; --c:70,211,245"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M6 8.5v7M8.3 7l7.4 4M8.3 17l7.4-4"/></svg></div><h3>Real git, real deploy</h3><p>On approval Argus <b>commits the fix to the repo</b>; the service deploys it and the error rate falls back to zero.</p></div>
+      <div class="card r" style="--d:4; --c:155,140,255"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 20V9"/></svg></div><h3>Reports for two audiences</h3><p>Engineers get the evidence and diff. Managers get <b>what happened, what it cost, what it saved</b>.</p></div>
+    </div>
+    <div class="card r mt-s" style="--d:5; display:flex; align-items:center; gap:40px; padding:30px 40px">
+      <span class="tag">Live demo</span>
+      <p style="font-size:24px">Push a bad commit to <b>ShopFast</b>, a real store with real traffic → checkout breaks → Alertmanager fires → <b>Argus opens the incident by itself</b> → approve → the shop recovers.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 · Governance -->
+<section class="slide">
+  <div class="criteria r" style="--d:0"><span class="tag">Judging · Governance &amp; responsibility</span></div>
+  <span class="kicker r" style="--d:0">Governance by design</span>
+  <h2 class="r" style="--d:1">The AI proposes. <span class="g">Policy and people decide.</span></h2>
+  <div class="body">
+    <div class="grid3" style="gap:22px">
+      <div class="card r" style="padding:28px 32px; --d:2; --c:62,229,154"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c.8-3.8 3.4-5.5 6-5.5s5.2 1.7 6 5.5M15 15c2.5 0 4.5 1.4 5.5 5"/></svg></div><h3>Human approval gate</h3><p>Approvers set per severity. Optional <b>two-person rule</b> with a team lead for sev1/2. The reporter <b>can't approve</b> their own serious fix. Declines need a reason.</p></div>
+      <div class="card r" style="padding:28px 32px; --d:3; --c:155,140,255"><div class="ic"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></div><h3>Rules in one file</h3><p><span class="mono">policy.yaml</span>: allowed fix types, <b>protected paths</b> (secrets, migrations, CI), max <b>80 lines</b> per fix. Break a rule → sent back to the fixer.</p></div>
+      <div class="card r" style="padding:28px 32px; --d:4; --c:255,181,71"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.2 1.1-2 2.5-2s2.5.8 2.5 2-1 1.6-2.5 2-2.5.8-2.5 2 1.1 2 2.5 2 2.5-.8 2.5-2"/></svg></div><h3>Hard stops</h3><p><b>AI budget</b> per incident (₹25): over it, Argus stops and hands over. <b>3-attempt</b> limit. Approval <b>SLA</b> escalates to the lead after 10 min.</p></div>
+      <div class="card r" style="padding:28px 32px; --d:5; --c:255,93,115"><div class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h3>Tamper-evident audit log</h3><p>Every event is <b>hash-chained</b> to the one before. Edit, delete or reorder anything and <span class="mono">/audit/verify</span> shows where.</p></div>
+      <div class="card r" style="padding:28px 32px; --d:6; --c:70,211,245"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></div><h3>Every decision explained</h3><p>Each approval, block and stop records <b>the rule that applied</b> and the policy file's <b>fingerprint</b>.</p></div>
+      <div class="card r" style="padding:28px 32px; --d:7; --c:110,160,255"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></div><h3>Role-based access</h3><p>Testers, developers and leads, checked <b>server-side on every write</b>. AI usage, tokens and energy shown on every ticket.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 · Reusability -->
+<section class="slide">
+  <div class="criteria r" style="--d:0"><span class="tag">Judging · Reusability</span></div>
+  <span class="kicker r" style="--d:0">Argus Connect</span>
+  <h2 class="r" style="--d:1">Same agents. <span class="g">Any service.</span> One config file.</h2>
+  <div class="body">
+    <div class="grid2" style="grid-template-columns: 1.15fr 1fr; gap:48px; align-items:center">
+      <div style="display:grid; gap:20px">
+        <div class="card r" style="--d:2; padding:26px 32px"><h3 style="font-size:24px">Alert adapters</h3><p><span class="mono">alertmanager</span> · <span class="mono">grafana</span> · <span class="mono">standard</span>: any webhook to <span class="mono">POST /alerts</span> becomes one standard incident, routed by labels.</p></div>
+        <div class="card r" style="--d:3; padding:26px 32px"><h3 style="font-size:24px">Log &amp; repo adapters</h3><p><span class="mono">text</span> · <span class="mono">jsonl</span> · <span class="mono">csv</span> · <span class="mono">command</span> (<span class="mono">docker logs</span>, <span class="mono">kubectl logs</span>) · <span class="mono">git</span> (local or cloned).</p></div>
+        <div class="card r" style="--d:4; padding:26px 32px"><h3 style="font-size:24px">Model-agnostic</h3><p>Groq, Gemini, OpenRouter or local <b>Ollama</b> through OpenAI-compatible APIs, with automatic failover.</p></div>
+        <div class="card r" style="--d:5; padding:26px 32px"><h3 style="font-size:24px">Onboard in minutes</h3><p><span class="mono">connect.wizard new my_service</span> asks a few questions, writes <span class="mono">argus.yaml</span>, and validates it.</p></div>
+      </div>
+      <div class="r" style="--d:6">
+        <table>
+          <tr><th>Proven on</th><th>ShopFast</th><th>QuickBite</th></tr>
+          <tr><td>Language</td><td class="a">Python</td><td class="a">Node.js</td></tr>
+          <tr><td>Monitoring</td><td class="a">Alertmanager</td><td class="a">Grafana</td></tr>
+          <tr><td>Logs</td><td class="a">Plain text</td><td class="a">JSON · CSV</td></tr>
+          <tr><td>Tests</td><td class="a">pytest</td><td class="a">node --test</td></tr>
+          <tr class="hl"><td>Pipeline code changed</td><td class="a ok" colspan="2" style="text-align:center">0 lines</td></tr>
+        </table>
+        <p style="margin-top:22px; font-size:21px">Adding a service is <b>data, not code</b>: a service pack of commits, telemetry, repro and business assumptions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 · ROI -->
+<section class="slide">
+  <div class="criteria r" style="--d:0"><span class="tag">Judging · ROI &amp; business value</span></div>
+  <span class="kicker r" style="--d:0">Return on AI spend</span>
+  <h2 class="r" style="--d:1"><span class="g">₹6</span> of AI to protect <span class="ok">₹4.8 lakh</span>.</h2>
+  <div class="body">
+    <div class="grid4">
+      <div class="card r" style="--d:2"><div class="stat g">&lt;4<small> min</small></div><div class="statlabel">alert to a <b>tested fix</b> awaiting approval (82–234 s on recorded runs)</div></div>
+      <div class="card r" style="--d:3"><div class="stat ok"><small>₹</small>4.8<small>L</small></div><div class="statlabel">revenue protected per checkout incident vs. an 80-min manual fix*</div></div>
+      <div class="card r" style="--d:4"><div class="stat">4<small> hrs</small></div><div class="statlabel">of engineer time saved (3 paged × 80 min → one approver)</div></div>
+      <div class="card r" style="--d:5"><div class="stat"><small>₹</small>6.4</div><div class="statlabel">AI cost of that incident: <b>127k tokens</b>, hard-capped at ₹25</div></div>
+    </div>
+    <div class="eq r mt" style="--d:6">
+      <span class="term2">Revenue at risk<small>per minute</small></span><span class="op">=</span>
+      <span class="term2">Orders / min<small>15</small></span><span class="op">×</span>
+      <span class="term2">Share failing<small>live 5xx rate · 38%</small></span><span class="op">×</span>
+      <span class="term2">Order value<small>₹1,200</small></span>
+      <span class="op">→</span><span class="term2" style="border-color:rgba(62,229,154,.5)"><span class="ok">Shown live on every ticket</span><small>assumptions editable on /results#value</small></span>
+    </div>
+    <p class="r mt-s" style="--d:7; font-size:18px; color:var(--dim)">* Estimate: (80 − ~10 min incl. human approval) × ₹6,840/min. Every figure in the product is labelled as an estimate and lists its assumptions.</p>
+  </div>
+</section>
+
+<!-- 15 · Benchmark -->
+<section class="slide">
+  <div class="criteria r" style="--d:0"><span class="tag">Proof · Accuracy benchmark</span></div>
+  <span class="kicker r" style="--d:0">Argus vs. a single chatbot prompt</span>
+  <h2 class="r" style="--d:1">Same incidents. Same scoring. <span class="g">Planted traps.</span></h2>
+  <div class="body">
+    <div class="r" style="--d:2">
+      <table>
+        <tr><th style="width:38%">Metric (3 recorded incidents)</th><th>Argus</th><th>Chatbot paste</th></tr>
+        <tr class="hl"><td>Quoted evidence that really exists</td><td class="a">100% <span style="color:var(--dim);font-weight:500">(26 / 26)</span><div class="bar-h"><i style="--w:100%"></i></div></td><td class="b">25% <span style="color:var(--dim)">(2 / 8)</span><div class="bar-h grey"><i style="--w:25%"></i></div></td></tr>
+        <tr><td>Culprit commit named</td><td class="a">3 / 3<div class="bar-h"><i style="--w:100%"></i></div></td><td class="b">2 / 3<div class="bar-h grey"><i style="--w:66%"></i></div></td></tr>
+        <tr><td>Fix passes the same sandbox</td><td class="a">3 / 3</td><td class="b">3 / 3</td></tr>
+        <tr><td>Fabricated quotes blocked before use</td><td class="a ok">Yes, by code</td><td class="b">No check</td></tr>
+        <tr><td>Speed</td><td class="a">~2–4 min</td><td class="b ok">~5 s <span style="color:var(--dim)">(the chatbot wins, and we say so)</span></td></tr>
+      </table>
+    </div>
+    <p class="r mt-s" style="--d:3; font-size:21px">Each scenario hides a trap: <b>"database overloaded"</b>, <b>"payment provider is slow"</b>, <b>"marketing traffic spike"</b>, <b>"the gateway is failing"</b>. Re-run it yourself: <span class="mono">python -m eval.compare</span>.</p>
+  </div>
+</section>
+
+<!-- 16 · MVP readiness -->
+<section class="slide">
+  <div class="criteria r" style="--d:0"><span class="tag">Judging · MVP readiness</span></div>
+  <span class="kicker r" style="--d:0">It runs today</span>
+  <h2 class="r" style="--d:1">Not a mock-up. A <span class="g">working product</span>, end to end.</h2>
+  <div class="body">
+    <div class="grid2" style="gap:48px">
+      <ul class="ticks">
+        <li class="r" style="--d:2"><b>One command</b> starts it all: <span class="mono">python run_demo.py</span> (shop, Argus and a self-check).</li>
+        <li class="r" style="--d:3"><b>Real integrations:</b> Alertmanager and Grafana webhooks, git repos, Docker sandbox, live deploys.</li>
+        <li class="r" style="--d:4"><b>Full web app:</b> dashboard, incident board, ticket war room, results, health page, command palette (Ctrl K), guided tour.</li>
+        <li class="r" style="--d:5"><b>Replay mode:</b> a demo that can't stall. Real breakage and recovery; only the agent steps are played back from a recorded real run.</li>
+        <li class="r" style="--d:6"><b>Resilient AI:</b> multi-provider failover, free-tier waits and cooldowns handled.</li>
+      </ul>
+      <div class="grid2" style="gap:22px; align-content:center">
+        <div class="card r" style="--d:3"><div class="stat ok">39</div><div class="statlabel">automated tests passing, offline</div></div>
+        <div class="card r" style="--d:4"><div class="stat">5</div><div class="statlabel">service scenarios incl. a live store</div></div>
+        <div class="card r" style="--d:5"><div class="stat">2</div><div class="statlabel">tech stacks: Python &amp; Node.js</div></div>
+        <div class="card r" style="--d:6"><div class="stat g">3</div><div class="statlabel">user roles with server-side permission checks</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 · Originality -->
+<section class="slide">
+  <div class="criteria r" style="--d:0"><span class="tag">Judging · Originality &amp; innovation</span></div>
+  <span class="kicker r" style="--d:0">What's new here</span>
+  <h2 class="r" style="--d:1">Five ideas you won't find in a <span class="g">chat window.</span></h2>
+  <div class="body">
+    <div class="grid3" style="grid-template-columns:repeat(5,1fr); gap:22px">
+      <div class="card r" style="--d:2; padding:30px 28px"><div class="stat g" style="font-size:64px">01</div><h3 style="margin-top:18px; font-size:25px">An agent paid to disagree</h3><p style="font-size:19px">Themis exists to refute. Truth wins the argument, not the loudest log.</p></div>
+      <div class="card r" style="--d:3; padding:30px 28px"><div class="stat g" style="font-size:64px">02</div><h3 style="margin-top:18px; font-size:25px">Evidence checked by code</h3><p style="font-size:19px">A deterministic checker, not another LLM, confirms each quote is real.</p></div>
+      <div class="card r" style="--d:4; padding:30px 28px"><div class="stat g" style="font-size:64px">03</div><h3 style="margin-top:18px; font-size:25px">Money-aware incident response</h3><p style="font-size:19px">Revenue at risk ticks live; AI cost sits next to what it saved.</p></div>
+      <div class="card r" style="--d:5; padding:30px 28px"><div class="stat g" style="font-size:64px">04</div><h3 style="margin-top:18px; font-size:25px">Governance as code</h3><p style="font-size:19px">One reviewable policy file plus a hash-chained audit trail.</p></div>
+      <div class="card r" style="--d:6; padding:30px 28px"><div class="stat g" style="font-size:64px">05</div><h3 style="margin-top:18px; font-size:25px">Honest benchmarks</h3><p style="font-size:19px">Planted traps and a head-to-head race against a chatbot, losses included.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 18 · B2B SaaS model -->
+<section class="slide">
+  <span class="kicker r" style="--d:0">The business · B2B SaaS</span>
+  <h2 class="r" style="--d:1">Built for the teams who <span class="g">carry the pager.</span></h2>
+  <div class="body">
+    <div class="grid3">
+      <div class="card r" style="--d:2"><span class="tag">Who buys</span><h3 style="margin-top:22px">SRE &amp; platform teams</h3><p>Mid-sized e-commerce, fintech and SaaS companies where <b>every minute of downtime has a rupee value</b> and on-call teams are stretched.</p></div>
+      <div class="card r" style="--d:3"><span class="tag">How it lands</span><h3 style="margin-top:22px">Plugs into what they run</h3><p>Point existing Alertmanager or Grafana alerts at Argus, connect a repo and logs. <b>No rip-and-replace</b>; the first service in an afternoon.</p></div>
+      <div class="card r" style="--d:4"><span class="tag">How it earns</span><h3 style="margin-top:22px">Subscription per service</h3><p>Tiered by connected services and incidents per month, with an <b>enterprise tier</b> for SSO, two-person approval and audit export. <span style="color:var(--dim)">(proposed)</span></p></div>
+    </div>
+    <div class="card r mt-s" style="--d:5; display:flex; gap:60px; align-items:center; padding:30px 44px">
+      <div><div class="stat ok" style="font-size:72px">&gt;70,000×</div></div>
+      <p style="font-size:26px">return on AI spend on a single checkout incident (₹4.8 L protected ÷ ₹6.4 of AI). The pitch to a CFO writes itself, and <b>Argus prints it on every ticket.</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- 19 · Roadmap -->
+<section class="slide">
+  <span class="kicker r" style="--d:0">What's next</span>
+  <h2 class="r" style="--d:1">From hackathon MVP to <span class="g">production SaaS.</span></h2>
+  <div class="body">
+    <div class="grid3">
+      <div class="card r" style="--d:2"><span class="tag" style="color:var(--ok);background:rgba(62,229,154,.1);border-color:rgba(62,229,154,.3)">Done</span>
+        <ul class="ticks mt-s" style="gap:12px"><li>7-agent pipeline</li><li>Alertmanager &amp; Grafana</li><li>Policy + audit chain</li><li>Live store demo</li><li>Benchmark harness</li></ul></div>
+      <div class="card r" style="--d:3"><span class="tag">Next</span>
+        <ul class="ticks mt-s" style="gap:12px"><li>PagerDuty, Datadog, Sentry adapters</li><li>Kubernetes rollbacks</li><li>Real Slack &amp; Teams</li><li>GitHub PR mode</li></ul></div>
+      <div class="card r" style="--d:4"><span class="tag" style="color:#b9b0ff;background:rgba(123,108,255,.14);border-color:rgba(123,108,255,.35)">Then</span>
+        <ul class="ticks mt-s" style="gap:12px"><li>Multi-tenant cloud &amp; SSO</li><li>Learns from past incidents</li><li>Self-hosted for regulated teams</li><li>SOC 2 audit export</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 · Close -->
+<section class="slide center meet">
+  <div class="ring" style="width:900px;height:900px"></div>
+  <svg class="logo r" style="--d:0; width:130px; height:130px"><use href="#logo"/></svg>
+  <h1 class="r" style="--d:1; margin-top:40px; font-size:150px">Argus sees everything.<br><span class="g">Ships nothing without you.</span></h1>
+  <p class="sub r" style="--d:3">Proven root causes · tested fixes · human approval · money saved, on every incident.</p>
+  <div class="r" style="--d:5; margin-top:54px; display:flex; gap:16px; justify-content:center">
+    <span class="pill"><span class="dot"></span>Live demo next</span>
+    <span class="pill">Team YSL · Siddhartha &amp; Yuvika</span>
+  </div>
+</section>
+
+</div></div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const slides = [...document.querySelectorAll('.slide')];
+  const bar = document.getElementById('progress'), count = document.getElementById('count'), hint = document.getElementById('hint');
+  let i = 0;
+
+  // brand mark on content slides
+  slides.forEach(s => { if (!s.classList.contains('center')) s.insertAdjacentHTML('beforeend', '<div class="brand"><svg><use href="#logo"/></svg>Argus</div>'); });
+
+  function fit() {
+    const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(-50%, -50%) scale(${k})`;
+  }
+  function go(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, j) => s.classList.toggle('active', j === i));
+    bar.style.width = `${(i + 1) / slides.length * 100}%`;
+    count.textContent = `${String(i + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+    try { history.replaceState(null, '', `#${i + 1}`); } catch (e) {}
+    if (i > 0) hint.style.opacity = 0;
+  }
+  addEventListener('resize', fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(document.documentElement);
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); go(i + 1); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); go(i - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(slides.length - 1);
+    else if (e.key.toLowerCase() === 'f') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); }
+  });
+  document.getElementById('prev').onclick = e => { e.stopPropagation(); go(i - 1); };
+  document.getElementById('next').onclick = e => { e.stopPropagation(); go(i + 1); };
+  document.getElementById('viewport').addEventListener('click', e => go(e.clientX < innerWidth * 0.3 ? i - 1 : i + 1));
+  let tx = null;
+  addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchend', e => { if (tx === null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1)); tx = null; });
+
+  fit();
+  go((parseInt(location.hash.slice(1), 10) || 1) - 1);
+})();
+</script>
+</body>
+</html>
