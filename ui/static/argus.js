@@ -4,13 +4,13 @@
 // Drag to rotate; hover a region to see whose it is; click a region or a card to see that agent's steps.
 const Argus = (() => {
   const AGENTS = {
-    triage:       { name: "Theia", title: "Investigator", role: "Reads the logs",          dark: [94, 206, 255],  light: [14, 132, 196],  icon: "eye",    x: .15, y: .24, dir: [-.7, -.5, .5] },
-    code_history: { name: "Chronos", title: "Change finder", role: "Checks recent changes",  dark: [255, 128, 210], light: [200, 50, 140],  icon: "branch", x: .11, y: .52, dir: [-.95, .05, -.3] },
-    verifier:     { name: "Themis", title: "Fact checker", role: "Tries to prove it wrong", dark: [160, 132, 255], light: [104, 76, 214],  icon: "scale",  x: .15, y: .80, dir: [-.6, .65, .45] },
-    fix:          { name: "Hephaestus", title: "Fixer",        role: "Suggests a fix",          dark: [255, 186, 108], light: [204, 110, 8],   icon: "spark",  x: .85, y: .24, dir: [.7, -.5, .5] },
-    sandbox:      { name: "Talos", title: "Test lab",     role: "Tests the fix safely",    dark: [120, 168, 255], light: [44, 100, 214],  icon: "cube",   x: .89, y: .52, dir: [.95, .05, -.3] },
-    reporter:     { name: "Clio", title: "Writer",       role: "Writes the summary",      dark: [100, 232, 206], light: [10, 140, 124],  icon: "doc",    x: .85, y: .80, dir: [.6, .65, .45] },
-    human:        { name: "You", title: "Approver",          role: "Approve the fix",         dark: [255, 214, 150], light: [190, 128, 16],  icon: "person", x: .50, y: .92, dir: [0, .95, -.3] },
+    triage:       { name: "Theia", title: "Investigator", role: "Reads the logs",          dark: [94, 206, 255],  light: [14, 132, 196],  icon: "eye",    x: .14, y: .2, dir: [-.7, -.5, .5] },
+    code_history: { name: "Chronos", title: "Change finder", role: "Checks recent changes",  dark: [255, 128, 210], light: [200, 50, 140],  icon: "branch", x: .14, y: .5, dir: [-.95, .05, -.3] },
+    verifier:     { name: "Themis", title: "Fact checker", role: "Tries to prove it wrong", dark: [160, 132, 255], light: [104, 76, 214],  icon: "scale",  x: .14, y: .8, dir: [-.6, .65, .45] },
+    fix:          { name: "Hephaestus", title: "Fixer",        role: "Suggests a fix",          dark: [255, 186, 108], light: [204, 110, 8],   icon: "spark",  x: .86, y: .2, dir: [.7, -.5, .5] },
+    sandbox:      { name: "Talos", title: "Test lab",     role: "Tests the fix safely",    dark: [120, 168, 255], light: [44, 100, 214],  icon: "cube",   x: .86, y: .5, dir: [.95, .05, -.3] },
+    reporter:     { name: "Clio", title: "Writer",       role: "Writes the summary",      dark: [100, 232, 206], light: [10, 140, 124],  icon: "doc",    x: .86, y: .8, dir: [.6, .65, .45] },
+    human:        { name: "You", title: "Approver",          role: "Approve the fix",         dark: [255, 214, 150], light: [190, 128, 16],  icon: "person", x: .50, y: .9, dir: [0, .95, -.3] },
   };
   const ACTOR = { triage: "triage", code_history: "code_history", verifier: "verifier", fix: "fix",
     sandbox: "sandbox", reporter: "reporter", human: "human" };

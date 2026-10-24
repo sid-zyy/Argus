@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import random
+import re
 import subprocess
 import sys
 import threading
@@ -132,6 +133,8 @@ class Shop:
         self.lock = threading.Lock()
         self.pool = ThreadPoolExecutor(max_workers=64, thread_name_prefix="req")
         self.deployed_at = None
+        self.deploys = collections.deque(maxlen=20)  # for the chart markers
+        self.resetting = False
 
     # ---- deploys -------------------------------------------------------------
     def deploy_if_changed(self) -> None:
@@ -140,7 +143,10 @@ class Shop:
             return
         old = self.release.sha if self.release else None
         author = git("log", "-1", "--format=%an", sha).split()[0].lower()
-        changes = git("rev-list", "--reverse", f"{old}..{sha}").split() if old else [sha]
+        try:
+            changes = git("rev-list", "--reverse", f"{old}..{sha}").split() if old else [sha]
+        except RuntimeError:  # the old commit is gone (the repo was rebuilt by a reset)
+            changes = [sha]
         t = now()
         logs.write("deploy.log", f"{iso(t, ms=False)} DEPLOY checkout-api commit={sha[:7]} deployer={author} status=started "
                                  f"changes={','.join(c[:7] for c in changes)}")
@@ -151,13 +157,16 @@ class Shop:
             logs.write("app.log", f"{iso(now())} INFO  app starting checkout-api commit={sha[:7]}")
             logs.write("app.log", f"{iso(now())} INFO  db pool initialised size={release.config.POOL_SIZE} timeout={release.config.POOL_TIMEOUT}s")
         self.release, self.deployed_at = release, now()
+        meta = git("log", "-1", "--format=%an%x1f%s", sha).split("\x1f")
+        self.deploys.append({"t": iso(self.deployed_at), "sha": sha[:7], "author": meta[0], "message": meta[1], "ok": not release.error})
         logs.write("deploy.log", f"{iso(now(), ms=False)} DEPLOY checkout-api commit={sha[:7]} deployer={author} "
                                  f"status={'failed' if release.error else 'succeeded'} replicas=1/1")
 
     def watch_deploys(self) -> None:
         while True:
             try:
-                self.deploy_if_changed()
+                if not self.resetting:
+                    self.deploy_if_changed()
             except Exception as e:
                 print("deploy watcher:", e, file=sys.stderr)
             time.sleep(2)
@@ -242,6 +251,8 @@ class Shop:
 
     # ---- alerting ------------------------------------------------------------
     def check_alert(self) -> None:
+        if self.resetting:
+            return
         rows = self.window(ALERT_WINDOW)
         s = self.summarise(rows, ALERT_WINDOW)
         a = self.alert
@@ -296,7 +307,7 @@ class Shop:
                 "error_rate": round(s["error_rate"], 3), "rps": round(s["rps"], 2), "p95_ms": s["p95_ms"],
                 "orders_per_min": s["orders"] * 2, "orders_total": self.orders, "pool_in_use": in_use, "pool_size": size,
                 "start_error": rel.error if rel else None, "deployed_at": iso(self.deployed_at) if self.deployed_at else None,
-                "commits": self.commits(), "series": list(self.series),
+                "commits": self.commits(), "series": list(self.series), "deploys": list(self.deploys),
                 "alert": {k: self.alert[k] for k in ("firing", "since", "incident", "error")},
                 "broken_change_live": self.bad_change_live(), "argus_url": ARGUS_URL}
 
@@ -314,17 +325,28 @@ class Shop:
         env = {**os.environ, "GIT_AUTHOR_NAME": who, "GIT_AUTHOR_EMAIL": email, "GIT_COMMITTER_NAME": who, "GIT_COMMITTER_EMAIL": email}
         git("add", "-A", env=env)
         git("commit", "-q", "-m", BAD_CHANGE["message"], env=env)
-        return {"sha": git("rev-parse", "--short", "HEAD"), "message": BAD_CHANGE["message"]}
+        return self.commit(git("rev-parse", "HEAD"))
+
+    def commit(self, ref: str) -> dict:
+        """One commit with its diff, for the 'what was pushed' view."""
+        sha, author, date, message = git("log", "-1", "--format=%h%x1f%an%x1f%aI%x1f%s", ref).split("\x1f")
+        return {"sha": sha, "author": author, "date": date, "message": message,
+                "diff": git("show", "--format=", "--no-color", "--unified=4", ref)}
 
     def reset(self) -> dict:
         from scenarios.build import build
-        build("live_shop")  # fresh repo with only the good history, and empty logs
-        with self.lock:
-            self.requests.clear()
-            self.series.clear()
-        self.alert.update(firing=False, since=None, incident=None, error=None, bad_checks=0, good_since=None)
-        self.release = None
-        self.deploy_if_changed()
+        # the running release keeps serving while the repo is rebuilt, so a reset never causes errors itself
+        self.resetting = True
+        try:
+            build("live_shop")  # fresh repo with only the good history, and empty logs
+            self.deploys.clear()
+            self.deploy_if_changed()
+            with self.lock:
+                self.requests.clear()
+                self.series.clear()
+            self.alert.update(firing=False, since=None, incident=None, error=None, bad_checks=0, good_since=None)
+        finally:
+            self.resetting = False
         return {"sha": self.release.sha[:7]}
 
 
@@ -367,6 +389,16 @@ def buy(body: dict):
 @app.get("/api/status")
 def status():
     return shop.status()
+
+
+@app.get("/api/commits/{sha}")
+def commit(sha: str):
+    if not re.fullmatch(r"[0-9a-f]{4,40}", sha):
+        raise HTTPException(422, "not a commit id")
+    try:
+        return shop.commit(sha)
+    except RuntimeError:
+        raise HTTPException(404, "no such commit")
 
 
 @app.post("/admin/break")

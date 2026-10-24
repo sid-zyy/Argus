@@ -6,125 +6,221 @@
 <title>ShopFast</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6b4a'/%3E%3Cpath d='M9 12h14l-1.5 11h-11z' fill='white'/%3E%3Cpath d='M12.5 12a3.5 3.5 0 0 1 7 0' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
   :root {
-    --bg: #faf8f5; --surface: #fff; --text: #1d1b22; --muted: #6b6775; --faint: #9a96a3; --border: #ebe7e1;
-    --accent: #ff6b4a; --good: #188c54; --good-bg: #e6f5ec; --bad: #cc3630; --bad-bg: #fdecea; --warn: #b07a10;
-    --shadow: 0 1px 2px rgba(30,20,10,.05), 0 6px 20px rgba(30,20,10,.05);
+    --bg: #faf8f5; --surface: #fff; --text: #1d1b22; --muted: #6b6775; --faint: #9a96a3; --border: #ece8e2;
+    --accent: #ff6b4a; --good: #188c54; --good-bg: #e6f5ec; --bad: #cc3630; --bad-bg: #fdecea; --warn: #c58a12;
+    --shadow: 0 1px 2px rgba(30,20,10,.04), 0 8px 24px rgba(30,20,10,.06);
+    --ops: #14151c; --ops-2: #1c1e27; --ops-line: #2a2d38; --ops-text: #e9eaf0; --ops-muted: #8e93a3;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 Inter, system-ui, sans-serif; }
-  header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 2; }
-  .logo { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 18px; }
-  .logo svg { width: 28px; height: 28px; }
-  .tag { color: var(--muted); font-size: 13px; }
+  button { font: inherit; cursor: pointer; }
+  code, .mono { font-family: "JetBrains Mono", monospace; }
+
+  .promo { background: var(--text); color: #fff; text-align: center; font-size: 12.5px; padding: 7px 16px; letter-spacing: .01em; }
+  .promo b { color: #ffb199; font-weight: 600; }
+  header { display: flex; align-items: center; gap: 28px; padding: 14px 28px; background: rgba(255,255,255,.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; }
+  .logo { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 19px; letter-spacing: -.01em; }
+  .logo svg { width: 30px; height: 30px; }
+  nav.cats { display: flex; gap: 22px; font-size: 14px; color: var(--muted); }
+  nav.cats span:first-child { color: var(--text); font-weight: 600; }
   .spacer { flex: 1; }
-  .pill { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; transition: background .4s, color .4s; }
   .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
   .pill.good { color: var(--good); background: var(--good-bg); }
   .pill.bad { color: var(--bad); background: var(--bad-bg); }
   .pill.bad::before { animation: blink 1s infinite; }
   @keyframes blink { 50% { opacity: .2; } }
-  main { max-width: 1240px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 1fr 400px; gap: 24px; }
-  @media (max-width: 960px) { main { grid-template-columns: 1fr; padding: 16px; } }
-  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.01em; }
-  h2 { font-size: 15px; margin: 0 0 12px; }
-  .sub { color: var(--muted); margin: 0 0 18px; }
-  .banner { padding: 12px 16px; border-radius: 12px; margin-bottom: 18px; font-weight: 500; display: none; }
-  .banner.bad { display: block; background: var(--bad-bg); color: var(--bad); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
-  .swatch { height: 130px; display: grid; place-items: center; }
-  .swatch svg { width: 54px; height: 54px; opacity: .9; }
-  .card .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .cart { position: relative; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); }
+  .cart svg { width: 18px; height: 18px; }
+  .cart b { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 11px; display: grid; place-items: center; }
+  .cart b:empty { display: none; }
+
+  main { max-width: 1320px; margin: 0 auto; padding: 24px 28px 40px; display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 28px; align-items: start; }
+  @media (max-width: 1080px) { main { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { main { padding: 16px; } header { padding: 12px 16px; gap: 14px; } nav.cats { display: none; } }
+
+  .hero { position: relative; overflow: hidden; border-radius: 20px; padding: 30px 32px; color: #fff; margin-bottom: 22px;
+    background: radial-gradient(120% 140% at 0% 0%, #ff8a65 0%, #ff6b4a 35%, #e0457b 100%); }
+  .hero h1 { font-size: 30px; line-height: 1.15; letter-spacing: -.02em; margin: 0; max-width: 460px; }
+  .hero p { margin: 8px 0 0; opacity: .9; max-width: 460px; }
+  .hero .blob { position: absolute; right: -40px; top: -60px; width: 260px; height: 260px; border-radius: 50%; background: rgba(255,255,255,.14); }
+  .hero .blob.b2 { right: 120px; top: 70px; width: 140px; height: 140px; background: rgba(255,255,255,.1); }
+  .banner { padding: 12px 16px; border-radius: 12px; margin-bottom: 18px; font-weight: 600; display: none; align-items: center; gap: 10px; }
+  .banner.bad { display: flex; background: var(--bad-bg); color: var(--bad); animation: slide .4s ease; }
+  @keyframes slide { from { opacity: 0; transform: translateY(-6px); } }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 18px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 16px 34px -18px rgba(30,20,10,.3); }
+  .swatch { height: 150px; display: grid; place-items: center; position: relative; }
+  .swatch svg { width: 58px; height: 58px; transition: transform .4s cubic-bezier(.2,.7,.2,1); }
+  .card:hover .swatch svg { transform: scale(1.08) rotate(-3deg); }
+  .tag { position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,.9); color: var(--text); font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+  .card .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 3px; flex: 1; }
   .name { font-weight: 600; }
-  .price { color: var(--muted); }
-  button { font: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 9px 14px; border-radius: 10px; font-weight: 600; }
-  button:hover { border-color: #d6d1c8; }
-  button.primary { background: var(--text); color: #fff; border-color: var(--text); margin-top: auto; }
-  button.primary:hover { background: #000; }
-  button.danger { color: var(--bad); }
-  button:disabled { opacity: .5; cursor: default; }
-  .check { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; margin: 16px 0 0; }
-  aside { display: flex; flex-direction: column; gap: 16px; }
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
+  .meta { display: flex; justify-content: space-between; align-items: baseline; }
+  .price { font-weight: 700; font-size: 16px; }
+  .stars { color: var(--warn); font-size: 12.5px; }
+  .buy { margin-top: 12px; border: 0; border-radius: 11px; padding: 10px 14px; background: var(--text); color: #fff; font-weight: 600; transition: background .2s; }
+  .buy:hover { background: #000; }
+  .buy:disabled { opacity: .55; cursor: default; }
+  .check { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; margin-top: 18px; }
+
+  /* ops console: the engineer's view, dark so it reads as "behind the scenes" */
+  aside { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 84px; }
+  .ops { background: var(--ops); color: var(--ops-text); border-radius: 18px; padding: 18px; box-shadow: 0 20px 40px -24px rgba(10,10,20,.6); }
+  .ops h2 { font-size: 12px; margin: 0 0 14px; color: var(--ops-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .ops h2 .live { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 0 rgba(74,222,128,.6); animation: ping 2s infinite; }
+  @keyframes ping { 70% { box-shadow: 0 0 0 7px rgba(74,222,128,0); } 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); } }
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .stat .k { color: var(--muted); font-size: 12px; }
-  .stat .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .stat .v.bad { color: var(--bad); }
-  .bar { height: 8px; border-radius: 99px; background: #f0ece6; overflow: hidden; margin-top: 6px; }
-  .bar > div { height: 100%; background: var(--good); transition: width .6s, background .6s; }
-  canvas { width: 100%; height: 110px; display: block; margin-top: 14px; }
-  .legend { color: var(--faint); font-size: 12px; display: flex; justify-content: space-between; }
-  .commit { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; padding: 9px 0; border-top: 1px solid var(--border); font-size: 13px; }
-  .commit:first-of-type { border-top: 0; }
-  .sha { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); }
-  .commit .meta { grid-column: 2; color: var(--faint); font-size: 12px; }
-  .commit.live .sha { color: var(--accent); font-weight: 600; }
-  .alert { padding: 12px 14px; border-radius: 12px; font-size: 14px; }
-  .alert.quiet { background: #f4f2ee; color: var(--muted); }
-  .alert.firing { background: var(--bad-bg); color: var(--bad); }
-  .alert a { color: inherit; font-weight: 700; }
+  .stat .k { color: var(--ops-muted); font-size: 12px; }
+  .stat .v { font-size: 26px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; transition: color .4s; }
+  .stat .v.bad { color: #ff6b6b; }
+  .bar { height: 8px; border-radius: 99px; background: var(--ops-line); overflow: hidden; margin-top: 7px; }
+  .bar > div { height: 100%; background: #4ade80; transition: width .6s, background .6s; }
+  canvas { width: 100%; height: 130px; display: block; margin-top: 16px; }
+  .legend { color: var(--ops-muted); font-size: 11.5px; display: flex; justify-content: space-between; margin-top: 4px; }
+  .alert { padding: 12px 14px; border-radius: 12px; font-size: 13.5px; background: var(--ops-2); color: var(--ops-muted); border: 1px solid var(--ops-line); transition: background .4s, color .4s; }
+  .alert.firing { background: rgba(255,107,107,.12); color: #ffb4b4; border-color: rgba(255,107,107,.35); }
+  .alert.ok { background: rgba(74,222,128,.1); color: #a7f3c4; border-color: rgba(74,222,128,.3); }
+  .alert a { color: #fff; font-weight: 700; }
+  .commit { width: 100%; text-align: left; background: none; border: 0; color: inherit; display: grid; grid-template-columns: 62px 1fr; gap: 1px 10px; padding: 9px 8px; border-radius: 10px; font-size: 13px; }
+  .commit:hover { background: var(--ops-2); }
+  .commit .sha { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ops-muted); padding-top: 1px; }
+  .commit .msg { color: var(--ops-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .commit .who { grid-column: 2; color: var(--ops-muted); font-size: 11.5px; }
+  .commit.live .sha { color: #ffb199; font-weight: 600; }
+  .commit.argus .sha { color: #a7f3c4; }
   .row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .hint { color: var(--faint); font-size: 12px; margin: 10px 0 0; }
-  code { font-family: "JetBrains Mono", monospace; font-size: 12px; background: #f4f2ee; padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
-  main > * { min-width: 0; }
-  @media (max-width: 600px) { .tag { display: none; } header { padding: 12px 16px; } }
-  .toast { position: fixed; left: 50%; bottom: 24px; translate: -50% 20px; opacity: 0; transition: .35s; background: var(--text); color: #fff; padding: 12px 18px; border-radius: 12px; font-weight: 500; box-shadow: var(--shadow); }
+  .btn { border: 1px solid var(--ops-line); background: var(--ops-2); color: var(--ops-text); padding: 9px 14px; border-radius: 10px; font-weight: 600; font-size: 13.5px; }
+  .btn:hover { border-color: #3a3e4c; }
+  .btn.danger { background: #ff6b4a; border-color: #ff6b4a; color: #fff; }
+  .btn.danger:hover { background: #ff5730; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .hint { color: var(--ops-muted); font-size: 12px; margin: 10px 0 0; }
+  .hint code { background: var(--ops-2); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+
+  .toast { position: fixed; left: 50%; bottom: 24px; translate: -50% 20px; opacity: 0; transition: .35s; background: var(--text); color: #fff; padding: 12px 18px; border-radius: 12px; font-weight: 500; box-shadow: var(--shadow); z-index: 30; }
   .toast.show { opacity: 1; translate: -50% 0; }
   .toast.bad { background: var(--bad); }
+
+  /* the push: terminal, diff, deploy pipeline */
+  .overlay { position: fixed; inset: 0; z-index: 20; background: rgba(12,12,18,.55); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 20px; opacity: 0; transition: opacity .3s; }
+  .overlay.show { opacity: 1; }
+  .push { width: min(760px, 100%); max-height: calc(100vh - 40px); overflow: auto; background: var(--ops); color: var(--ops-text); border-radius: 18px; border: 1px solid var(--ops-line);
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,.7); transform: translateY(14px) scale(.98); transition: transform .45s cubic-bezier(.2,.7,.2,1); }
+  .overlay.show .push { transform: none; }
+  .push-head { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--ops-line); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; background: #ffb199; color: #4a1d10; flex: none; }
+  .avatar.argus { background: #a7f3c4; color: #0d3b22; }
+  .push-head .who { font-weight: 600; }
+  .push-head .sub { color: var(--ops-muted); font-size: 12.5px; }
+  .push-head .x { margin-left: auto; background: none; border: 0; color: var(--ops-muted); font-size: 22px; line-height: 1; padding: 4px 8px; border-radius: 8px; }
+  .push-head .x:hover { background: var(--ops-2); color: #fff; }
+  .term { font-family: "JetBrains Mono", monospace; font-size: 13px; padding: 14px 20px; color: #c9cbd6; min-height: 20px; }
+  .term .p { color: #7dd3fc; }
+  .term .ok { color: #a7f3c4; }
+  .term .dim { color: var(--ops-muted); }
+  .caret { display: inline-block; width: 7px; height: 15px; background: #c9cbd6; vertical-align: -2px; animation: blink .9s steps(1) infinite; }
+  .diff { margin: 0 20px; border: 1px solid var(--ops-line); border-radius: 12px; overflow: hidden; font-family: "JetBrains Mono", monospace; font-size: 12.5px; }
+  .diff .file { display: flex; justify-content: space-between; padding: 9px 14px; background: var(--ops-2); color: var(--ops-text); font-weight: 600; }
+  .diff .file span:last-child { font-weight: 500; }
+  .diff .file .plus { color: #4ade80; } .diff .file .minus { color: #ff6b6b; }
+  .diff .lines { padding: 6px 0; }
+  .ln { display: grid; grid-template-columns: 20px 1fr; padding: 0 14px; white-space: pre; opacity: 0; transform: translateX(-6px); transition: opacity .25s, transform .25s, background .4s; }
+  .ln.in { opacity: 1; transform: none; }
+  .ln.add { background: rgba(74,222,128,.09); color: #b6f3cc; }
+  .ln.del { background: rgba(255,107,107,.1); color: #ffc2c2; }
+  .ln.hunk { color: #7dd3fc; opacity: .7; }
+  .ln.ctx { color: #9ea3b3; }
+  .ln.spot { background: rgba(255,177,76,.22) !important; box-shadow: inset 3px 0 0 #ffb14c; }
+  .note { margin: 12px 20px 0; padding: 11px 14px; border-radius: 10px; background: rgba(255,177,76,.12); border: 1px solid rgba(255,177,76,.3); color: #ffd7a0; font-size: 13.5px; opacity: 0; transition: opacity .5s; }
+  .note.in { opacity: 1; }
+  .note b { color: #fff; }
+  .pipe { display: flex; gap: 8px; padding: 16px 20px; flex-wrap: wrap; align-items: center; }
+  .step { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; background: var(--ops-2); color: var(--ops-muted); border: 1px solid var(--ops-line); transition: all .35s; }
+  .step::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .5; }
+  .step.run { color: #7dd3fc; border-color: rgba(125,211,252,.4); }
+  .step.run::before { opacity: 1; animation: blink .8s infinite; }
+  .step.done { color: #a7f3c4; border-color: rgba(167,243,196,.35); }
+  .step.done::before { opacity: 1; }
+  .arrow { color: var(--ops-line); }
+  .push-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 0 20px 18px; }
+  @media (prefers-reduced-motion: reduce) { .ln, .push, .overlay, .note { transition: none; } }
 </style>
 </head>
 <body>
+<div class="promo">Free delivery on orders over ₹999 · <b>Demo store</b>, watched by Argus</div>
 <header>
   <div class="logo"><svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#ff6b4a"/><path d="M9 12h14l-1.5 11h-11z" fill="#fff"/><path d="M12.5 12a3.5 3.5 0 0 1 7 0" stroke="#fff" stroke-width="2" fill="none"/></svg>ShopFast</div>
-  <span class="tag">Demo store, watched by Argus</span>
+  <nav class="cats"><span>New in</span><span>Shoes</span><span>Audio</span><span>Home</span><span>Deals</span></nav>
   <span class="spacer"></span>
   <span class="pill good" id="health">Connecting…</span>
+  <span class="cart" title="Your orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.5 12h-11z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg><b id="cart"></b></span>
 </header>
 <main>
   <section>
-    <h1>Today's picks</h1>
-    <p class="sub">Every purchase runs the real checkout code from <code>scenarios/live_shop/repo</code>.</p>
+    <div class="hero"><div class="blob"></div><div class="blob b2"></div>
+      <h1>Autumn picks, delivered tomorrow</h1>
+      <p>Every purchase runs the real checkout code from <code style="color:#fff">scenarios/live_shop/repo</code>.</p>
+    </div>
     <div class="banner" id="banner"></div>
     <div class="grid" id="products"></div>
     <label class="check"><input type="checkbox" id="decline"> Pay with a card that gets declined</label>
   </section>
   <aside>
-    <div class="panel">
-      <h2>Behind the scenes</h2>
+    <div class="ops">
+      <h2><span class="live"></span>Behind the scenes · checkout-api</h2>
       <div class="stats">
         <div class="stat"><div class="k">Error rate (30 s)</div><div class="v" id="err">–</div></div>
         <div class="stat"><div class="k">Orders per minute</div><div class="v" id="opm">–</div></div>
         <div class="stat" style="grid-column: span 2"><div class="k" id="pool-k">Database connections in use</div><div class="bar"><div id="pool"></div></div></div>
       </div>
       <canvas id="chart"></canvas>
-      <div class="legend"><span>Error rate, last 10 min</span><span id="chart-max"></span></div>
+      <div class="legend"><span>Error rate, last 10 min · pins are deploys</span><span id="chart-max"></span></div>
     </div>
-    <div class="panel">
+    <div class="ops">
       <h2>Argus</h2>
-      <div class="alert quiet" id="alert">Watching. Nothing wrong right now.</div>
+      <div class="alert" id="alert">Watching. Nothing wrong right now.</div>
     </div>
-    <div class="panel">
+    <div class="ops">
       <h2>Deployed changes</h2>
       <div id="commits"></div>
     </div>
-    <div class="panel">
+    <div class="ops">
       <h2>Developer controls</h2>
       <div class="row">
-        <button class="danger" id="break">Push a bad change</button>
-        <button id="reset">Reset shop</button>
+        <button class="btn danger" id="break">Push a bad change</button>
+        <button class="btn" id="reset">Reset shop</button>
       </div>
-      <p class="hint">Or change the code yourself: edit <code>app/checkout.py</code> in <code>scenarios/live_shop/repo</code> and <code>git commit</code>. Each commit is deployed within seconds.</p>
+      <p class="hint">Or change it yourself: edit <code>app/checkout.py</code> in <code>scenarios/live_shop/repo</code> and <code>git commit</code>. Every commit is deployed within seconds. Click any change above to see its code.</p>
     </div>
   </aside>
 </main>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="push" role="dialog" aria-modal="true" aria-labelledby="push-who">
+    <div class="push-head"><div class="avatar" id="push-avatar">AM</div>
+      <div><div class="who" id="push-who"></div><div class="sub" id="push-sub"></div></div>
+      <button class="x" id="push-close" aria-label="Close">×</button></div>
+    <div class="term" id="term"></div>
+    <div class="diff" id="diff" hidden></div>
+    <div class="note" id="note" hidden></div>
+    <div class="pipe" id="pipe" hidden></div>
+    <div class="push-foot"><button class="btn" id="push-done" hidden>Watch the shop</button></div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const rupees = (v) => `₹${v.toLocaleString("en-IN")}`;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const pace = (ms) => (calm ? 0 : ms);
 const ICONS = [
   '<path d="M6 30h36l-4 8H10z M14 30l6-14h8l6 14" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
   '<path d="M10 28a14 14 0 0 1 28 0v8h-6v-10h4 M10 28v8h6V26h-4" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
@@ -133,7 +229,8 @@ const ICONS = [
   '<path d="M14 12l10 6 10-6 6 8-6 4v16H14V24l-6-4z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
   '<path d="M12 40h24 M24 40V22 M14 22l10-14 10 14z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>',
 ];
-let toastTimer;
+const TAGS = ["Bestseller", "New", "", "Top rated", "", "Deal"];
+let toastTimer, myOrders = 0, last = null;
 function toast(text, bad) {
   const t = $("toast");
   t.textContent = text; t.className = `toast show ${bad ? "bad" : ""}`;
@@ -143,90 +240,215 @@ function ago(iso) {
   const s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
   return s < 60 ? "Just now" : s < 3600 ? `${Math.floor(s / 60)} min ago` : s < 86400 ? `${Math.floor(s / 3600)} h ago` : `${Math.floor(s / 86400)} d ago`;
 }
+const initials = (name) => name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
+// ---- storefront ----
 async function loadProducts() {
   const items = await fetch("/api/products").then((r) => r.json());
   $("products").innerHTML = items.map((p, i) => `
-    <div class="card"><div class="swatch" style="background:${p.tint}"><svg viewBox="0 0 48 48">${ICONS[i % ICONS.length]}</svg></div>
-      <div class="body"><div class="name">${esc(p.name)}</div><div class="price">${rupees(p.price)}</div>
-      <button class="primary" data-id="${p.id}" style="margin-top:10px">Buy now</button></div></div>`).join("");
+    <div class="card"><div class="swatch" style="background:linear-gradient(140deg, ${p.tint}, color-mix(in srgb, ${p.tint} 70%, #000))">
+        ${TAGS[i] ? `<span class="tag">${TAGS[i]}</span>` : ""}<svg viewBox="0 0 48 48">${ICONS[i % ICONS.length]}</svg></div>
+      <div class="body"><div class="name">${esc(p.name)}</div>
+        <div class="meta"><span class="price">${rupees(p.price)}</span><span class="stars">★ ${(4.3 + (i % 5) / 10).toFixed(1)}</span></div>
+        <button class="buy" data-id="${p.id}">Buy now</button></div></div>`).join("");
   document.querySelectorAll("[data-id]").forEach((b) => b.onclick = async () => {
     b.disabled = true; b.textContent = "Paying…";
     try {
       const r = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ product_id: b.dataset.id, decline: $("decline").checked }) }).then((x) => x.json());
-      if (r.status === 200) toast(`Order placed: ${r.product}`);
+      if (r.status === 200) { toast(`Order placed: ${r.product}`); $("cart").textContent = ++myOrders; }
       else if (r.status === 402) toast("Your card was declined. Try another card.", true);
       else toast(`Sorry, checkout failed (error ${r.status}). Please try again later.`, true);
     } finally { b.disabled = false; b.textContent = "Buy now"; }
   });
 }
 
-function drawChart(series) {
+// ---- error chart with deploy pins ----
+function drawChart(series, deploys) {
   const c = $("chart"), dpr = devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
   c.width = w * dpr; c.height = h * dpr;
   const ctx = c.getContext("2d"); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
-  const pts = series.slice(-120);
+  const pts = series.slice(-120), top = 22, bottom = h - 4;
   const max = Math.max(.1, ...pts.map((p) => p.error_rate));
   $("chart-max").textContent = `Top: ${Math.round(max * 100)}%`;
-  ctx.strokeStyle = "#ebe7e1"; ctx.lineWidth = 1;
-  [0, .5, 1].forEach((f) => { const y = h - 4 - f * (h - 8); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); });
-  const ty = h - 4 - (.05 / max) * (h - 8);  // alert threshold
-  ctx.setLineDash([4, 4]); ctx.strokeStyle = "#e0a96d"; ctx.beginPath(); ctx.moveTo(0, ty); ctx.lineTo(w, ty); ctx.stroke(); ctx.setLineDash([]);
+  const y = (v) => bottom - (v / max) * (bottom - top);
+  ctx.strokeStyle = "#2a2d38"; ctx.lineWidth = 1;
+  [0, .5, 1].forEach((f) => { const yy = bottom - f * (bottom - top); ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(w, yy); ctx.stroke(); });
+  ctx.setLineDash([4, 4]); ctx.strokeStyle = "rgba(255,177,76,.55)";
+  ctx.beginPath(); ctx.moveTo(0, y(.05)); ctx.lineTo(w, y(.05)); ctx.stroke(); ctx.setLineDash([]);
   if (pts.length < 2) return;
-  const x = (i) => (i / 119) * w, y = (v) => h - 4 - (v / max) * (h - 8);
-  const off = 120 - pts.length;
-  ctx.beginPath(); ctx.moveTo(x(off), h);
-  pts.forEach((p, i) => ctx.lineTo(x(off + i), y(p.error_rate)));
-  ctx.lineTo(x(off + pts.length - 1), h); ctx.closePath();
-  ctx.fillStyle = "rgba(204,54,48,.12)"; ctx.fill();
-  ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, x(off + i), y(p.error_rate)));
-  ctx.strokeStyle = "#cc3630"; ctx.lineWidth = 2; ctx.stroke();
+  const off = 120 - pts.length, x = (i) => ((off + i) / 119) * w;
+  ctx.beginPath(); ctx.moveTo(x(0), bottom);
+  pts.forEach((p, i) => ctx.lineTo(x(i), y(p.error_rate)));
+  ctx.lineTo(x(pts.length - 1), bottom); ctx.closePath();
+  const g = ctx.createLinearGradient(0, top, 0, bottom); g.addColorStop(0, "rgba(255,107,107,.35)"); g.addColorStop(1, "rgba(255,107,107,0)");
+  ctx.fillStyle = g; ctx.fill();
+  ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, x(i), y(p.error_rate)));
+  ctx.strokeStyle = "#ff6b6b"; ctx.lineWidth = 2; ctx.stroke();
+  // a pin at each deploy inside the window
+  const t0 = Date.parse(pts[0].t), t1 = Date.parse(pts[pts.length - 1].t);
+  ctx.font = "600 10.5px Inter, sans-serif"; ctx.textBaseline = "middle";
+  (deploys || []).forEach((d) => {
+    const t = Date.parse(d.t);
+    if (t < t0 || t > t1 + 5000) return;
+    const px = x(0) + ((t - t0) / Math.max(1, t1 - t0)) * (x(pts.length - 1) - x(0));
+    const argus = d.author === "Argus", col = argus ? "#4ade80" : "#ffb14c";
+    ctx.strokeStyle = col; ctx.globalAlpha = .8; ctx.beginPath(); ctx.moveTo(px, top - 2); ctx.lineTo(px, bottom); ctx.stroke(); ctx.globalAlpha = 1;
+    const label = argus ? `Argus fix ${d.sha}` : `${d.author.split(" ")[0]} ${d.sha}`;
+    const tw = ctx.measureText(label).width + 12, lx = Math.min(Math.max(px - tw / 2, 0), w - tw);
+    ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(lx, 2, tw, 16, 8); ctx.fill();
+    ctx.fillStyle = "#14151c"; ctx.fillText(label, lx + 6, 10.5);
+  });
 }
 
+// ---- live status ----
 async function refresh() {
   let s;
   try { s = await fetch("/api/status").then((r) => r.json()); } catch { return; }
+  last = s;
   const bad = !s.healthy;
   $("health").className = `pill ${bad ? "bad" : "good"}`;
   $("health").textContent = bad ? "Checkout failing" : "All systems normal";
   $("banner").className = `banner ${bad ? "bad" : ""}`;
-  $("banner").textContent = s.start_error ? `The latest version failed to start: ${s.start_error}` :
-    `Checkout is failing for ${Math.round(s.error_rate * 100)}% of requests right now.`;
+  $("banner").textContent = s.start_error ? `⚠ The latest version failed to start: ${s.start_error}` :
+    `⚠ Checkout is failing for ${Math.round(s.error_rate * 100)}% of requests right now. Our engineers have been alerted.`;
   $("err").textContent = `${(s.error_rate * 100).toFixed(1)}%`;
   $("err").className = `v ${bad ? "bad" : ""}`;
   $("opm").textContent = s.orders_per_min;
   $("pool-k").textContent = `Database connections in use: ${s.pool_in_use} of ${s.pool_size}`;
   const share = s.pool_size ? s.pool_in_use / s.pool_size : 0;
   $("pool").style.width = `${Math.max(2, share * 100)}%`;
-  $("pool").style.background = share > .8 ? "var(--bad)" : share > .5 ? "var(--warn)" : "var(--good)";
-  drawChart(s.series);
-  const a = s.alert, inc = a.incident;
-  $("alert").className = `alert ${a.firing ? "firing" : "quiet"}`;
+  $("pool").style.background = share > .8 ? "#ff6b6b" : share > .5 ? "#ffb14c" : "#4ade80";
+  drawChart(s.series, s.deploys);
+  const a = s.alert, inc = a.incident, link = inc ? `<a href="${esc(s.argus_url + inc.url)}" target="_blank">${esc(inc.key)}</a>` : "";
+  $("alert").className = `alert ${a.firing ? "firing" : inc ? "ok" : ""}`;
   $("alert").innerHTML = a.error ? `Alert firing, but ${esc(a.error)}`
-    : a.firing ? `Alert sent. Argus opened <a href="${esc(s.argus_url + (inc ? inc.url : "/"))}" target="_blank">${esc(inc ? inc.key : "an incident")}</a> and is investigating.`
-    : inc ? `Recovered. Argus handled <a href="${esc(s.argus_url + inc.url)}" target="_blank">${esc(inc.key)}</a>.`
-    : "Watching. Nothing wrong right now.";
-  $("commits").innerHTML = s.commits.map((c, i) => `<div class="commit ${i === 0 ? "live" : ""}"><span class="sha">${esc(c.sha)}</span>
-    <span>${esc(c.message)}</span><span class="meta">${esc(c.author)} · ${ago(c.date)}${i === 0 ? " · Live" : ""}</span></div>`).join("");
-  $("break").disabled = s.broken_change_live;
+    : a.firing ? `Alert sent. Argus opened ${link || "an incident"} and is investigating.`
+    : inc ? `Recovered. Argus handled ${link}.` : "Watching. Nothing wrong right now.";
+  $("commits").innerHTML = s.commits.map((c, i) => `<button class="commit ${i === 0 ? "live" : ""} ${c.author === "Argus" ? "argus" : ""}" data-sha="${esc(c.sha)}">
+    <span class="sha">${esc(c.sha)}</span><span class="msg">${esc(c.message)}</span><span class="who">${esc(c.author)} · ${ago(c.date)}${i === 0 ? " · Live" : ""}</span></button>`).join("");
+  document.querySelectorAll(".commit").forEach((b) => b.onclick = () => showCommit(b.dataset.sha));
+  $("break").disabled = s.broken_change_live || pushing;
+}
+
+// ---- the push: who, the command, the diff, then the deploy pipeline ----
+let pushing = false;
+function openOverlay(commit, sub) {
+  $("push-avatar").textContent = commit.author === "Argus" ? "A" : initials(commit.author);
+  $("push-avatar").className = `avatar ${commit.author === "Argus" ? "argus" : ""}`;
+  $("push-who").textContent = commit.author;
+  $("push-sub").textContent = sub;
+  ["diff", "note", "pipe", "push-done"].forEach((id) => ($(id).hidden = true));
+  $("note").classList.remove("in");
+  $("term").innerHTML = "";
+  $("overlay").hidden = false;
+  requestAnimationFrame(() => $("overlay").classList.add("show"));
+}
+function closeOverlay() {
+  $("overlay").classList.remove("show");
+  setTimeout(() => ($("overlay").hidden = true), 300);
+}
+async function type(el, text, speed = 22) {
+  for (let i = 1; i <= text.length; i++) { el.textContent = text.slice(0, i); if (!calm) await sleep(speed); }
+}
+async function termLine(html, typed) {
+  const line = document.createElement("div");
+  $("term").appendChild(line);
+  if (!typed) { line.innerHTML = html; return; }
+  line.innerHTML = `<span class="p">$</span> <span class="cmd"></span><span class="caret"></span>`;
+  await type(line.querySelector(".cmd"), typed);
+  line.querySelector(".caret").remove();
+  await sleep(pace(250));
+}
+function renderDiff(diff) {
+  const files = [];
+  for (const raw of diff.split("\n")) {
+    if (raw.startsWith("diff --git")) { files.push({ name: raw.split(" b/")[1], lines: [], add: 0, del: 0 }); continue; }
+    const f = files[files.length - 1];
+    if (!f || /^(index |--- |\+\+\+ |new file|deleted file)/.test(raw)) continue;
+    const kind = raw.startsWith("@@") ? "hunk" : raw.startsWith("+") ? "add" : raw.startsWith("-") ? "del" : "ctx";
+    if (kind === "add") f.add++;
+    if (kind === "del") f.del++;
+    f.lines.push({ kind, text: kind === "hunk" ? raw.replace(/^@@[^@]*@@/, "···") : raw.slice(1) });
+  }
+  $("diff").innerHTML = files.map((f) => `<div class="file"><span>${esc(f.name)}</span><span><span class="plus">+${f.add}</span> <span class="minus">−${f.del}</span></span></div>
+    <div class="lines">${f.lines.map((l) => `<div class="ln ${l.kind}"><span>${l.kind === "add" ? "+" : l.kind === "del" ? "−" : ""}</span><span>${esc(l.text) || " "}</span></div>`).join("")}</div>`).join("");
+  $("diff").hidden = false;
+}
+async function revealDiff() {
+  const lines = [...$("diff").querySelectorAll(".ln")];
+  for (const l of lines) { l.classList.add("in"); if (!calm) await sleep(l.classList.contains("ctx") ? 25 : 70); }
+}
+// point at the line that matters: a 'return' added before the connection is released
+function spotTheBug() {
+  const lines = [...$("diff").querySelectorAll(".ln")];
+  const ret = lines.find((l) => l.classList.contains("add") && /return/.test(l.textContent) && /402|error/.test(l.textContent));
+  const rel = lines.find((l) => l.classList.contains("del") && /finally/.test(l.textContent));
+  if (!ret && !rel) return false;
+  [ret, rel].forEach((l) => l && l.classList.add("spot"));
+  return true;
+}
+function pipeline(steps) {
+  $("pipe").innerHTML = steps.map((s, i) => `${i ? '<span class="arrow">→</span>' : ""}<span class="step" data-i="${i}">${esc(s)}</span>`).join("");
+  $("pipe").hidden = false;
+  return (i, state) => { const el = $("pipe").querySelector(`[data-i="${i}"]`); if (el) el.className = `step ${state}`; };
 }
 
 $("break").onclick = async () => {
-  const r = await fetch("/admin/break", { method: "POST" });
-  const j = await r.json();
-  toast(r.ok ? `Arjun pushed ${j.sha}: "${j.message}". Deploying…` : j.detail, !r.ok);
-  refresh();
+  if (pushing) return;
+  pushing = true; $("break").disabled = true;
+  try {
+    const r = await fetch("/admin/break", { method: "POST" });
+    const c = await r.json();
+    if (!r.ok) { toast(c.detail || "Could not push", true); return; }
+    openOverlay(c, "Pushing to main · checkout-api");
+    await sleep(pace(450));
+    await termLine("", `git commit -am "${c.message}"`);
+    await termLine(`<span class="dim">[main ${esc(c.sha)}] ${esc(c.message)}</span>`);
+    await sleep(pace(200));
+    renderDiff(c.diff);
+    await revealDiff();
+    await sleep(pace(300));
+    await termLine("", "git push origin main");
+    await termLine(`<span class="ok">✓</span> <span class="dim">pushed ${esc(c.sha)} to main</span>`);
+    const set = pipeline(["Pushed", "Deploying", "Live on ShopFast"]);
+    set(0, "done"); set(1, "run");
+    for (let i = 0; i < 40 && !(last && last.commits[0] && last.commits[0].sha === c.sha); i++) { await refresh(); await sleep(500); }
+    set(1, "done"); set(2, "done");
+    await sleep(pace(500));
+    if (spotTheBug()) {
+      $("note").innerHTML = "<b>Looks like a tidy refactor.</b> But on a declined card it now returns before <code>pool.release(conn)</code>, so every declined payment keeps a database connection forever.";
+      $("note").hidden = false;
+      requestAnimationFrame(() => $("note").classList.add("in"));
+    }
+    $("push-done").hidden = false;
+  } finally { pushing = false; refresh(); }
 };
+
+async function showCommit(sha) {
+  const r = await fetch(`/api/commits/${encodeURIComponent(sha)}`);
+  if (!r.ok) return toast("Couldn't load that change", true);
+  const c = await r.json();
+  openOverlay(c, `${c.sha} · ${ago(c.date)}`);
+  await termLine(`<span class="dim">${esc(c.message)}</span>`);
+  renderDiff(c.diff);
+  $("diff").querySelectorAll(".ln").forEach((l) => l.classList.add("in"));
+  $("push-done").textContent = "Close"; $("push-done").hidden = false;
+}
+
+$("push-close").onclick = closeOverlay;
+$("push-done").onclick = () => { closeOverlay(); $("push-done").textContent = "Watch the shop"; };
+$("overlay").onclick = (e) => { if (e.target === $("overlay")) closeOverlay(); };
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("overlay").hidden) closeOverlay(); });
 $("reset").onclick = async () => {
   if (!confirm("Reset the shop to its healthy code and clear its logs?")) return;
   $("reset").disabled = true;
-  try { await fetch("/admin/reset", { method: "POST" }); toast("Shop reset to the healthy version."); }
+  try { await fetch("/admin/reset", { method: "POST" }); toast("Shop reset to the healthy version."); myOrders = 0; $("cart").textContent = ""; }
   finally { $("reset").disabled = false; refresh(); }
 };
 loadProducts();
 refresh();
-setInterval(refresh, 2000);
+setInterval(() => { if (!pushing) refresh(); }, 2000);
 </script>
 </body>
 </html>
