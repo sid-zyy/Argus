@@ -268,9 +268,11 @@ def test_demo_agents_switch_needs_a_developer(tmp_path, monkeypatch):
     monkeypatch.setenv("SHOP_URL", "http://127.0.0.1:9")  # no shop: status still reports the switch
     import ui.app as appmod
     c = TestClient(importlib.reload(appmod).app)
-    assert c.get("/live/status").json()["agents"] == {"mode": "live", "by": None, "replay_available": True}
+    # replay is the default while a recording exists, so a demo never waits on an AI service
+    assert c.get("/live/status").json()["agents"] == {"mode": "replay", "by": None, "replay_available": True}
+    assert c.get("/demo/agents").json()["mode"] == "replay"  # the ShopFast page reads this without signing in
     sign_in(c, "Tara")
-    assert c.post("/demo/agents", json={"mode": "replay"}).status_code == 403
+    assert c.post("/demo/agents", json={"mode": "live"}).status_code == 403
     sign_in(c, "Siddhartha")
-    assert c.post("/demo/agents", json={"mode": "replay"}).json()["mode"] == "replay"
-    assert c.get("/live/status").json()["agents"]["mode"] == "replay"
+    assert c.post("/demo/agents", json={"mode": "live"}).json() == {"mode": "live", "by": "Siddhartha"}
+    assert c.get("/live/status").json()["agents"]["mode"] == "live"

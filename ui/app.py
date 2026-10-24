@@ -374,10 +374,18 @@ def live_status():
         return {"online": False, "url": SHOP_URL, "error": e.detail if e.status_code != 503 else None, "agents": agents}
 
 
-# For demos: who answers ShopFast's alerts. 'live' calls the AI models; 'replay' plays back a recorded real run of the same
-# bug (no AI calls), while the shop, its alert, the approval and the deploy stay real.
+# For demos: who answers ShopFast's alerts. 'replay' (the default when a recording exists) plays back a recorded real run of
+# the same bug, so the demo never waits on an AI service; the shop, its alert, the approval and the deploy stay real.
+# 'live' calls the AI models.
 def demo_agents() -> dict:
-    return {"mode": "live", "by": None, **(store.get_setting("demo_agents") or {})}
+    default = "replay" if runner.replay_file("live_shop") else "live"
+    return {"mode": default, "by": None, **(store.get_setting("demo_agents") or {})}
+
+
+@app.get("/demo/agents")
+def get_demo_agents():
+    """Read by the ShopFast page, so the presenter sees what will answer the next push."""
+    return demo_agents()
 
 
 class AgentsIn(BaseModel):
